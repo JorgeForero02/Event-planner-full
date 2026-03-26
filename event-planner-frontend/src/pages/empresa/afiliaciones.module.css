@@ -1,0 +1,350 @@
+
+.container {
+  padding: 20px;
+  min-height: 100vh;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.tab {
+  padding: 12px 24px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  color: #757575;
+  transition: all 0.3s ease;
+}
+
+.tab:hover {
+  color: #1976d2;
+  background-color: rgba(25, 118, 210, 0.05);
+}
+
+.tabActive {
+  color: #1976d2;
+  border-bottom-color: #1976d2;
+  font-weight: 600;
+}
+
+/* Alert Banner */
+.alertBanner {
+  background-color: #fff8e1;
+  border: 1px solid #ffd54f;
+  border-radius: 8px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.alertIcon {
+  flex-shrink: 0;
+}
+
+.alertText {
+  color: #f57c00;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  align-items: center;
+}
+
+.searchContainer {
+  flex: 1;
+  position: relative;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 12px 40px 12px 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: white;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.searchInput:focus {
+  border-color: #1976d2;
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+}
+
+.searchIcon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.filterBadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background-color: #fff8e1;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #f57c00;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.filterBadge:hover {
+  background-color: #ffecb3;
+}
+
+/* Lista de empresas */
+.empresasList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.empresaCard {
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.empresaCard:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.empresaInfo {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  flex: 1;
+}
+
+.infoRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 13px;
+  color: #757575;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.value {
+  font-size: 15px;
+  color: #212121;
+  font-weight: 400;
+  word-break: break-word;
+}
+
+/* Actions */
+.empresaActions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 130px;
+  margin-left: 24px;
+}
+
+.btnAprobar {
+  padding: 10px 24px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.btnAprobar:hover {
+  background-color: #45a049;
+  transform: scale(1.02);
+  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+}
+
+.btnAprobar:active {
+  transform: scale(0.98);
+}
+
+.btnRechazar {
+  padding: 10px 24px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.btnRechazar:hover {
+  background-color: #da190b;
+  transform: scale(1.02);
+  box-shadow: 0 4px 8px rgba(244, 67, 54, 0.3);
+}
+
+.btnRechazar:active {
+  transform: scale(0.98);
+}
+
+/* Status Badge */
+.statusBadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #e8f5e9;
+  border-radius: 20px;
+  color: #2e7d32;
+  font-weight: 600;
+  font-size: 14px;
+  margin-left: 24px;
+  white-space: nowrap;
+}
+
+/* Loading & No Results */
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 16px;
+  color: #757575;
+}
+
+.noResults {
+  text-align: center;
+  padding: 60px 20px;
+  background-color: white;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  color: #757575;
+}
+
+.noResults p {
+  margin: 0;
+  font-size: 16px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .empresaInfo {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 16px;
+  }
+
+  .tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tab {
+    white-space: nowrap;
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+
+  .empresaCard {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 20px;
+  }
+
+  .empresaInfo {
+    grid-template-columns: 1fr;
+    margin-bottom: 20px;
+  }
+
+  .empresaActions {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .statusBadge {
+    margin-left: 0;
+    justify-content: center;
+  }
+
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filterBadge {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .alertBanner {
+    padding: 12px 16px;
+  }
+
+  .alertText {
+    font-size: 14px;
+  }
+
+  .btnAprobar,
+  .btnRechazar {
+    font-size: 13px;
+    padding: 8px 16px;
+  }
+}

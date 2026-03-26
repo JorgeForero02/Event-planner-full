@@ -1,0 +1,378 @@
+.roles {
+  width: 100%;
+  height: 1024px;
+  position: relative;
+  border-radius: 6px;
+  background-color: #f2e6cf;
+  overflow: hidden;
+  text-align: left;
+  font-size: 20px;
+  color: #000;
+  font-family: Inter;
+}
+.rolesChild {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  background-color: #122548;
+  width: 249px;
+  height: 1024px;
+}
+.icons8FlechaAmpliar501 {
+  position: absolute;
+  top: 448px;
+  left: 201px;
+  width: 14px;
+  height: 14px;
+  object-fit: cover;
+}
+.personIcon {
+  position: absolute;
+  top: 439px;
+  left: 34px;
+  width: 24px;
+  height: 24px;
+}
+.panelDeAdministracin {
+  position: absolute;
+  top: 122px;
+  left: 25px;
+  font-size: 18px;
+  display: inline-block;
+  color: #f3fbff;
+  width: 230px;
+  height: 41px;
+}
+.eventPlanner {
+  position: absolute;
+  top: 39px;
+  left: 76px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #276e90;
+  display: inline-block;
+  width: 179px;
+  height: 48px;
+}
+.gestinDeRoles {
+  position: absolute;
+  top: 188px;
+  left: 298px;
+  font-size: 32px;
+  font-weight: 500;
+  color: #276e90;
+  display: inline-block;
+  width: 352px;
+  height: 48px;
+}
+.icons8Seguridad501 {
+  position: absolute;
+  top: 275px;
+  left: 37px;
+  width: 18px;
+  height: 18px;
+  object-fit: cover;
+}
+.icons8Ajustes501 {
+  position: absolute;
+  top: 555px;
+  left: 37px;
+  width: 18px;
+  height: 18px;
+  object-fit: cover;
+}
+.rolesItem {
+  position: absolute;
+  top: 19px;
+  left: 16px;
+  border-radius: 50%;
+  background-color: #d9d9d9;
+  width: 54px;
+  height: 53px;
+}
+.rolesInner {
+  position: absolute;
+  top: 199px;
+  left: 36px;
+  border-radius: 1px;
+  background-color: #fff;
+  width: 10px;
+  height: 6px;
+}
+.rectangleDiv {
+  position: absolute;
+  top: 199px;
+  left: 47px;
+  border-radius: 1px;
+  background-color: #fff;
+  width: 6px;
+  height: 6px;
+}
+.rolesRolesChild {
+  position: absolute;
+  top: 206px;
+  left: 47px;
+  border-radius: 1px;
+  background-color: #fff;
+  width: 6px;
+  height: 8px;
+}
+.rolesChild2 {
+  position: absolute;
+  top: 206px;
+  left: 36px;
+  border-radius: 1px;
+  background-color: #fff;
+  width: 10px;
+  height: 8px;
+}
+.rolesChild3 {
+  position: absolute;
+  top: 246px;
+  left: 285px;
+  border-radius: 23px;
+  background-color: #fff;
+  border: 1px solid #4a6eb0;
+  box-sizing: border-box;
+  width: 944px;
+  height: 572px;
+}
+.rolesChild4 {
+  position: absolute;
+  top: 343px;
+  left: 313px;
+  border-radius: 5px;
+  background-color: #fff;
+  border: 1px solid #4a6eb0;
+  box-sizing: border-box;
+  width: 889px;
+  height: 225px;
+}
+.listadoDeRoles {
+  position: absolute;
+  top: 267px;
+  left: 313px;
+  font-size: 13px;
+  font-weight: 500;
+  display: inline-block;
+  width: 311px;
+  height: 67px;
+}
+.icons8Buscar481 {
+  position: absolute;
+  top: 297px;
+  left: 314px;
+  width: 32px;
+  height: 31px;
+  object-fit: cover;
+}
+.buscarPorDescripcin {
+  position: absolute;
+  top: 304px;
+  left: 352px;
+  font-size: 11px;
+  font-weight: 300;
+  color: #8a5a6b;
+  display: inline-block;
+  width: 381px;
+  height: 30px;
+}
+.rolEstadoFecha {
+  position: absolute;
+  top: 353px;
+  left: 352px;
+  font-weight: 300;
+  white-space: pre-wrap;
+  display: inline-block;
+  width: 911px;
+  height: 25px;
+}
+.gerente11112025ControlContainer {
+  position: absolute;
+  top: 418px;
+  left: 330px;
+  font-weight: 300;
+  display: inline-block;
+  width: 910px;
+  height: 25px;
+}
+.gerente {
+  margin: 0;
+  white-space: pre-wrap;
+}
+.ponente01122025ExpertoContainer {
+  position: absolute;
+  top: 489px;
+  left: 330px;
+  font-weight: 300;
+  display: inline-block;
+  width: 910px;
+  height: 26px;
+}
+.lineDiv {
+  position: absolute;
+  top: 389.5px;
+  left: 333.5px;
+  border-top: 1px solid #4a6eb0;
+  box-sizing: border-box;
+  width: 848px;
+  height: 1px;
+}
+.rolesChild5 {
+  position: absolute;
+  top: 475.5px;
+  left: 333.5px;
+  border-top: 1px solid #4a6eb0;
+  box-sizing: border-box;
+  width: 848px;
+  height: 1px;
+}
+.whatsappImage20251007At1 {
+  position: absolute;
+  top: 427px;
+  left: 1047px;
+  width: 101px;
+  height: 26px;
+  object-fit: cover;
+}
+.rolesWhatsappImage20251007At1 {
+  position: absolute;
+  top: 503px;
+  left: 1053px;
+  width: 101px;
+  height: 26px;
+  object-fit: cover;
+}
+.rolesChild6 {
+  position: absolute;
+  top: 418px;
+  left: 455px;
+  border-radius: 10px;
+  background-color: #ddf4dd;
+  width: 91px;
+  height: 22px;
+}
+.rolesChild7 {
+  position: absolute;
+  top: 489px;
+  left: 455px;
+  border-radius: 10px;
+  background-color: #f7caca;
+  width: 91px;
+  height: 22px;
+}
+.activo {
+  position: absolute;
+  top: 422px;
+  left: 478px;
+  font-size: 15px;
+  font-weight: 300;
+  display: inline-block;
+  width: 58px;
+  height: 22px;
+}
+.inactivo {
+  position: absolute;
+  top: 489px;
+  left: 470px;
+  font-size: 15px;
+  font-weight: 300;
+  display: inline-block;
+  width: 73px;
+  height: 26px;
+}
+.icons8FlechaAmpliar502 {
+  position: absolute;
+  top: 275px;
+  left: 201px;
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+.rolesChild8 {
+  position: absolute;
+  top: 316px;
+  left: 27px;
+  border-radius: 10px;
+  background-color: #d5e3f6;
+  width: 188px;
+  height: 45px;
+}
+.dashboardSeguridadRolesContainer {
+  position: absolute;
+  top: 197px;
+  left: 59px;
+  font-size: 16px;
+  display: inline-block;
+  width: 226px;
+  height: 438px;
+  color: #fff;
+}
+.dashboard {
+  margin: 0;
+}
+.roles2 {
+  margin: 0;
+  color: #3c6baa;
+}
+.administradorParent {
+  position: absolute;
+  top: 91px;
+  left: 1056px;
+  width: 249px;
+  height: 72px;
+  font-size: 13px;
+}
+.administrador {
+  position: absolute;
+  top: 3px;
+  left: 37px;
+  font-weight: 500;
+  display: inline-block;
+  width: 90px;
+  height: 15px;
+}
+.icons8RecordatoriosDeCitas {
+  position: absolute;
+  top: 6px;
+  left: 0px;
+  width: 23px;
+  height: 23px;
+  object-fit: cover;
+}
+.admineventcom {
+  position: absolute;
+  top: 21px;
+  left: 33px;
+  font-size: 11px;
+  font-weight: 300;
+  color: #8a5a6b;
+  display: inline-block;
+  width: 98px;
+  height: 13px;
+}
+.frameChild {
+  position: absolute;
+  top: 0px;
+  left: 141px;
+  border-radius: 50%;
+  background-color: #67a6f9;
+  width: 31px;
+  height: 30px;
+}
+.ad {
+  position: absolute;
+  top: 6px;
+  left: 145px;
+  font-size: 16px;
+  display: inline-block;
+  color: #fff;
+  width: 42px;
+  height: 48px;
+}
+
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,700&display=swap');
+
+/* NOTE: removed global body rules to avoid conflicts with src/index.css
+   Component styles should target the root class (e.g. .roles) instead. */
