@@ -19,8 +19,11 @@ Full-stack event management platform with role-based access control. Two separat
 
 ### Backend (`Event-planner/`)
 ```bash
-npm run dev     # nodemon server.js (development)
-npm start       # node server.js (production)
+npm run dev          # nodemon server.js (development)
+npm start            # node server.js (production)
+npm test             # jest (all unit tests)
+npm test:coverage    # jest --coverage
+npx jest --testPathPattern=<file>   # run a single test file
 ```
 
 ### Frontend (`event-planner-frontend/`)
@@ -79,6 +82,36 @@ Provider: Resend API (`RESEND_API_KEY`). All email calls are fire-and-forget (do
 ### Response utility
 
 All controllers use `utils/response.js` for uniform `{ success, message, data }` shape.
+
+### Notable API endpoints (added in AG1 audit)
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `PATCH` | `/ubicaciones/:id/toggle-estado` | auth + isGerente | Enable/disable location |
+| `PATCH` | `/lugares/:id/toggle-estado` | auth + isGerente | Enable/disable venue |
+| `GET` | `/eventos/:id/reporte` | auth + isGerenteOrOrganizador | KPI report (inscriptions, attendance, surveys) |
+| `GET` | `/eventos/:id/presupuesto` | auth | Budget summary per activity |
+| `GET` | `/admin/dashboard/stats` | auth + isAdministrador | System-wide user/event/attendance stats |
+
+### Unit tests (`Event-planner/tests/unit/`)
+
+Tests use Jest with `jest.mock('../../models', ...)` to run without a database. 8 test files, 56 tests total.
+
+| File | Covers |
+|------|--------|
+| `actividad.validator.pure.test.js` | `_detectarSolapamientoHorario`, `_validarFechaActividad`, `validarCreacion`, `validarActualizacion` |
+| `actividad.validator.capacity.test.js` | `validarCapacidadSala` (mocked Inscripcion + Lugar) |
+| `inscripcion.validator.test.js` | `validarInscripcionEquipo` |
+| `inscripcion.service.cancelar.test.js` | `cancelar` — 404/403/400/success cases |
+| `evento.service.pure.test.js` | `_obtenerFechaHoy`, `construirActualizaciones`, `construirFiltros` |
+| `ubicacion.service.toggle.test.js` | `toggleEstado` — future-event guard, enable/disable |
+| `lugar.service.toggle.test.js` | `toggleEstado` — future-activity guard, enable/disable |
+| `admin.controller.stats.test.js` | `obtenerDashboardStats` — counts, tasa, 500 error |
+
+Key model facts needed when writing tests:
+- `RespuestaEncuesta.estado` is ENUM `('pendiente', 'completada', 'expirada')` — not a boolean `respondida`
+- `AdministradorEmpresa.es_Gerente` is TINYINT (1=gerente, 0=organizador) — not a `rol` string
+- `Asistencia` FK to Inscripcion is named `inscripcion` (not `id_inscripcion`)
 
 ---
 

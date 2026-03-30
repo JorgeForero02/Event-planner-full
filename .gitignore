@@ -32,3 +32,5 @@ Thumbs.db
 
 # Misc
 README.zip
+.claude
+Event-planner/.env
