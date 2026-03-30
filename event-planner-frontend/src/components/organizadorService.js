@@ -12,16 +12,13 @@ const getAuthToken = () => {
 /**
  * Headers comunes para las peticiones
  */
+// [FRONTEND-SYNC] F3: Corregido anidamiento incorrecto de headers
 const getHeaders = () => {
   const token = getAuthToken();
-  const headers = {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    }
+  return {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
   };
-  console.log('📤 Headers a enviar:', headers);
-  return headers;
 };
 
 /**
@@ -86,18 +83,9 @@ export const obtenerEquipo = async (idEmpresa) => {
 
     return { success: true, data: data.data || [] };
   } catch (error) {
-
-
-    if (!response.ok) {
-      throw new Error(data.message || 'Error al obtener el equipo');
-      console.error('Error en obtenerEquipo:', error);
-    }
-
-    return {
-      success: true,
-      data: data.data || []
-    };
-
+    // [FRONTEND-SYNC] F3: Corregido catch que referenciaba variables fuera de scope
+    console.error('Error en obtenerEquipo:', error);
+    throw error;
   }
 };
 
@@ -143,7 +131,7 @@ export const validarDatosOrganizador = (data) => {
  */
 export const actualizarOrganizador = async (id, datosActualizados) => {
   try {
-    const response = await fetch(`${API_URL}/organizadores/${id}`, {
+    const response = await fetch(`${API_URL}/gestion-usuarios/${id}/profile`, {
       method: 'PUT',
       headers: getHeaders(),
       body: JSON.stringify(datosActualizados)
@@ -172,9 +160,10 @@ export const actualizarOrganizador = async (id, datosActualizados) => {
  */
 export const eliminarOrganizador = async (id) => {
   try {
-    const response = await fetch(`${API_URL}/organizadores/${id}`, {
-      method: 'DELETE',
-      headers: getHeaders()
+    const response = await fetch(`${API_URL}/gestion-usuarios/${id}/status`, {
+      method: 'PATCH',
+      headers: getHeaders(),
+      body: JSON.stringify({ activo: 0 })
     });
 
     const data = await response.json();

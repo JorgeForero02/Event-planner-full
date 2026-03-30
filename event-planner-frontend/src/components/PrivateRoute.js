@@ -2,7 +2,7 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const PrivateRoute = ({ children }) => {
-  const { isAuthenticated, initialized, loading } = useAuth();
+  const { isAuthenticated, initialized } = useAuth();
 
   if (!initialized) {
     return (

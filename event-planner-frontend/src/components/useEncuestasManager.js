@@ -45,8 +45,8 @@ export const useEncuestasManager = () => {
 
     useEffect(() => {
         cargarEventos();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-
     const cargarEventos = async () => {
         try {
             const perfil = await obtenerPerfil();
@@ -90,8 +90,8 @@ export const useEncuestasManager = () => {
             headers: getHeaders()
         });
 
-        if (!response. ok) {
-            throw new Error(`Error al obtener encuestas: ${response. status}`);
+        if (!response.ok) {
+            throw new Error(`Error al obtener encuestas: ${response.status}`);
         }
 
         const data = await response.json();
@@ -101,8 +101,8 @@ export const useEncuestasManager = () => {
             listaEncuestas = data;
         } else if (data.data && Array.isArray(data.data)) {
             listaEncuestas = data.data;
-        } else if (data.encuestas && Array. isArray(data. encuestas)) {
-            listaEncuestas = data. encuestas;
+        } else if (data.encuestas && Array.isArray(data.encuestas)) {
+            listaEncuestas = data.encuestas;
         }
 
         // Obtener estadísticas para cada encuesta
@@ -114,10 +114,10 @@ export const useEncuestasManager = () => {
                         { method: 'GET', headers: getHeaders() }
                     );
                     if (statsResponse.ok) {
-                        const stats = await statsResponse. json();
+                        const stats = await statsResponse.json();
                         return {
-                            ... encuesta,
-                            total_completadas: stats.total_completadas || stats.data?. total_completadas || 0
+                            ...encuesta,
+                            total_completadas: stats.total_completadas || stats.data?.total_completadas || 0
                         };
                     }
                 } catch (error) {
@@ -370,8 +370,8 @@ export const useEncuestasManager = () => {
     const activarEncuesta = async (id) => {
         try {
             setCargando(true);
-            const response = await fetch(`${API_URL}/encuestas/${id}/activar`, {
-                method: 'PUT',
+            const response = await fetch(`${API_URL}/encuestas/${id}/enviar`, {
+                method: 'POST',
                 headers: getHeaders()
             });
 

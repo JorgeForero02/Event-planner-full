@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useEmpresas } from '../../../../hooks/useEmpresas';
 import { useNotifications } from '../../../../hooks/useNotifications';
 import EmpresaCard from '../sections/EmpresaCard';
-import styles from './afiliaciones.module.css';
+import { Search, AlertTriangle, CheckCircle, XCircle, Info } from 'lucide-react';
+import { Input } from '../../../../components/ui/input';
+import { Button } from '../../../../components/ui/button';
 
 const AfiliacionesPendientesSection = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -20,9 +22,7 @@ const AfiliacionesPendientesSection = () => {
     fetchEmpresas('empresas/pendientes');
   }, [fetchEmpresas]);
 
-  const empresasPendientes = empresas.filter(e => e.estado === 0);
-
-  const filteredEmpresas = empresasPendientes.filter(empresa =>
+  const filteredEmpresas = empresas.filter(empresa =>
     empresa.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     empresa.nit?.includes(searchTerm)
   );
@@ -59,11 +59,11 @@ const AfiliacionesPendientesSection = () => {
     if (!modal.empresa) return;
 
     try {
-      await handleAprobarEmpresa(modal.empresa.id, modal.empresa.nombre, modal.empresa.id_creador);
-      showNotification('success', `✅ Empresa "${modal.empresa.nombre}" aprobada exitosamente`);
+      await handleAprobarEmpresa(modal.empresa.id, modal.empresa.nombre, modal.empresa.id_creador);                                                                   
+      showNotification('success', `Empresa "${modal.empresa.nombre}" aprobada exitosamente`);                                                                      
       fetchEmpresas('empresas/pendientes');
     } catch (error) {
-      const cleanError = cleanNotificationMessage(error.message || 'Error al aprobar empresa');
+      const cleanError = cleanNotificationMessage(error.message || 'Error al aprobar empresa');                                                                       
       showNotification('error', cleanError);
     } finally {
       closeModal();
@@ -77,11 +77,11 @@ const AfiliacionesPendientesSection = () => {
     }
 
     try {
-      await handleRechazarEmpresa(modal.empresa.id, modal.empresa.nombre, modal.motivo);
-      showNotification('success', `❌ Empresa "${modal.empresa.nombre}" rechazada`);
+      await handleRechazarEmpresa(modal.empresa.id, modal.empresa.nombre, modal.motivo);                                                                              
+      showNotification('success', `Empresa "${modal.empresa.nombre}" rechazada`);                                                                                  
       fetchEmpresas('empresas/pendientes');
     } catch (error) {
-      const cleanError = cleanNotificationMessage(error.message || 'Error al rechazar empresa');
+      const cleanError = cleanNotificationMessage(error.message || 'Error al rechazar empresa');                                                                      
       showNotification('error', cleanError);
     } finally {
       closeModal();
@@ -97,107 +97,63 @@ const AfiliacionesPendientesSection = () => {
   };
 
   return (
-    <div className={styles.container}>
+    <div className="space-y-6">
       {notification && (
-        <div className={`${styles.notification} ${styles[notification.type]}`}>
-          <div className={styles.notificationContent}>
-            <div className={styles.notificationIcon}>
-              {notification.type === 'success' ? '✓' : '✗'}
-            </div>
-            <p className={styles.notificationMessage}>{notification.message}</p>
-            <button
-              className={styles.notificationClose}
-              onClick={() => showNotification(null)}
-            >
-              ×
-            </button>
-          </div>
+        <div className={`p-4 rounded-md flex items-center gap-3 ${notification.type === 'success' ? 'bg-emerald-50 text-emerald-800' : 'bg-rose-50 text-rose-800'}`}>
+          {notification.type === 'success' ? <CheckCircle className="w-5 h-5 text-emerald-600" /> : <XCircle className="w-5 h-5 text-rose-600" />}
+          <p className="flex-1">{notification.message}</p>
+          <button onClick={() => showNotification(null)} className="text-slate-400 hover:text-slate-600">×</button>
         </div>
       )}
 
       {modal.isOpen && (
-        <div className={styles.modalOverlay} onClick={closeModal}>
-          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4" onClick={closeModal}>
+          <div className="bg-white rounded-xl shadow-modal w-full max-w-md p-6" onClick={(e) => e.stopPropagation()}>                                                                                        
             {modal.type === 'approve' && (
               <>
-                <div className={styles.modalHeader}>
-                  <div className={styles.modalIcon}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                      <circle cx="12" cy="12" r="10" stroke="#4caf50" strokeWidth="2" />
-                      <path d="M8 12l3 3 5-5" stroke="#4caf50" strokeWidth="2" strokeLinecap="round" />
-                    </svg>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-emerald-100 rounded-full text-emerald-600">
+                    <CheckCircle className="w-6 h-6" />
                   </div>
-                  <h3 className={styles.modalTitle}>Confirmar Aprobación</h3>
+                  <h3 className="text-lg font-semibold text-slate-900">Confirmar Aprobación</h3>
                 </div>
 
-                <div className={styles.modalBody}>
-                  <p>¿Está seguro de aprobar la empresa <strong>"{modal.empresa?.nombre}"</strong>?</p>
-                  <p style={{ fontSize: '14px', color: '#666', marginTop: '8px' }}>
-                    Esta acción no se puede deshacer.
-                  </p>
+                <div className="mb-6 text-slate-600">
+                  <p>¿Está seguro de aprobar la empresa <strong className="text-slate-900">"{modal.empresa?.nombre}"</strong>?</p>                                                                           
+                  <p className="text-sm mt-2 text-slate-500">Esta acción no se puede deshacer.</p>
                 </div>
 
-                <div className={styles.modalActions}>
-                  <button
-                    className={styles.btnCancel}
-                    onClick={closeModal}
-                    type="button"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    className={styles.btnConfirm}
-                    onClick={confirmApprove}
-                    type="button"
-                  >
-                    Aprobar
-                  </button>
+                <div className="flex justify-end gap-3 border-t pt-4">
+                  <Button variant="outline" onClick={closeModal}>Cancelar</Button>
+                  <Button className="bg-emerald-600 hover:bg-emerald-700 text-white" onClick={confirmApprove}>Aprobar</Button>
                 </div>
               </>
             )}
 
             {modal.type === 'reject' && (
               <>
-                <div className={styles.modalHeader}>
-                  <div className={styles.modalIcon}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                      <circle cx="12" cy="12" r="10" stroke="#f44336" strokeWidth="2" />
-                      <path d="M15 9l-6 6M9 9l6 6" stroke="#f44336" strokeWidth="2" strokeLinecap="round" />
-                    </svg>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-rose-100 rounded-full text-rose-600">
+                    <XCircle className="w-6 h-6" />
                   </div>
-                  <h3 className={styles.modalTitle}>Confirmar Rechazo</h3>
+                  <h3 className="text-lg font-semibold text-slate-900">Confirmar Rechazo</h3>
                 </div>
 
-                <div className={styles.modalBody}>
-                  <p>¿Por qué rechaza la empresa <strong>"{modal.empresa?.nombre}"</strong>?</p>
+                <div className="mb-6">
+                  <p className="text-slate-600 mb-2">¿Por qué rechaza la empresa <strong className="text-slate-900">"{modal.empresa?.nombre}"</strong>?</p>                                                                                  
                   <textarea
-                    className={styles.motivoInput}
+                    className="w-full min-h-[100px] p-3 border rounded-md focus:border-brand-600 focus:ring-1 focus:ring-brand-600"
                     placeholder="Ingrese el motivo del rechazo..."
                     value={modal.motivo}
-                    onChange={(e) => setModal(prev => ({ ...prev, motivo: e.target.value }))}
+                    onChange={(e) => setModal(prev => ({ ...prev, motivo: e.target.value }))}                                                                                       
                     rows="4"
                   />
-                  <p style={{ fontSize: '14px', color: '#666', marginTop: '8px' }}>
-                    Esta acción notificará al solicitante y no se puede deshacer.
-                  </p>
+                  <p className="text-sm text-slate-500 mt-2">Esta acción notificará al solicitante y no se puede deshacer.</p>
                 </div>
 
-                <div className={styles.modalActions}>
-                  <button
-                    className={styles.btnCancel}
-                    onClick={closeModal}
-                    type="button"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    className={styles.btnDanger}
-                    onClick={confirmReject}
-                    disabled={!modal.motivo.trim()}
-                    type="button"
-                  >
-                    Rechazar
-                  </button>
+                <div className="flex justify-end gap-3 border-t pt-4">
+                  <Button variant="outline" onClick={closeModal}>Cancelar</Button>
+                  <Button variant="destructive" onClick={confirmReject} disabled={!modal.motivo.trim()}>Rechazar</Button>
                 </div>
               </>
             )}
@@ -205,63 +161,50 @@ const AfiliacionesPendientesSection = () => {
         </div>
       )}
 
-      <div className={styles.header}>
-        <h1 className={styles.title}>Afiliaciones Pendientes</h1>
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Afiliaciones Pendientes</h1>
       </div>
 
       {filteredEmpresas.length > 0 && (
-        <div className={styles.alertBanner}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className={styles.alertIcon}>
-            <circle cx="12" cy="12" r="10" stroke="#ff9800" strokeWidth="2" fill="none" />
-            <path d="M12 8v4M12 16h.01" stroke="#ff9800" strokeWidth="2" strokeLinecap="round" />
-          </svg>
-          <span className={styles.alertText}>
+        <div className="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg flex items-center gap-3">
+          <AlertTriangle className="w-5 h-5 text-amber-600" />
+          <span className="font-medium">
             Solicitudes de Afiliación Pendientes ({filteredEmpresas.length})
           </span>
         </div>
       )}
 
-      <div className={styles.controls}>
-        <div className={styles.searchContainer}>
-          <input
-            type="text"
-            placeholder="Buscar por nombre o NIT"
-            className={styles.searchInput}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className={styles.searchIcon}>
-            <circle cx="8" cy="8" r="6" stroke="#757575" strokeWidth="2" />
-            <path d="M13 13l5 5" stroke="#757575" strokeWidth="2" strokeLinecap="round" />
-          </svg>
-        </div>
+      <div className="relative w-full sm:w-80">
+        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
+        <Input
+          type="text"
+          placeholder="Buscar por nombre o NIT"
+          className="pl-9 bg-white"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
 
       {error && (
-        <div className={styles.errorMessage}>
+        <div className="p-4 bg-rose-50 border-rose-200 text-rose-800 rounded-lg flex items-center justify-between">
           <p>{cleanNotificationMessage(error)}</p>
-          <button onClick={handleRetry} className={styles.btnRetry}>
-            Reintentar
-          </button>
+          <Button variant="outline" size="sm" onClick={handleRetry} className="bg-white">Reintentar</Button>
         </div>
       )}
 
       {loading && (
-        <div className={styles.loading}>Cargando empresas...</div>
+        <div className="h-32 flex items-center justify-center text-slate-500">Cargando empresas...</div>
       )}
 
       {!loading && filteredEmpresas.length === 0 && (
-        <div className={styles.noResults}>
-          <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-            <circle cx="32" cy="32" r="30" stroke="#ddd" strokeWidth="2" fill="none" />
-            <path d="M32 20v16M32 44h.01" stroke="#ddd" strokeWidth="3" strokeLinecap="round" />
-          </svg>
-          <p>{searchTerm ? 'No se encontraron empresas con ese criterio' : 'No hay solicitudes pendientes'}</p>
+        <div className="h-48 bg-white border border-dashed rounded-lg flex flex-col items-center justify-center text-slate-500 space-y-3">
+          <Info className="w-8 h-8 text-slate-400" />
+          <p>{searchTerm ? 'No se encontraron empresas con ese criterio' : 'No hay solicitudes pendientes'}</p>                                                         
         </div>
       )}
 
       {!loading && filteredEmpresas.length > 0 && (
-        <div className={styles.empresasList}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredEmpresas.map((empresa) => (
             <EmpresaCard
               key={empresa.id}

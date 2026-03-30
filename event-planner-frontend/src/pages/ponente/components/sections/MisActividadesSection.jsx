@@ -42,6 +42,7 @@ const MisActividadesSection = ({ actividades, onSolicitudEnviada, error }) => {
                 return actividad;
             });
         });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Procesar actividades para mostrar

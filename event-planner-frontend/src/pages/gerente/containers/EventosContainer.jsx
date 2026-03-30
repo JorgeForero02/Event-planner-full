@@ -2,13 +2,13 @@ import React from 'react';
 import { useEvents } from '../hooks/useEvents';
 import GerenteSidebar from '../../../layouts/Sidebar/sidebarGerente/GerenteSidebar';
 import Header from '../../../layouts/Header/header';
+import Footer from '../../../layouts/FooterAsistente/footer';
 import PageHeader from '../components/shared/PageHeader';
 import EventFilters from '../components/forms/EventFilters';
 import EventsList from '../components/lists/EventsList';
 import EventDetailsModal from '../components/modals/EventDetailsModal';
 import NotificationSystem from '../components/shared/NotificationSystem';
 import LoadingState from '../components/shared/LoadingState';
-import styles from '../styles/eventosPage.module.css';
 
 const EventosContainer = () => {
     const {
@@ -27,7 +27,6 @@ const EventosContainer = () => {
         handleOrganizadorFilterChange,
         handleSidebarToggle,
         limpiarFiltros,
-        recargarEventos,
         formatFecha,
         formatHora,
         getLugarTexto,
@@ -38,58 +37,55 @@ const EventosContainer = () => {
 
     if (loading) {
         return (
-            <div className={styles.asistenteContainer}>
+            <div className="flex min-h-screen bg-slate-50 items-center justify-center">
                 <LoadingState message="Cargando eventos..." />
             </div>
         );
     }
 
     return (
-        <div className={styles.asistenteContainer}>
+        <div className="flex min-h-screen bg-slate-50">
             <GerenteSidebar onToggle={handleSidebarToggle} />
+            <div className={`shrink-0 transition-all duration-300 ${sidebarCollapsed ? 'w-16' : 'w-64'}`} />
 
             <NotificationSystem
                 notifications={notifications}
                 onClose={closeNotification}
             />
 
-            <div className={styles.mainLayout}>
-                <div className={`${sidebarCollapsed ? styles.sidebarCollapsed : styles.sidebarExpanded}`}>
-                    <Header />
+            <div className="flex-1 flex flex-col min-w-0">
+                <Header />
 
-                    <div className={styles.contentArea}>
-                        <div className={styles.pageHeader}>
-                            <PageHeader
-                                title="Eventos"
-                                subtitle={`Total: ${eventos.length} eventos`}
-                            />
-                        </div>
+                <main className="flex-1 overflow-auto p-6 space-y-5">
+                    <PageHeader
+                        title="Eventos"
+                        subtitle={`Total: ${eventos.length} eventos`}
+                    />
 
-                        <div className={styles.filtersSection}>
-                            <EventFilters
-                                searchTerm={searchTerm}
-                                filtroOrganizador={filtroOrganizador}
-                                organizadores={organizadores}
-                                eventosCount={eventosFiltrados.length}
-                                totalEventos={eventos.length}
-                                onSearchChange={handleSearchChange}
-                                onOrganizadorChange={handleOrganizadorFilterChange}
-                                onClearFilters={limpiarFiltros}
-                                hasActiveFilters={!!(searchTerm || filtroOrganizador)}
-                            />
-                        </div>
+                    <EventFilters
+                        searchTerm={searchTerm}
+                        filtroOrganizador={filtroOrganizador}
+                        organizadores={organizadores}
+                        eventosCount={eventosFiltrados.length}
+                        totalEventos={eventos.length}
+                        onSearchChange={handleSearchChange}
+                        onOrganizadorChange={handleOrganizadorFilterChange}
+                        onClearFilters={limpiarFiltros}
+                        hasActiveFilters={!!(searchTerm || filtroOrganizador)}
+                    />
 
-                        <EventsList
-                            eventos={eventosFiltrados}
-                            onVerDetalles={verDetallesEvento}
-                            formatFecha={formatFecha}
-                            formatHora={formatHora}
-                            getLugarTexto={getLugarTexto}
-                            getEstadoEvento={getEstadoEvento}
-                            sidebarCollapsed={sidebarCollapsed}
-                        />
-                    </div>
-                </div>
+                    <EventsList
+                        eventos={eventosFiltrados}
+                        onVerDetalles={verDetallesEvento}
+                        formatFecha={formatFecha}
+                        formatHora={formatHora}
+                        getLugarTexto={getLugarTexto}
+                        getEstadoEvento={getEstadoEvento}
+                        sidebarCollapsed={sidebarCollapsed}
+                    />
+                </main>
+
+                <Footer />
             </div>
 
             {showModal && eventoSeleccionado && (

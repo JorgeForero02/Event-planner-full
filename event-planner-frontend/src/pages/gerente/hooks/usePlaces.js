@@ -35,13 +35,14 @@ export const usePlaces = () => {
 
   useEffect(() => {
     loadEmpresas();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
   useEffect(() => {
     if (state.empresas.length > 0 && !state.filterEmpresa) {
       const primeraEmpresa = state.empresas[0];
       handleEmpresaSeleccionada(primeraEmpresa);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.empresas]);
 
   const loadEmpresas = async () => {
@@ -187,6 +188,19 @@ export const usePlaces = () => {
     }
   };
 
+  const handleToggle = async (lugar) => {
+    try {
+      await placesAPI.toggleLugar(lugar.id);
+      const newActivo = lugar.activo === 0 || lugar.activo === false ? 1 : 0;
+      showNotification('success', 'Éxito', `Lugar ${newActivo ? 'habilitado' : 'deshabilitado'} exitosamente`);
+      if (state.selectedEmpresaId) {
+        await fetchLugaresByEmpresa(state.selectedEmpresaId);
+      }
+    } catch (error) {
+      showNotification('error', 'Error', error.message);
+    }
+  };
+
   const openCreateModal = () => {
     if (!state.empresaSeleccionada) {
       showNotification('warning', 'Seleccione empresa', 'Primero seleccione una empresa del filtro.');
@@ -206,7 +220,7 @@ export const usePlaces = () => {
     try {
       setModalState(prev => ({ ...prev, editingLugar: lugar }));
 
-      const ubicacionesEmpresa = await fetchUbicacionesByEmpresa(lugar.empresaId || state.selectedEmpresaId);
+      await fetchUbicacionesByEmpresa(lugar.empresaId || state.selectedEmpresaId);
 
       setFormData({
         empresaId: lugar.empresaId || state.selectedEmpresaId,
@@ -270,6 +284,7 @@ export const usePlaces = () => {
     handleCreate,
     handleUpdate,
     handleDelete,
+    handleToggle,
     handleEmpresaSeleccionada,
     handleFilterChange,
     openCreateModal,

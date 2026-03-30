@@ -32,8 +32,8 @@ export const useLocations = () => {
 
   useEffect(() => {
     fetchData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
   const fetchData = async () => {
     try {
       setState(prev => ({ ...prev, loading: true }));
@@ -86,7 +86,7 @@ export const useLocations = () => {
   const handleCreate = async (e) => {
     e.preventDefault();
     try {
-      const resultado = await locationsAPI.createUbicacion(state.empresa.id, formData);
+      await locationsAPI.createUbicacion(state.empresa.id, formData);
       showNotification('success', 'Éxito', 'Ubicación creada exitosamente');
       closeAllModals();
       await fetchUbicacionesByEmpresa(state.empresa.id);
@@ -98,7 +98,7 @@ export const useLocations = () => {
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
-      const resultado = await locationsAPI.updateUbicacion(modalState.editingUbicacion.id, formData);
+      await locationsAPI.updateUbicacion(modalState.editingUbicacion.id, formData);
       showNotification('success', 'Éxito', 'Ubicación actualizada exitosamente');
       closeAllModals();
       await fetchUbicacionesByEmpresa(state.empresa.id);
@@ -109,9 +109,20 @@ export const useLocations = () => {
 
   const handleDelete = async () => {
     try {
-      const resultado = await locationsAPI.deleteUbicacion(modalState.deletingUbicacion.id);
+      await locationsAPI.deleteUbicacion(modalState.deletingUbicacion.id);
       showNotification('success', 'Éxito', 'Ubicación eliminada exitosamente');
       closeAllModals();
+      await fetchUbicacionesByEmpresa(state.empresa.id);
+    } catch (error) {
+      showNotification('error', 'Error', error.message);
+    }
+  };
+
+  const handleToggle = async (ubicacion) => {
+    try {
+      await locationsAPI.toggleUbicacion(ubicacion.id);
+      const newActivo = ubicacion.activo === 0 || ubicacion.activo === false ? 1 : 0;
+      showNotification('success', 'Éxito', `Ubicación ${newActivo ? 'habilitada' : 'deshabilitada'} exitosamente`);
       await fetchUbicacionesByEmpresa(state.empresa.id);
     } catch (error) {
       showNotification('error', 'Error', error.message);
@@ -196,6 +207,7 @@ export const useLocations = () => {
     handleCreate,
     handleUpdate,
     handleDelete,
+    handleToggle,
     openCreateModal,
     openEditModal,
     openDeleteModal,

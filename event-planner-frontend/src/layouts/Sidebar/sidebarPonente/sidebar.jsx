@@ -1,10 +1,20 @@
 import React, { useState } from 'react';
-import styles from './sidebar.module.css';
-import campana from '../../../assets/calendar.png';
-import hamburgerIcon from '../../../assets/hamburgerIcon.png';
-import logoIcon from '../../../assets/evento-remove.png';
-import calendarEvento from '../../../assets/calendarEvento.png';
-import actividadesIcon from '../../../assets/calendar.png';
+import {
+    LayoutDashboard,
+    CalendarDays,
+    ClipboardList,
+    FileText,
+    Menu as MenuIcon,
+    LogOut,
+} from 'lucide-react';
+import { cn } from '../../../lib/utils';
+
+const navItems = [
+    { view: 'dashboard',   label: 'Dashboard',       Icon: LayoutDashboard },
+    { view: 'eventos',     label: 'Eventos',          Icon: CalendarDays    },
+    { view: 'actividades', label: 'Mis Actividades',  Icon: ClipboardList   },
+    { view: 'encuestas',   label: 'Encuestas',        Icon: FileText        },
+];
 
 const Sidebar = ({ onToggle, onNavigate, currentView }) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
@@ -12,10 +22,7 @@ const Sidebar = ({ onToggle, onNavigate, currentView }) => {
     const toggleSidebar = () => {
         const newCollapsedState = !isCollapsed;
         setIsCollapsed(newCollapsedState);
-
-        if (onToggle) {
-            onToggle(newCollapsedState);
-        }
+        if (onToggle) onToggle(newCollapsedState);
     };
 
     const handleLogout = () => {
@@ -27,127 +34,62 @@ const Sidebar = ({ onToggle, onNavigate, currentView }) => {
     const isActive = (view) => currentView === view;
 
     return (
-        <aside className={`${styles.rectangleParent} ${isCollapsed ? styles.collapsed : ''}`}>
-            <div className={styles.groupChild} />
-
-            <button
-                className={styles.hamburgerIcon}
-                onClick={toggleSidebar}
-                title={isCollapsed ? 'Expandir menú' : 'Colapsar menú'}
-            >
-                <img
-                    src={hamburgerIcon}
-                    alt="menu toggle"
-                    onError={(e) => {
-                        e.target.style.display = 'none';
-                        const parent = e.target.parentElement;
-                        if (!parent.querySelector('.fallbackHamburger')) {
-                            const fallback = document.createElement('div');
-                            fallback.className = 'fallbackHamburger';
-                            fallback.innerHTML = `
-                <div style="width: 20px; height: 2px; background: white; margin: 4px 0;"></div>
-                <div style="width: 20px; height: 2px; background: white; margin: 4px 0;"></div>
-                <div style="width: 20px; height: 2px; background: white; margin: 4px 0;"></div>
-              `;
-                            parent.appendChild(fallback);
-                        }
-                    }}
-                />
-            </button>
-
-            <div className={styles.logoSection}>
-                {!isCollapsed ? (
-                    <div className={styles.panelDeAdministracin}>Panel de Ponente</div>
-                ) : (
-                    <img
-                        src={logoIcon}
-                        alt="Event Planner"
-                        className={styles.logoCollapsed}
-                    />
+        <aside className={cn(
+            'fixed left-0 top-0 z-[1000] h-screen bg-[#1A2332] text-white flex flex-col transition-all duration-300',
+            isCollapsed ? 'w-16' : 'w-64'
+        )}>
+            {/* Header */}
+            <div className="flex items-center justify-between px-3 py-4 border-b border-white/10 shrink-0">
+                {!isCollapsed && (
+                    <span className="text-sm font-semibold truncate">Panel de Ponente</span>
                 )}
+                <button
+                    onClick={toggleSidebar}
+                    title={isCollapsed ? 'Expandir menú' : 'Colapsar menú'}
+                    className={cn(
+                        'rounded-lg p-2 text-white/70 hover:text-white hover:bg-white/10 transition-colors',
+                        isCollapsed && 'mx-auto'
+                    )}
+                >
+                    <MenuIcon size={18} />
+                </button>
             </div>
 
-            <div className={styles.menuContainer}>
-                {/* Dashboard */}
-                <div className={styles.menuItem}>
-                    <div
-                        className={`${styles.menuItemContent} ${isActive('dashboard') ? styles.activeMenuItem : ''
-                            }`}
-                        onClick={() => onNavigate('dashboard')}
-                        title={isCollapsed ? 'Dashboard' : ''}
+            {/* Nav */}
+            <nav className="flex-1 overflow-y-auto py-3 space-y-0.5 px-2">
+                {navItems.map(({ view, label, Icon }) => (
+                    <button
+                        key={view}
+                        onClick={() => onNavigate(view)}
+                        title={isCollapsed ? label : ''}
+                        className={cn(
+                            'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                            isActive(view)
+                                ? 'bg-brand-600 text-white'
+                                : 'text-white/70 hover:text-white hover:bg-white/10',
+                            isCollapsed && 'justify-center'
+                        )}
                     >
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className={styles.menuIcon}>
-                            <rect x="3" y="3" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.5" />
-                            <rect x="11" y="3" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.5" />
-                            <rect x="3" y="11" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.5" />
-                            <rect x="11" y="11" width="6" height="6" rx="1" stroke="currentColor" strokeWidth="1.5" />
-                        </svg>
-                        {!isCollapsed && <span className={styles.menuLabel}>Dashboard</span>}
-                    </div>
-                </div>
+                        <Icon size={18} className="shrink-0" />
+                        {!isCollapsed && <span>{label}</span>}
+                    </button>
+                ))}
+            </nav>
 
-                {/* Eventos */}
-                <div className={styles.menuItem}>
-                    <div
-                        className={`${styles.menuItemContent} ${isActive('eventos') ? styles.activeMenuItem : ''
-                            }`}
-                        onClick={() => onNavigate('eventos')}
-                        title={isCollapsed ? 'Eventos' : ''}
-                    >
-                        <img src={calendarEvento} alt="Evento Icon" className={styles.menuIcon} />
-                        {!isCollapsed && <span className={styles.menuLabel}>Eventos</span>}
-                    </div>
-                </div>
-
-                {/* Mis Actividades */}
-                <div className={styles.menuItem}>
-                    <div
-                        className={`${styles.menuItemContent} ${isActive('actividades') ? styles.activeMenuItem : ''
-                            }`}
-                        onClick={() => onNavigate('actividades')}
-                        title={isCollapsed ? 'Mis Actividades' : ''}
-                    >
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className={styles.menuIcon}>
-                            <path d="M10 13L10 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                            <path d="M7 10L13 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                            <rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" />
-                        </svg>
-                        {!isCollapsed && <span className={styles.menuLabel}>Mis Actividades</span>}
-                    </div>
-                </div>
-
-                <div className={styles.menuItem}>
-                    <div
-                        className={`${styles.menuItemContent} ${isActive('encuestas') ? styles.activeMenuItem : ''}`}
-                        onClick={() => onNavigate('encuestas')}
-                        title={isCollapsed ? 'Encuestas' : ''}
-                    >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className={styles.menuIcon}>
-                            <rect x="5" y="4" width="14" height="16" rx="1"
-                                stroke="white" strokeWidth="2" />
-
-                            <line x1="8" y1="8" x2="16" y2="8"
-                                stroke="white" strokeWidth="2" strokeLinecap="round" />
-                            <line x1="8" y1="12" x2="16" y2="12"
-                                stroke="white" strokeWidth="2" strokeLinecap="round" />
-                            <line x1="8" y1="16" x2="12" y2="16"
-                                stroke="white" strokeWidth="2" strokeLinecap="round" />
-                        </svg>
-                        {!isCollapsed && <span className={styles.menuLabel}>Encuestas</span>}
-                    </div>
-                </div>
+            {/* Logout */}
+            <div className="px-2 py-3 border-t border-white/10 shrink-0">
+                <button
+                    onClick={handleLogout}
+                    title="Cerrar Sesión"
+                    className={cn(
+                        'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-rose-500/20 transition-colors',
+                        isCollapsed && 'justify-center'
+                    )}
+                >
+                    <LogOut size={18} className="shrink-0" />
+                    {!isCollapsed && <span>Cerrar Sesión</span>}
+                </button>
             </div>
-
-            <button
-                className={styles.logoutButton}
-                onClick={handleLogout}
-                title="Cerrar Sesión"
-            >
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className={styles.logoutIcon}>
-                    <path d="M13 3h3a2 2 0 012 2v10a2 2 0 01-2 2h-3M8 16l-5-5 5-5M3 11h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                {!isCollapsed && <span>Cerrar Sesión</span>}
-            </button>
         </aside>
     );
 };

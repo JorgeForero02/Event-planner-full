@@ -1,181 +1,53 @@
 // src/utils/roleUtils.js
+// [LOGIC-FIX] L3: Simplificadas todas las funciones de rol a comparación directa con user.rol
+// El backend siempre devuelve { rol: 'administrador'|'gerente'|'organizador'|'ponente'|'asistente' }
+// Las heurísticas anteriores (JSON.stringify, búsqueda por email, etc.) causaban falsos positivos
+
+/**
+ * Obtiene el rol normalizado del usuario
+ * @param {Object} user - Objeto usuario del localStorage
+ * @returns {string} - Rol del usuario en minúsculas
+ */
+const getRol = (user) => {
+  if (!user) return '';
+  const rol = user.rol || user.role || '';
+  return typeof rol === 'string' ? rol.toLowerCase() : '';
+};
 
 /**
  * Verifica si un usuario es administrador
- * @param {Object} user - Objeto usuario del localStorage
- * @returns {boolean} - true si es administrador
  */
 export const isAdmin = (user) => {
-  if (!user) return false;
-
-  const role = user.rol || user.role;
-
-  const adminRoles = [
-    'admin',
-    'administrador',
-    'administrator',
-    'Admin',
-    'Administrador',
-    'ADMIN',
-    'ADMINISTRADOR'
-  ];
-
-  if (typeof role === 'string') {
-    return adminRoles.includes(role);
-  }
-
-  if (typeof role === 'number') {
-    return role === 1;
-  }
-
-  return false;
+  const rol = getRol(user);
+  return rol === 'administrador' || rol === 'admin';
 };
 
 /**
  * Verifica si un usuario es asistente
- * @param {Object} user - Objeto usuario del localStorage
- * @returns {boolean} - true si es asistente
  */
 export const isAsistente = (user) => {
-  if (!user) return false;
-
-  const rawRole = user.rol ?? user.role ?? user.tipo ?? user.type ?? '';
-
-  if (Array.isArray(user.roles) && user.roles.length) {
-    for (const r of user.roles) {
-      const v = (r?.name || r?.role || r?.rol || r || '').toString().toLowerCase();
-      if (v.includes('asistente') || v.includes('attend') || v.includes('participant')) return true;
-    }
-  }
-
-  if (user.asistente) return true;
-
-  if (typeof rawRole === 'string') {
-    const role = rawRole.toLowerCase();
-    if (role.includes('asistente') || role.includes('attend') || role.includes('participant')) return true;
-  }
-
-  if (typeof rawRole === 'number') {
-    return rawRole === 3;
-  }
-
-  try {
-    const dump = JSON.stringify(user).toLowerCase();
-    if (dump.includes('asistente') || dump.includes('attendee') || dump.includes('participant')) return true;
-  } catch (e) {
-    // ignore
-  }
-
-  return false;
+  return getRol(user) === 'asistente';
 };
 
 /**
  * Verifica si un usuario es gerente
- * @param {Object} user - Objeto usuario del localStorage
- * @returns {boolean} - true si es gerente
  */
 export const isGerente = (user) => {
-  if (!user) return false;
-
-  const rawRole = user.rol ?? user.role ?? user.tipo ?? user.type ?? '';
-
-  if (Array.isArray(user.roles) && user.roles.length) {
-    for (const r of user.roles) {
-      const v = (r?.name || r?.role || r?.rol || r || '').toString().toLowerCase();
-      if (v.includes('gerente') || v.includes('manager') || v.includes('supervisor')) return true;
-    }
-  }
-
-  if (user.gerente) return true;
-
-  if (typeof rawRole === 'string') {
-    const role = rawRole.toLowerCase();
-    const gerenteRoles = ['gerente', 'manager', 'supervisor', 'jefe'];
-    if (gerenteRoles.some(r => role === r)) return true;
-  }
-
-  if (typeof rawRole === 'number') {
-    return rawRole === 2;
-  }
-
-  const email = (user?.email || user?.correo || user?.username || '').toString().toLowerCase();
-  if (email.includes('gerente') || email.includes('manager')) return true;
-
-  try {
-    const dump = JSON.stringify(user).toLowerCase();
-    if (dump.includes('gerente') || dump.includes('manager') || dump.includes('supervisor')) return true;
-  } catch (e) {
-    // ignore
-  }
-
-  return false;
+  return getRol(user) === 'gerente';
 };
 
 /**
  * Verifica si un usuario es organizador
- * @param {Object} user - Objeto usuario del localStorage
- * @returns {boolean} - true si es organizador
  */
 export const isOrganizador = (user) => {
-  if (!user) return false;
-
-  const rawRole = user.rol ?? user.role ?? user.tipo ?? user.type ?? '';
-
-  if (Array.isArray(user.roles) && user.roles.length) {
-    for (const r of user.roles) {
-      const v = (r?.name || r?.role || r?.rol || r || '').toString().toLowerCase();
-      if (v.includes('organizador') || v.includes('organizer')) return true;
-    }
-  }
-
-  if (user.organizador) return true;
-
-  if (typeof rawRole === 'string') {
-    const role = rawRole.toLowerCase();
-    if (role.includes('organizador') || role.includes('organizer')) return true;
-  }
-
-  try {
-    const dump = JSON.stringify(user).toLowerCase();
-    if (dump.includes('organizador') || dump.includes('organizer')) return true;
-  } catch (e) {
-    // ignore
-  }
-
-  return false;
+  return getRol(user) === 'organizador';
 };
 
+/**
+ * Verifica si un usuario es ponente
+ */
 export const isPonente = (user) => {
-  if (!user) return false;
-
-  const rawRole = user.rol ?? user.role ?? user.tipo ?? user.type ?? '';
-
-  if (Array.isArray(user.roles) && user.roles.length) {
-    for (const r of user.roles) {
-      const v = (r?.name || r?.role || r?.rol || r || '').toString().toLowerCase();
-      if (v.includes('ponente') || v.includes('speaker') || v.includes('presenter')) return true;
-    }
-  }
-
-  if (user.ponente) return true;
-
-  if (typeof rawRole === 'string') {
-    const role = rawRole.toLowerCase();
-    if (role.includes('ponente') || role.includes('speaker') || role.includes('presenter')) return true;
-  }
-
-  if (typeof rawRole === 'number') {
-    return rawRole === 5;
-  }
-
-  try {
-    const dump = JSON.stringify(user).toLowerCase();
-    if (dump.includes('ponente') || dump.includes('speaker') || dump.includes('presenter')) return true;
-  } catch (e) {
-    // ignore
-  }
-
-  return false;
+  return getRol(user) === 'ponente';
 };
 
 /**
@@ -185,19 +57,10 @@ export const isPonente = (user) => {
  */
 export const getRedirectPath = (user) => {
   if (isAdmin(user)) return '/admin';
-  // Priorizar organizador antes que gerente en caso de ambigüedad
   if (isOrganizador(user)) return '/organizador';
   if (isGerente(user)) return '/gerente';
   if (isAsistente(user)) return '/asistente';
   if (isPonente(user)) return '/ponente';
-
-  // También verifica por correo en caso de fallback
-  const email = (user?.email || user?.correo || user?.username || '').toString().toLowerCase();
-  if (email.includes('gerente') || email.includes('manager')) return '/gerente';
-  if (email.includes('asistente')) return '/asistente';
-  if (email.includes('organizador') || email.includes('organizer')) return '/organizador';
-  if (email.includes('ponente') || email.includes('speaker')) return '/ponente';
-
   return '/dashboard';
 };
 
@@ -209,17 +72,15 @@ export const getRedirectPath = (user) => {
 export const getRoleName = (user) => {
   if (!user) return 'Sin rol';
 
-  if (isAdmin(user)) return 'Administrador';
-  if (isGerente(user)) return 'Gerente';
-  if (isAsistente(user)) return 'Asistente';
-  if (isOrganizador(user)) return 'Organizador';
-  if (isPonente(user)) return 'Ponente';
+  const rolMap = {
+    administrador: 'Administrador',
+    admin: 'Administrador',
+    gerente: 'Gerente',
+    organizador: 'Organizador',
+    asistente: 'Asistente',
+    ponente: 'Ponente'
+  };
 
-  const role = user.rol || user.role;
-
-  if (typeof role === 'string') {
-    return role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
-  }
-
-  return `Rol ${role}`;
+  const rol = getRol(user);
+  return rolMap[rol] || rol.charAt(0).toUpperCase() + rol.slice(1);
 };

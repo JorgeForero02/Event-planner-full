@@ -34,6 +34,12 @@ const Ubicacion = sequelize.define('Ubicacion', {
       model: 'Ciudad',
       key: 'id'
     }
+  },
+  activo: {
+    type: DataTypes.TINYINT(1),
+    allowNull: false,
+    defaultValue: 1,
+    comment: '1 = habilitada, 0 = deshabilitada'
   }
 }, {
   tableName: 'Ubicacion',

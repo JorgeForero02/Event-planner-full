@@ -101,6 +101,7 @@ export const useEncuestasPonente = (ponenteIdProp) => {
         } finally {
             setLoading(false);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ponenteIdProp]);
 
     const obtenerEncuestasPorActividad = useCallback(async (actividadId) => {
@@ -132,6 +133,7 @@ export const useEncuestasPonente = (ponenteIdProp) => {
         } finally {
             setLoading(false);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ponenteIdProp]);
 
     const obtenerTodasEncuestas = useCallback(async () => {
@@ -139,9 +141,11 @@ export const useEncuestasPonente = (ponenteIdProp) => {
         setError(null);
 
         try {
-            const data = await fetchConAuth(
-                `${API_BASE}/encuestas/ponente`
-            );
+            const ponenteId = obtenerIdPonente();
+            const url = ponenteId
+                ? `${API_BASE}/encuestas?ponente_id=${ponenteId}`
+                : `${API_BASE}/encuestas`;
+            const data = await fetchConAuth(url);
 
             const encuestasData = data.data || data.encuestas || [];
             setEncuestas(encuestasData);

@@ -81,7 +81,8 @@ class NotificacionController {
                 });
             }
 
-            if (notificacion.id_destinatario !== usuario.id && usuario.rol !== 'admin') {
+            // [BACKEND-FIX] B8: Corregido 'admin' → 'administrador'
+            if (notificacion.id_destinatario !== usuario.id && usuario.rol !== 'administrador') {
                 return res.status(403).json({
                     success: false,
                     message: MENSAJES.SIN_PERMISO_VER
@@ -119,7 +120,8 @@ class NotificacionController {
                 });
             }
 
-            if (notificacion.id_destinatario !== usuario.id && usuario.rol !== 'admin') {
+            // [BACKEND-FIX] B8: Corregido 'admin' → 'administrador'
+            if (notificacion.id_destinatario !== usuario.id && usuario.rol !== 'administrador') {
                 await transaction.rollback();
                 return res.status(403).json({
                     success: false,

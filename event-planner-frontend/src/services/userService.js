@@ -95,15 +95,10 @@ export const usuariosService = {
     });
   },
 
-  delete: async (id) => {
-    return await apiRequest(`/gestion-usuarios/${id}`, {
-      method: 'DELETE',
-    });
-  },
-
-  search: async (query) => {
-    return await apiRequest(`/gestion-usuarios/search?q=${encodeURIComponent(query)}`, {
-      method: 'GET',
+  changePassword: async (id, data) => {
+    return await apiRequest(`/gestion-usuarios/${id}/password`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
     });
   },
 };
@@ -132,19 +127,15 @@ export const authService = {
   },
 
   logout: async () => {
-    try {
-      await apiRequest('/auth/logout', {
-        method: 'POST',
-      });
-    } finally {
-      // Limpiar tokens localmente
-      localStorage.removeItem('access_token');
-      sessionStorage.removeItem('access_token');
-    }
+    // Backend no tiene endpoint de logout, solo limpiar tokens localmente
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    sessionStorage.removeItem('access_token');
+    localStorage.removeItem('user');
   },
 
   verifyToken: async () => {
-    return await apiRequest('/auth/verify', {
+    return await apiRequest('/auth/profile', {
       method: 'GET',
     });
   },
@@ -156,7 +147,7 @@ export const authService = {
   },
 
   getCurrentUser: async () => {
-    return await apiRequest('/auth/me', {
+    return await apiRequest('/auth/profile', {
       method: 'GET',
     });
   },
@@ -200,29 +191,22 @@ export const eventosService = {
 
 export const ponentesService = {
   getAll: async () => {
-    return await apiRequest('/ponentes', { method: 'GET' });
+    return await apiRequest('/ponente-actividad/ponentes', { method: 'GET' });
   },
 
-  getById: async (id) => {
-    return await apiRequest(`/ponentes/${id}`, { method: 'GET' });
+  getByPonente: async (ponenteId) => {
+    return await apiRequest(`/ponente-actividad/ponente/${ponenteId}`, { method: 'GET' });
   },
 
-  create: async (data) => {
-    return await apiRequest('/ponentes', {
+  getByActividad: async (actividadId) => {
+    return await apiRequest(`/ponente-actividad/actividad/${actividadId}`, { method: 'GET' });
+  },
+
+  asignar: async (data) => {
+    return await apiRequest('/ponente-actividad', {
       method: 'POST',
       body: JSON.stringify(data),
     });
-  },
-
-  update: async (id, data) => {
-    return await apiRequest(`/ponentes/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
-  },
-
-  delete: async (id) => {
-    return await apiRequest(`/ponentes/${id}`, { method: 'DELETE' });
   },
 };
 

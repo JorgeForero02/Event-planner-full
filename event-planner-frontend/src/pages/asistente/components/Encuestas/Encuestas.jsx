@@ -6,7 +6,6 @@ import EncuestaModal from './EncuestaModal';
 
 const Encuestas = ({ actividadesDisponibles = [], cargandoActividades = false }) => {
     const {
-        encuestas,
         loading,
         error,
         completando,
@@ -165,6 +164,7 @@ const Encuestas = ({ actividadesDisponibles = [], cargandoActividades = false })
             setEventosUnicos([]);
             setEventoSeleccionado('');
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [actividadesDisponibles]);
 
     useEffect(() => {
@@ -190,12 +190,14 @@ const Encuestas = ({ actividadesDisponibles = [], cargandoActividades = false })
             setActividadesFiltradas([]);
             setActividadSeleccionada('');
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [eventoSeleccionado, actividadesDisponibles]);
 
     useEffect(() => {
         if (eventoSeleccionado) {
             cargarEncuestas();
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [eventoSeleccionado, actividadSeleccionada, filtroTipo]);
 
     const cargarEncuestas = async () => {

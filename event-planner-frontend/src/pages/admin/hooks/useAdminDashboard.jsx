@@ -9,7 +9,8 @@ export const useAdminDashboard = () => {
       aprobadas: 0,
       rechazadas: 0
     },
-    auditoria: []
+    auditoria: [],
+    stats: null
   });
 
   const [loading, setLoading] = useState(false);
@@ -92,6 +93,7 @@ export const useAdminDashboard = () => {
     }
 
     return { pendientes: 0, aprobadas: 0, rechazadas: 0 };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchWithErrorHandling]);
 
   const fetchAuditoriaData = useCallback(async () => {
@@ -112,6 +114,14 @@ export const useAdminDashboard = () => {
     }
 
     return [];
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchWithErrorHandling]);
+
+  const fetchSystemStats = useCallback(async () => {
+    const result = await fetchWithErrorHandling(`${API_URL}/admin/dashboard/stats`);
+    if (result.success && result.data?.data) return result.data.data;
+    return null;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchWithErrorHandling]);
 
   const fetchDashboardData = useCallback(async () => {
@@ -119,9 +129,10 @@ export const useAdminDashboard = () => {
     setError(null);
 
     try {
-      const [afiliacionesData, auditoriaData] = await Promise.all([
+      const [afiliacionesData, auditoriaData, statsData] = await Promise.all([
         fetchAfiliacionesData(),
-        fetchAuditoriaData()
+        fetchAuditoriaData(),
+        fetchSystemStats()
       ]);
 
       setDashboardData({
@@ -130,7 +141,8 @@ export const useAdminDashboard = () => {
           aprobadas: afiliacionesData.aprobadas,
           rechazadas: afiliacionesData.rechazadas
         },
-        auditoria: auditoriaData
+        auditoria: auditoriaData,
+        stats: statsData
       });
 
     } catch (error) {
@@ -138,7 +150,7 @@ export const useAdminDashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, [fetchAfiliacionesData, fetchAuditoriaData]);
+  }, [fetchAfiliacionesData, fetchAuditoriaData, fetchSystemStats]);
 
   useEffect(() => {
     fetchDashboardData();

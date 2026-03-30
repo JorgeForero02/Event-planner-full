@@ -1,4 +1,5 @@
-const { Lugar, Ubicacion, Empresa, LugarActividad } = require('../models');
+const { Lugar, Ubicacion, Empresa, LugarActividad, Actividad, Evento } = require('../models');
+const { Op } = require('sequelize');
 const { MENSAJES } = require('../constants/lugar.constants');
 
 class LugarService {
@@ -16,6 +17,14 @@ class LugarService {
                 }
             })
         ]);
+
+        // [BACKEND-FIX] B14: Validar existencia de FK antes de crear
+        if (!empresa) {
+            throw new Error('La empresa especificada no existe');
+        }
+        if (!ubicacion) {
+            throw new Error('La ubicación especificada no existe o no pertenece a esta empresa');
+        }
 
         const lugar = await Lugar.create(datosLugar, { transaction });
         return {
@@ -35,7 +44,7 @@ class LugarService {
         }
 
         const lugares = await Lugar.findAll({
-            where: { id_empresa: empresaId },
+            where: { id_empresa: empresaId, activo: 1 },
             include: [{
                 model: Ubicacion,
                 as: 'ubicacion',
@@ -74,6 +83,40 @@ class LugarService {
         if (descripcion !== undefined) actualizaciones.descripcion = descripcion;
         if (capacidad !== undefined) actualizaciones.capacidad = capacidad;
         return actualizaciones;
+    }
+
+    async toggleEstado(lugarId, transaction) {
+        const lugar = await Lugar.findByPk(lugarId, { transaction });
+        if (!lugar) return { exito: false, mensaje: MENSAJES.NO_ENCONTRADO, codigoEstado: 404 };
+
+        // Si se va a deshabilitar, verificar que no tenga actividades en eventos futuros activos
+        if (lugar.activo === 1) {
+            const hoy = new Date().toISOString().split('T')[0];
+            const actividadFutura = await LugarActividad.findOne({
+                where: { id_lugar: lugarId },
+                include: [{
+                    model: Actividad,
+                    as: 'actividad',
+                    required: true,
+                    where: { fecha_actividad: { [Op.gte]: hoy } },
+                    include: [{
+                        model: Evento,
+                        as: 'evento',
+                        required: true,
+                        where: { estado: { [Op.in]: [0, 1] } }
+                    }]
+                }],
+                transaction
+            });
+
+            if (actividadFutura) {
+                return { exito: false, mensaje: MENSAJES.TIENE_ACTIVIDADES_FUTURAS, codigoEstado: 400 };
+            }
+        }
+
+        const nuevoEstado = lugar.activo === 1 ? 0 : 1;
+        await lugar.update({ activo: nuevoEstado }, { transaction });
+        return { exito: true, lugar, habilitado: nuevoEstado === 1 };
     }
 
     async verificarActividadesAsociadas(lugarId, transaction) {

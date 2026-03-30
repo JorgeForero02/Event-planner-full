@@ -1,8 +1,9 @@
 import React from 'react';
 import { useForgotPassword } from '../components/ForgotPassword';
-import { Eye, EyeOff, Mail, Lock, ArrowLeft, CheckCircle, AlertCircle } from 'lucide-react';
-import '../pages/ForgotPassword.css';
-import logo from '../assets/evento-remove.png';
+import { Eye, EyeOff, Mail, Lock, ArrowLeft, CheckCircle2, AlertCircle, CalendarDays } from 'lucide-react';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
 
 const ForgotPassword = () => {
   const {
@@ -24,131 +25,127 @@ const ForgotPassword = () => {
   } = useForgotPassword();
 
   return (
-    <div className="forgot-password-container">
-      <div className="forgot-password-card">
+    <div className="min-h-screen bg-gradient-to-br from-[#142B6F] via-brand-700 to-brand-500 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-modal w-full max-w-md p-8 space-y-6">
         {/* Header */}
-        <div className="forgot-password-header">
-          <div className="logo-section">
-            <div className="logo-icon">
-              <img src={logo} alt="Logo" />
-            </div>
+        <div className="text-center space-y-2">
+          <div className="inline-flex items-center justify-center h-12 w-12 rounded-xl bg-brand-100 text-brand-600 mb-2">
+            <CalendarDays size={24} />
           </div>
-          <h2>Recuperar Contraseña</h2>
-          <p>Ingresa tu correo y nueva contraseña</p>
+          <h2 className="text-2xl font-bold text-slate-800">Recuperar Contraseña</h2>
+          <p className="text-sm text-slate-500">Ingresa tu correo y nueva contraseña</p>
         </div>
 
-        {/* Mensajes de error y éxito */}
+        {/* Error / success alerts */}
         {error && (
-          <div className="alert alert-error">
-            <AlertCircle size={20} />
+          <div className="flex items-center gap-2 rounded-lg bg-rose-50 border border-rose-200 px-4 py-3 text-sm text-rose-700">
+            <AlertCircle size={16} className="shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {success && (
-          <div className="alert alert-success">
-            <CheckCircle size={20} />
+          <div className="flex items-center gap-2 rounded-lg bg-emerald-50 border border-emerald-200 px-4 py-3 text-sm text-emerald-700">
+            <CheckCircle2 size={16} className="shrink-0" />
             <span>{success}</span>
           </div>
         )}
 
-        {/* Formulario */}
-        <form onSubmit={handleResetPassword} className="forgot-password-form">
-          {/* Campo de correo */}
-          <div className="form-group">
-            <label htmlFor="email">Correo Electrónico</label>
-            <div className="input-wrapper">
-              <Mail className="input-icon" size={20} />
-              <input
+        {/* Form */}
+        <form onSubmit={handleResetPassword} className="space-y-4">
+          {/* Email */}
+          <div className="space-y-1.5">
+            <Label htmlFor="email">Correo Electrónico</Label>
+            <div className="relative">
+              <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Input
                 id="email"
                 type="email"
                 placeholder="correo@ejemplo.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                disabled={loading || success}
+                disabled={loading || !!success}
                 required
+                className="pl-9"
               />
             </div>
           </div>
 
-          {/* Campo de nueva contraseña */}
-          <div className="form-group">
-            <label htmlFor="newPassword">Nueva Contraseña</label>
-            <div className="input-wrapper">
-              <Lock className="input-icon" size={20} />
-              <input
+          {/* New password */}
+          <div className="space-y-1.5">
+            <Label htmlFor="newPassword">Nueva Contraseña</Label>
+            <div className="relative">
+              <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Input
                 id="newPassword"
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Ingresa tu nueva contraseña"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                disabled={loading || success}
+                disabled={loading || !!success}
                 required
+                className="pl-9 pr-10"
               />
               <button
                 type="button"
-                className="toggle-password"
                 onClick={togglePasswordVisibility}
-                disabled={loading || success}
+                disabled={loading || !!success}
                 aria-label="Mostrar/Ocultar contraseña"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
               >
-                {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
+                {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
               </button>
             </div>
           </div>
 
-          {/* Campo de confirmar contraseña */}
-          <div className="form-group">
-            <label htmlFor="confirmPassword">Confirmar Contraseña</label>
-            <div className="input-wrapper">
-              <Lock className="input-icon" size={20} />
-              <input
+          {/* Confirm password */}
+          <div className="space-y-1.5">
+            <Label htmlFor="confirmPassword">Confirmar Contraseña</Label>
+            <div className="relative">
+              <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Input
                 id="confirmPassword"
                 type={showConfirmPassword ? 'text' : 'password'}
                 placeholder="Confirma tu nueva contraseña"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                disabled={loading || success}
+                disabled={loading || !!success}
                 required
+                className="pl-9 pr-10"
               />
               <button
                 type="button"
-                className="toggle-password"
                 onClick={toggleConfirmPasswordVisibility}
-                disabled={loading || success}
+                disabled={loading || !!success}
                 aria-label="Mostrar/Ocultar contraseña"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
               >
-                {showConfirmPassword ? <Eye size={20} /> : <EyeOff size={20} />}
+                {showConfirmPassword ? <Eye size={16} /> : <EyeOff size={16} />}
               </button>
             </div>
           </div>
 
-          {/* Botón de envío */}
-          <button
-            type="submit"
-            className="submit-button"
-            disabled={loading || success}
-          >
+          <Button type="submit" disabled={loading || !!success} className="w-full gap-2 mt-2">
             {loading ? (
               <>
-                <span className="spinner"></span>
+                <span className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
                 Actualizando...
               </>
             ) : success ? (
-              'Contraseña Actualizada'
+              <><CheckCircle2 size={16} /> Contraseña Actualizada</>
             ) : (
               'Actualizar Contraseña'
             )}
-          </button>
+          </Button>
         </form>
 
-        {/* Botón para volver al login */}
+        {/* Back to login */}
         <button
-          className="back-to-login"
+          className="flex items-center justify-center gap-2 w-full text-sm text-slate-500 hover:text-slate-700 transition-colors disabled:opacity-50"
           onClick={handleNavigateToLogin}
           disabled={loading}
         >
-          <ArrowLeft size={18} />
+          <ArrowLeft size={16} />
           Volver al inicio de sesión
         </button>
       </div>
@@ -157,3 +154,4 @@ const ForgotPassword = () => {
 };
 
 export default ForgotPassword;
+

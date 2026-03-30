@@ -55,6 +55,24 @@ export const inscriptionService = {
         return result;
     },
 
+    async cancelInscription(inscripcionId, token) {
+        const response = await fetch(`${API_BASE}/inscripciones/${inscripcionId}/cancelar`, {
+            method: 'PATCH',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            throw new Error(result.message || 'Error al cancelar la inscripción');
+        }
+
+        return result;
+    },
+
     formatInscriptionData(inscripcion) {
         return {
             id: inscripcion.id,

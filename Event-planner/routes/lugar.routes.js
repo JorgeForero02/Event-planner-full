@@ -28,4 +28,12 @@ router.delete(
     lugarController.eliminarLugar
 );
 
+// RF27 — Deshabilitar/habilitar sala sin borrar histórico
+router.patch(
+    '/:lugarId/toggle-estado',
+    auth,
+    isOrganizadorOGerente,
+    lugarController.toggleEstadoLugar
+);
+
 module.exports = router;

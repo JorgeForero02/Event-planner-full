@@ -96,11 +96,15 @@ const SolicitudCambioModal = ({ actividad, onClose, onSubmit }) => {
     });
 
     const [errors, setErrors] = useState({});
+    // eslint-disable-next-line no-unused-vars
     const [showNotification, setShowNotification] = useState(false);
+    // eslint-disable-next-line no-unused-vars
     const [notificationMessage, setNotificationMessage] = useState('');
+    // eslint-disable-next-line no-unused-vars
     const [notificationType, setNotificationType] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // eslint-disable-next-line no-unused-vars
     function formatDateForInput(dateString) {
         if (!dateString) return '';
         const date = new Date(dateString);

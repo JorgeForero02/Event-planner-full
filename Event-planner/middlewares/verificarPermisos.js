@@ -1,4 +1,4 @@
-const { Evento, Empresa, AdministradorEmpresa } = require('../models');
+const { Evento, Empresa, AdministradorEmpresa, Actividad } = require('../models');
 
 /**
  * Verifica que el usuario pueda crear eventos en una empresa
@@ -95,7 +95,63 @@ const verificarPermisoEdicionEvento = async (req, res, next) => {
     }
 };
 
+/**
+ * [BACKEND-FIX] B4: Verifica permisos para EDITAR/ELIMINAR una actividad
+ * Obtiene la actividad → su evento → verifica que el usuario pertenezca a la empresa del evento
+ */
+const verificarPermisoActividad = async (req, res, next) => {
+    try {
+        const usuarioId = req.usuario.id;
+        const actividadId = req.params.actividadId;
+
+        const actividad = await Actividad.findByPk(actividadId);
+
+        if (!actividad) {
+            return res.status(404).json({
+                success: false,
+                message: 'Actividad no encontrada'
+            });
+        }
+
+        const evento = await Evento.findByPk(actividad.id_evento);
+
+        if (!evento) {
+            return res.status(404).json({
+                success: false,
+                message: 'Evento asociado no encontrado'
+            });
+        }
+
+        const adminEmpresa = await AdministradorEmpresa.findOne({
+            where: {
+                id_usuario: usuarioId,
+                id_empresa: evento.id_empresa
+            }
+        });
+
+        if (!adminEmpresa) {
+            return res.status(403).json({
+                success: false,
+                message: 'No tienes permiso para modificar actividades de esta empresa'
+            });
+        }
+
+        req.actividad = actividad;
+        req.evento = evento;
+        req.adminEmpresa = adminEmpresa;
+        next();
+
+    } catch (error) {
+        console.error('Error en verificarPermisoActividad:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Error al verificar permisos de actividad'
+        });
+    }
+};
+
 module.exports = {
     verificarPermisoEvento,
-    verificarPermisoEdicionEvento
+    verificarPermisoEdicionEvento,
+    verificarPermisoActividad
 };

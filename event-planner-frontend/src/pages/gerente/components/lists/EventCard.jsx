@@ -1,128 +1,110 @@
 import React from 'react';
-import Calendar from '../../../../assets/calendar.png';
-import Cupos from '../../../../assets/cupos.png';
-import Edificio from '../../../../assets/edificio.png';
-import styles from '../../styles/eventosPage.module.css';
+import { Calendar, Users, Building2, Eye } from 'lucide-react';
+import { cn } from '../../../../lib/utils';
+
+const estadoVariants = {
+  publicado:  'bg-brand-100 text-brand-700 border-brand-200',
+  activo:     'bg-emerald-100 text-emerald-700 border-emerald-200',
+  cancelado:  'bg-rose-100 text-rose-700 border-rose-200',
+  finalizado: 'bg-slate-100 text-slate-600 border-slate-200',
+};
+
+const progressColors = {
+  publicado:  'bg-brand-500',
+  activo:     'bg-emerald-500',
+  cancelado:  'bg-rose-500',
+  finalizado: 'bg-slate-400',
+};
 
 const EventCard = ({
-    evento,
-    onVerDetalles,
-    formatFecha,
-    formatHora,
-    getEstadoEvento
+  evento,
+  onVerDetalles,
+  formatFecha,
+  formatHora,
+  getEstadoEvento
 }) => {
-    const estado = getEstadoEvento(evento);
-    const fechaInicio = formatFecha(evento.fecha_inicio || evento.fecha);
-    const hora = formatHora(evento.hora);
+  const estado = getEstadoEvento(evento);
+  const fechaInicio = formatFecha(evento.fecha_inicio || evento.fecha);
+  const hora = formatHora(evento.hora);
+  const claseKey = (estado.clase || '').toLowerCase();
+  const badgeCls = estadoVariants[claseKey] || 'bg-slate-100 text-slate-600 border-slate-200';
+  const progressCls = progressColors[claseKey] || 'bg-brand-500';
 
-    const DetailItem = ({ icon, label, value }) => (
-        <div className={styles.detailItem}>
-            <span className={styles.detailIcon}>
-                <img src={icon} alt={label} className={styles.iconImage} />
-            </span>
-            <div className={styles.detailContent}>
-                <span className={styles.detailLabel}>{label}</span>
-                <span className={styles.detailValue}>{value}</span>
-            </div>
+  return (
+    <div className="bg-white rounded-xl border border-slate-200 shadow-card hover:shadow-md transition-shadow overflow-hidden flex flex-col">
+      {/* Card header */}
+      <div className="px-5 pt-5 pb-3 flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h3 className="text-sm font-semibold text-slate-800 truncate leading-snug">
+            {evento.titulo || 'Evento sin título'}
+          </h3>
+          <span className="text-xs text-slate-500 mt-0.5 block">
+            {evento.modalidad || 'Presencial'}
+          </span>
         </div>
-    );
+        <span className={cn('inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border shrink-0', badgeCls)}>
+          {estado.texto}
+        </span>
+      </div>
 
-    return (
-        <div className={styles.eventCard}>
-            <div className={styles.eventCardHeader}>
-                <div className={styles.eventHeader}>
-                    <div className={styles.eventTitleSection}>
-                        <h3 className={styles.eventTitle}>
-                            {evento.titulo || 'Evento sin título'}
-                        </h3>
-                        <span className={styles.eventCategory}>
-                            {evento.modalidad || 'Presencial'}
-                        </span>
-                    </div>
-                    <span className={`${styles.eventStatus} ${styles[estado.clase]}`}>
-                        {estado.texto}
-                    </span>
-                </div>
-            </div>
-
-            <div className={styles.eventCardContent}>
-                {estado.tieneProgreso && (
-                    <div className={styles.cuposProgress}>
-                        <div className={styles.progressHeader}>
-                            <span className={styles.progressLabel}>Ocupación del evento</span>
-                            <span className={styles.progressPercentage}>{estado.porcentaje}%</span>
-                        </div>
-                        <div className={styles.progressBar}>
-                            <div
-                                className={`${styles.progressFill} ${styles['progressFill' + estado.clase.charAt(0).toUpperCase() + estado.clase.slice(1)]}`}
-                                style={{ width: `${estado.porcentaje}%` }}
-                            />
-                        </div>
-                        <span className={styles.progressText}>
-                            {estado.cuposOcupados} de {estado.cuposTotales} cupos ocupados
-                            ({estado.cuposDisponibles} disponibles)
-                        </span>
-                    </div>
-                )}
-
-
-                {evento.descripcion && evento.descripcion !== 'Sin descripción disponible' && (
-                    <p className={styles.eventDescription}>
-                        {evento.descripcion}
-                    </p>
-                )}
-
-                <div className={styles.eventDetails}>
-                    <DetailItem
-                        icon={Calendar}
-                        label="Fecha y hora"
-                        value={`${fechaInicio}${hora ? ` - ${hora}` : ''}`}
-                    />
-
-                    {estado.tieneProgreso ? (
-                        <>
-                            <DetailItem
-                                icon={Cupos}
-                                label="Cupos ocupados"
-                                value={`${estado.cuposOcupados} de ${estado.cuposTotales}`}
-                            />
-                            <DetailItem
-                                icon={Cupos}
-                                label="Cupos disponibles"
-                                value={estado.cuposDisponibles}
-                            />
-                        </>
-                    ) : (
-                        <DetailItem
-                            icon={Cupos}
-                            label="Cupos"
-                            value={estado.cuposTotales > 0
-                                ? `${estado.cuposTotales} cupos totales`
-                                : 'Sin límite'
-                            }
-                        />
-                    )}
-
-                    {evento.creador && evento.creador !== 'No especificado' && (
-                        <DetailItem
-                            icon={Edificio}
-                            label="Organizador"
-                            value={evento.creador}
-                        />
-                    )}
-                </div>
-
-                <div className={styles.eventActions}>
-                    <button
-                        className={styles.btnVerDetalles}
-                        onClick={() => onVerDetalles(evento)}
-                    >
-                        Ver Detalles Completos
-                    </button>
-                </div>
-            </div>
+      {/* Progress bar */}
+      {estado.tieneProgreso && (
+        <div className="px-5 pb-3">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs text-slate-500">Ocupación</span>
+            <span className="text-xs font-semibold text-slate-700">{estado.porcentaje}%</span>
+          </div>
+          <div className="h-1.5 w-full rounded-full bg-slate-100 overflow-hidden">
+            <div
+              className={cn('h-1.5 rounded-full transition-all', progressCls)}
+              style={{ width: `${estado.porcentaje}%` }}
+            />
+          </div>
+          <p className="text-xs text-slate-400 mt-1">
+            {estado.cuposOcupados} de {estado.cuposTotales} cupos ocupados
+          </p>
         </div>
-    );
+      )}
+
+      {/* Description */}
+      {evento.descripcion && evento.descripcion !== 'Sin descripción disponible' && (
+        <div className="px-5 pb-3">
+          <p className="text-xs text-slate-500 line-clamp-2">{evento.descripcion}</p>
+        </div>
+      )}
+
+      {/* Meta */}
+      <div className="px-5 pb-3 flex flex-wrap gap-x-4 gap-y-1">
+        <span className="flex items-center gap-1 text-xs text-slate-500">
+          <Calendar size={12} className="shrink-0" />
+          {fechaInicio}{hora ? ` — ${hora}` : ''}
+        </span>
+        {!estado.tieneProgreso && (
+          <span className="flex items-center gap-1 text-xs text-slate-500">
+            <Users size={12} className="shrink-0" />
+            {estado.cuposTotales > 0 ? `${estado.cuposTotales} cupos` : 'Sin límite'}
+          </span>
+        )}
+        {evento.creador && evento.creador !== 'No especificado' && (
+          <span className="flex items-center gap-1 text-xs text-slate-500">
+            <Building2 size={12} className="shrink-0" />
+            {typeof evento.creador === 'string' ? evento.creador : evento.creador?.nombre}
+          </span>
+        )}
+      </div>
+
+      {/* CTA */}
+      <div className="mt-auto px-5 pb-5">
+        <button
+          onClick={() => onVerDetalles(evento)}
+          className="w-full flex items-center justify-center gap-2 h-9 rounded-lg bg-brand-50 text-brand-700 text-xs font-semibold hover:bg-brand-100 transition-colors border border-brand-200"
+        >
+          <Eye size={14} />
+          Ver Detalles
+        </button>
+      </div>
+    </div>
+  );
 };
 
 export default EventCard;

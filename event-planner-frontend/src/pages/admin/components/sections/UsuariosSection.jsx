@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../../../components/ui/table";
 import { useAuth } from '../../../../contexts/AuthContext';
-import styles from './usuarios.module.css';
+
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 const ROLES_DEFAULT = [
@@ -163,6 +164,18 @@ const UsuariosSection = () => {
 
     const estaActivo = (usuario) => {
         return usuario.activo === 1;
+    };
+
+    const getRolBadgeClass = (rol) => {
+        const base = 'inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize';
+        switch (rol) {
+            case 'gerente':     return `${base} bg-purple-100 text-purple-700`;
+            case 'organizador': return `${base} bg-teal-100 text-teal-700`;
+            case 'ponente':     return `${base} bg-pink-100 text-pink-700`;
+            case 'asistente':   return `${base} bg-indigo-100 text-indigo-700`;
+            case 'administrador': return `${base} bg-amber-100 text-amber-700`;
+            default:            return `${base} bg-slate-100 text-slate-600`;
+        }
     };
 
     const getFilteredUsers = () => {
@@ -596,33 +609,33 @@ const UsuariosSection = () => {
     const renderTableRows = () => {
         if (filteredUsers.length === 0) {
             return (
-                <tr>
-                    <td colSpan="7" className={styles.noResults}>
+                <TableRow>
+                    <TableCell colSpan="7" className="text-center py-6 text-slate-500">
                         No se encontraron usuarios
-                    </td>
-                </tr>
+                    </TableCell>
+                </TableRow>
             );
         }
 
         return filteredUsers.map((usuario) => (
-            <tr key={usuario.id}>
-                <td>
-                    <div className={styles.userInfo}>
+            <TableRow key={usuario.id}>
+                <TableCell>
+                    <div className="font-medium text-slate-900">
                         <span>{usuario.nombre || 'N/A'}</span>
                     </div>
-                </td>
-                <td>{usuario.cedula || 'N/A'}</td>
-                <td>{usuario.email || usuario.correo || 'N/A'}</td>
-                <td>{usuario.telefono || 'N/A'}</td>
-                <td>{obtenerNombreEmpresa(usuario)}</td>
-                <td>
-                    <div className={styles.rolCell}>
-                        <span className={`${styles.rolBadge} ${usuario.rol ? styles[`rol${usuario.rol.charAt(0).toUpperCase() + usuario.rol.slice(1)}`] : ''}`}>
-                            {usuario.rol ? usuario.rol.charAt(0).toUpperCase() + usuario.rol.slice(1) : 'N/A'}
+                </TableCell>
+                <TableCell>{usuario.cedula || 'N/A'}</TableCell>
+                <TableCell>{usuario.email || usuario.correo || 'N/A'}</TableCell>
+                <TableCell>{usuario.telefono || 'N/A'}</TableCell>
+                <TableCell>{obtenerNombreEmpresa(usuario)}</TableCell>
+                <TableCell>
+                    <div className="flex items-center justify-between gap-3">
+                        <span className={getRolBadgeClass(usuario.rol)}>
+                            {usuario.rol || 'N/A'}
                         </span>
-                        <div className={styles.actionIcons}>
+                        <div className="flex gap-1.5 opacity-70 hover:opacity-100 transition-opacity">
                             <button
-                                className={styles.iconBtn}
+                                className="p-1.5 rounded text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors disabled:opacity-50"
                                 title="Ver"
                                 onClick={() => handleViewUser(usuario)}
                                 disabled={loadingView || loadingEdit}
@@ -632,7 +645,7 @@ const UsuariosSection = () => {
                                 </svg>
                             </button>
                             <button
-                                className={styles.iconBtn}
+                                className="p-1.5 rounded text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition-colors disabled:opacity-50"
                                 title="Editar"
                                 onClick={() => handleEditUser(usuario)}
                                 disabled={loadingView || loadingEdit}
@@ -643,25 +656,25 @@ const UsuariosSection = () => {
                             </button>
                         </div>
                     </div>
-                </td>
-            </tr>
+                </TableCell>
+            </TableRow>
         ));
     };
 
     if (loading) {
         return (
-            <div className={styles.usuariosContainer}>
-                <div className={styles.loadingSpinner}>Cargando usuarios...</div>
+            <div className="flex items-center justify-center min-h-64 p-12">
+                <div className="text-slate-500 text-base">Cargando usuarios...</div>
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className={styles.usuariosContainer}>
-                <div className={styles.errorMessage}>
-                    <p>Error: {error}</p>
-                    <button onClick={fetchUsuarios} className={styles.btnRetry}>
+            <div className="flex items-center justify-center min-h-64 p-12">
+                <div className="text-center">
+                    <p className="text-danger font-medium mb-3">Error: {error}</p>
+                    <button onClick={fetchUsuarios} className="px-4 py-2 bg-brand-600 hover:bg-brand-600/90 text-white rounded-lg text-sm font-medium transition-colors">
                         Reintentar
                     </button>
                 </div>
@@ -670,11 +683,18 @@ const UsuariosSection = () => {
     }
 
     return (
-        <div className={styles.usuariosContainer}>
+        <div className="flex flex-col gap-6">
             {notification && (
-                <div className={`${styles.notification} ${styles[notification.type]}`}>
-                    <div className={styles.notificationContent}>
-                        <div className={styles.notificationIcon}>
+                <div className={`fixed top-5 right-5 z-[2000] min-w-[320px] max-w-md bg-white rounded-xl shadow-xl overflow-hidden animate-slide-up ${
+                    notification.type === 'success' ? 'border-l-4 border-success' :
+                    notification.type === 'warning' ? 'border-l-4 border-warning' :
+                    'border-l-4 border-danger'
+                }`}>
+                    <div className="flex items-start gap-3 p-4">
+                        <div className={`shrink-0 mt-0.5 ${
+                            notification.type === 'success' ? 'text-success' :
+                            notification.type === 'warning' ? 'text-warning' : 'text-danger'
+                        }`}>
                             {notification.type === 'success' ? (
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                                     <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -685,49 +705,52 @@ const UsuariosSection = () => {
                                 </svg>
                             )}
                         </div>
-                        <p className={styles.notificationMessage}>{notification.message}</p>
+                        <p className="flex-1 text-sm text-slate-700">{notification.message}</p>
                         <button
-                            className={styles.notificationClose}
+                            className="shrink-0 text-slate-400 hover:text-slate-600 text-xl leading-none p-0 ml-1"
                             onClick={() => setNotification(null)}
                         >
                             ×
                         </button>
                     </div>
-                    <div className={styles.notificationProgress}></div>
+                    <div className={`h-1 w-full ${
+                        notification.type === 'success' ? 'bg-success' :
+                        notification.type === 'warning' ? 'bg-warning' : 'bg-danger'
+                    }`}></div>
                 </div>
             )}
 
-            <div className={styles.usuariosHeader}>
-                <h1 className={styles.usuariosTitle}>Usuarios</h1>
+            <div className="flex items-center justify-between">
+                <h1 className="text-2xl font-bold text-slate-900">Usuarios</h1>
                 <button
-                    className={styles.btnCrearUsuario}
+                    className="flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-600/90 text-white rounded-lg text-sm font-medium transition-colors"
                     onClick={() => setShowCreateModal(true)}
                 >
                     + Crear Usuarios
                 </button>
             </div>
 
-            <div className={styles.usuariosCard}>
-                <div className={styles.cardHeader}>
-                    <h2 className={styles.cardTitle}>Listado de Usuarios</h2>
-                    <div className={styles.headerControls}>
-                        <div className={styles.searchContainer}>
-                            <svg className={styles.searchIcon} width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border-b border-slate-200">
+                    <h2 className="text-base font-semibold text-slate-800">Listado de Usuarios</h2>
+                    <div className="flex items-center gap-3">
+                        <div className="relative">
+                            <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" width="20" height="20" viewBox="0 0 20 20" fill="none">
                                 <path d="M9 17A8 8 0 1 0 9 1a8 8 0 0 0 0 16zM18 18l-4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                             </svg>
                             <input
                                 type="text"
                                 placeholder="Buscar por nombre..."
-                                className={styles.searchInput}
+                                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-600 focus:bg-white transition-colors"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
-                        <div className={styles.filterContainer}>
-                            <label htmlFor="filter-select">Filtrar por:</label>
+                        <div className="flex items-center gap-2 relative">
+                            <label htmlFor="filter-select" className="text-sm text-slate-500 whitespace-nowrap">Filtrar por:</label>
                             <select
                                 id="filter-select"
-                                className={styles.filterSelect}
+                                className="appearance-none pl-3 pr-8 py-2 border border-slate-200 rounded-lg text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-brand-600 min-w-[140px] cursor-pointer"
                                 value={filterBy}
                                 onChange={(e) => setFilterBy(e.target.value)}
                             >
@@ -737,116 +760,129 @@ const UsuariosSection = () => {
                                 <option value="organizador">Organizador</option>
                                 <option value="asistente">Asistente</option>
                             </select>
-                            <svg className={styles.filterIcon} width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <svg className="absolute right-2 pointer-events-none text-slate-400" width="16" height="16" viewBox="0 0 16 16" fill="none">
                                 <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                             </svg>
                         </div>
                     </div>
                 </div>
 
-                <div className={styles.tableContainer}>
-                    <table className={styles.usuariosTable}>
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Cédula</th>
-                                <th>Email</th>
-                                <th>Telefono</th>
-                                <th>Empresa</th>
-                                <th>Rol</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex-1">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Nombre</TableHead>
+                                <TableHead>Cédula</TableHead>
+                                <TableHead>Email</TableHead>
+                                <TableHead>Telefono</TableHead>
+                                <TableHead>Empresa</TableHead>
+                                <TableHead>Rol</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
                             {renderTableRows()}
-                        </tbody>
-                    </table>
+                        </TableBody>
+                    </Table>
                 </div>
             </div>
 
             {showViewModal && selectedUsuario && (
-                <div className={styles.modalOverlay} onClick={() => setShowViewModal(false)}>
-                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-                        <div className={styles.modalHeader}>
-                            <div className={`${styles.userIcon} ${styles.userIconBlue}`}>
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
+                <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowViewModal(false)}>
+                    <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-between p-6 border-b border-slate-200">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 bg-blue-100 text-blue-600">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                </div>
+                                <h2 className="text-lg font-semibold text-slate-800">Ver Usuario</h2>
                             </div>
-                            <h3 className={styles.modalTitle}>Información del Usuario</h3>
-                            <button className={styles.closeBtn} onClick={() => setShowViewModal(false)}>×</button>
+                            <button className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors" onClick={() => setShowViewModal(false)}>×</button>
                         </div>
 
-                        <div className={styles.modalForm}>
-                            <div className={`${styles.statusBadge} ${estaActivo(selectedUsuario) ? styles.active : styles.inactive}`}>
-                                <span className={`${styles.statusIndicator} ${estaActivo(selectedUsuario) ? styles.active : styles.inactive}`} />
+                        <div className="overflow-y-auto p-6 flex flex-col gap-5">
+                            <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${
+                                estaActivo(selectedUsuario)
+                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                    : 'bg-red-50 text-danger border border-red-200'
+                            }`}>
+                                <span className={`w-2 h-2 rounded-full ${
+                                    estaActivo(selectedUsuario) ? 'bg-success' : 'bg-danger'
+                                }`} />
                                 <span>
                                     Estado: {estaActivo(selectedUsuario) ? 'Activo' : 'Inactivo'}
                                 </span>
                             </div>
 
-                            <div className={styles.infoSection}>
-                                <h4 className={styles.sectionTitle}>Información Personal</h4>
+                            <div className="mb-2">
+                                <h4 className="text-lg font-semibold text-slate-800 border-b border-slate-200 pb-2 mb-4">Información Personal</h4>
 
-                                <div className={styles.formRow}>
-                                    <div className={styles.formGroup}>
-                                        <label>Nombre Completo</label>
+                                <div className="grid grid-cols-1 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-slate-700">Nombre Completo</label>
                                         <input
                                             type="text"
                                             value={selectedUsuario.nombre || 'N/A'}
                                             disabled
                                             readOnly
+                                            className="w-full h-9 px-3 rounded-md border border-slate-200 bg-slate-50 text-sm text-slate-600 cursor-not-allowed"
                                         />
                                     </div>
                                 </div>
 
-                                <div className={styles.formRow}>
-                                    <div className={styles.formGroup}>
-                                        <label>Número de Documento</label>
+                                <div className="grid grid-cols-2 gap-4 mt-4">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-slate-700">Número de Documento</label>
                                         <input
                                             type="text"
                                             value={selectedUsuario.cedula || 'N/A'}
                                             disabled
                                             readOnly
+                                            className="w-full h-9 px-3 rounded-md border border-slate-200 bg-slate-50 text-sm text-slate-600 cursor-not-allowed"
                                         />
                                     </div>
-                                    <div className={styles.formGroup}>
-                                        <label>Teléfono</label>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-slate-700">Teléfono</label>
                                         <input
                                             type="text"
                                             value={selectedUsuario.telefono || 'N/A'}
                                             disabled
                                             readOnly
+                                            className="w-full h-9 px-3 rounded-md border border-slate-200 bg-slate-50 text-sm text-slate-600 cursor-not-allowed"
                                         />
                                     </div>
                                 </div>
 
-                                <div className={styles.formGroup}>
-                                    <label>Correo Electrónico</label>
+                                <div className="space-y-2 mt-4">
+                                    <label className="text-sm font-medium text-slate-700">Correo Electrónico</label>
                                     <input
                                         type="email"
                                         value={selectedUsuario.correo || 'N/A'}
                                         disabled
                                         readOnly
+                                        className="w-full h-9 px-3 rounded-md border border-slate-200 bg-slate-50 text-sm text-slate-600 cursor-not-allowed"
                                     />
                                 </div>
                             </div>
 
-                            <div className={styles.infoSection}>
-                                <h4 className={styles.sectionTitle}>Información del Sistema</h4>
+                            <div className="mb-2">
+                                <h4 className="text-lg font-semibold text-slate-800 border-b border-slate-200 pb-2 mb-4">Información del Sistema</h4>
 
-                                <div className={styles.formGroup}>
-                                    <label>Rol Asignado *</label>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-700">Rol Asignado</label>
                                     <input
                                         type="text"
                                         value={selectedUsuario.rol ? selectedUsuario.rol.charAt(0).toUpperCase() + selectedUsuario.rol.slice(1) : 'N/A'}
                                         disabled
                                         readOnly
-                                        className={styles.textCapitalize}
+                                        className="w-full h-9 px-3 rounded-md border border-slate-200 bg-slate-50 text-sm text-slate-600 cursor-not-allowed capitalize"
                                     />
                                 </div>
 
                                 {selectedUsuario.rol_data?.empresa_nombre && (
-                                    <div className={styles.formGroup}>
+                                    <div className="space-y-2">
                                         <label>Empresa Asociada</label>
                                         <input
                                             type="text"
@@ -858,7 +894,7 @@ const UsuariosSection = () => {
                                 )}
 
                                 {selectedUsuario.rol_data?.especialidad && (
-                                    <div className={styles.formGroup}>
+                                    <div className="space-y-2">
                                         <label>Especialidad</label>
                                         <input
                                             type="text"
@@ -871,12 +907,12 @@ const UsuariosSection = () => {
                             </div>
 
                             {selectedUsuario.fecha_creacion && (
-                                <div className={styles.infoSection}>
-                                    <h4 className={styles.sectionTitle}>Información Adicional</h4>
+                                <div className="mb-2">
+                                    <h4 className="text-lg font-semibold text-slate-800 border-b border-slate-200 pb-2 mb-4">Información Adicional</h4>
 
-                                    <div className={styles.formRow}>
-                                        <div className={styles.formGroup}>
-                                            <label>Fecha de Creación</label>
+                                    <div className="grid grid-cols-1 gap-4">
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium text-slate-700">Fecha de Creación</label>
                                             <input
                                                 type="text"
                                                 value={new Date(selectedUsuario.fecha_creacion).toLocaleDateString('es-ES', {
@@ -888,17 +924,22 @@ const UsuariosSection = () => {
                                                 })}
                                                 disabled
                                                 readOnly
+                                                className="w-full h-9 px-3 rounded-md border border-slate-200 bg-slate-50 text-sm text-slate-600 cursor-not-allowed"
                                             />
                                         </div>
                                     </div>
                                 </div>
                             )}
 
-                            <div className={styles.formActions}>
+                            <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 mt-2">
                                 <button
                                     onClick={() => handleToggleStatus(selectedUsuario.id, selectedUsuario.nombre, selectedUsuario.activo)}
                                     disabled={loadingStatus}
-                                    className={estaActivo(selectedUsuario) ? styles.btnDeactivate : styles.btnActivate}
+                                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
+                                        estaActivo(selectedUsuario)
+                                            ? 'bg-danger hover:bg-danger/90 text-white'
+                                            : 'bg-success hover:bg-success/90 text-white'
+                                    }`}
                                 >
                                     {estaActivo(selectedUsuario) ? (
                                         <>
@@ -920,7 +961,7 @@ const UsuariosSection = () => {
                                 <button
                                     onClick={() => setShowViewModal(false)}
                                     disabled={loadingStatus}
-                                    className={styles.btnSubmit}
+                                    className="px-4 py-2 bg-brand-600 hover:bg-brand-600/90 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
                                 >
                                     Cerrar
                                 </button>
@@ -931,33 +972,33 @@ const UsuariosSection = () => {
             )}
 
             {showEditModal && selectedUsuario && (
-                <div className={styles.modalOverlay} onClick={() => {
+                <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => {
                     setShowEditModal(false);
                     resetForm();
                     setSelectedUsuario(null);
                 }}>
-                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-                        <div className={styles.modalHeader}>
-                            <div className={`${styles.userIcon} ${styles.userIconOrange}`}>
+                    <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-between p-6 border-b border-slate-200">
+                            <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 bg-amber-100 text-amber-600">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                                     <path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                 </svg>
                             </div>
-                            <h3 className={styles.modalTitle}>Editar Usuario</h3>
-                            <button className={styles.closeBtn} onClick={() => {
+                            <h3 className="text-xl font-bold text-slate-800">Editar Usuario</h3>
+                            <button className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors" onClick={() => {
                                 setShowEditModal(false);
                                 resetForm();
                                 setSelectedUsuario(null);
                             }}>×</button>
                         </div>
 
-                        <form onSubmit={handleUpdateUser} className={styles.modalForm}>
-                            <div className={styles.infoSection}>
-                                <h4 className={styles.sectionTitle}>Información Personal</h4>
+                        <form onSubmit={handleUpdateUser} className="overflow-y-auto p-6 flex flex-col gap-5">
+                            <div className="mb-2">
+                                <h4 className="text-lg font-semibold text-slate-800 border-b border-slate-200 pb-2 mb-4">Información Personal</h4>
 
-                                <div className={styles.formRow}>
-                                    <div className={styles.formGroup}>
-                                        <label>Nombre *</label>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-slate-700">Nombre *</label>
                                         <input
                                             type="text"
                                             name="nombre"
@@ -965,10 +1006,11 @@ const UsuariosSection = () => {
                                             value={formData.nombre}
                                             onChange={handleInputChange}
                                             required
+                                            className="w-full h-9 px-3 rounded-md border border-slate-200 bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-600 transition"
                                         />
                                     </div>
-                                    <div className={styles.formGroup}>
-                                        <label>Apellidos *</label>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-slate-700">Apellidos *</label>
                                         <input
                                             type="text"
                                             name="apellidos"
@@ -976,85 +1018,91 @@ const UsuariosSection = () => {
                                             value={formData.apellidos}
                                             onChange={handleInputChange}
                                             required
+                                            className="w-full h-9 px-3 rounded-md border border-slate-200 bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-600 transition"
                                         />
                                     </div>
                                 </div>
 
-                                <div className={styles.formGroup}>
-                                    <label>Número de Documento</label>
+                                <div className="space-y-2 mt-4">
+                                    <label className="text-sm font-medium text-slate-700">Número de Documento</label>
                                     <input
                                         type="text"
                                         name="numeroDocumento"
                                         value={formData.numeroDocumento}
                                         disabled
+                                        className="w-full h-9 px-3 rounded-md border border-slate-200 bg-slate-50 text-sm text-slate-600 cursor-not-allowed"
                                     />
-                                    <small className={styles.helperText}>El documento no puede ser modificado</small>
+                                    <small className="text-xs text-slate-500 italic">El documento no puede ser modificado</small>
                                 </div>
 
-                                <div className={styles.formRow}>
-                                    <div className={styles.formGroup}>
-                                        <label>Teléfono *</label>
+                                <div className="grid grid-cols-2 gap-4 mt-4">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-slate-700">Teléfono *</label>
                                         <input
                                             type="tel"
                                             name="telefono"
                                             value={formData.telefono}
                                             onChange={handleInputChange}
                                             required
+                                            className="w-full h-9 px-3 rounded-md border border-slate-200 bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-600 transition"
                                         />
                                     </div>
-                                    <div className={styles.formGroup}>
-                                        <label>Correo Electrónico *</label>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-slate-700">Correo Electrónico *</label>
                                         <input
                                             type="email"
                                             name="email"
                                             value={formData.email}
                                             onChange={handleInputChange}
                                             required
+                                            className="w-full h-9 px-3 rounded-md border border-slate-200 bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-600 transition"
                                         />
                                     </div>
                                 </div>
                             </div>
 
-                            <div className={styles.infoSection}>
-                                <h4 className={styles.sectionTitle}>Información del Rol</h4>
+                            <div className="mb-2">
+                                <h4 className="text-lg font-semibold text-slate-800 border-b border-slate-200 pb-2 mb-4">Información del Rol</h4>
 
-                                <div className={styles.formGroup}>
-                                    <label>Rol Asignado *</label>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-700">Rol Asignado *</label>
                                     <input
                                         type="text"
                                         value={selectedUsuario.rol ? selectedUsuario.rol.charAt(0).toUpperCase() + selectedUsuario.rol.slice(1) : 'N/A'}
                                         disabled
                                         readOnly
-                                        className={styles.textCapitalize}
+                                        className="w-full h-9 px-3 rounded-md border border-slate-200 bg-slate-50 text-sm text-slate-600 cursor-not-allowed capitalize"
                                     />
-                                    <small className={styles.helperText}>
+                                    <small className="text-xs text-slate-500 italic">
                                         No se puede cambiar el rol asignado al usuario
                                     </small>
                                 </div>
 
                                 {formData.rol === 'ponente' && (
-                                    <div className={styles.formGroup}>
-                                        <label>Especialidad</label>
+                                    <div className="space-y-2 mt-4">
+                                        <label className="text-sm font-medium text-slate-700">Especialidad</label>
                                         <input
                                             type="text"
                                             name="especialidad"
                                             placeholder="Ej: Tecnología, Negocios, Medicina..."
                                             value={formData.especialidad}
                                             onChange={handleInputChange}
+                                            className="w-full h-9 px-3 rounded-md border border-slate-200 bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-600 transition"
                                         />
-                                        <small className={styles.helperText}>Especialidad del ponente</small>
+                                        <small className="text-xs text-slate-500 italic">Especialidad del ponente</small>
                                     </div>
                                 )}
 
                                 {(formData.rol === 'gerente' || formData.rol === 'organizador') && (
-                                    <div className={styles.formGroup}>
-                                        <label>Empresa Asociada *</label>
+                                    <div className="space-y-2 mt-4">
+                                        <label className="text-sm font-medium text-slate-700">Empresa Asociada *</label>
                                         <select
                                             name="empresa"
                                             value={formData.empresa}
                                             onChange={handleInputChange}
                                             disabled={loadingEmpresas}
                                             required
+                                            className="w-full h-9 px-3 rounded-md border border-slate-200 bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-600 transition disabled:bg-slate-50 disabled:cursor-not-allowed"
                                         >
                                             <option value="">Seleccione una empresa...</option>
                                             {loadingEmpresas ? (
@@ -1067,15 +1115,15 @@ const UsuariosSection = () => {
                                                 ))
                                             )}
                                         </select>
-                                        <small className={styles.helperText}>Empresa asignada al usuario</small>
+                                        <small className="text-xs text-slate-500 italic">Empresa asignada al usuario</small>
                                     </div>
                                 )}
                             </div>
 
-                            <div className={styles.formActions}>
+                            <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 mt-2">
                                 <button
                                     type="button"
-                                    className={styles.btnCancel}
+                                    className="px-4 py-2 border border-slate-200 text-slate-700 bg-white rounded-lg hover:bg-slate-50 font-medium transition-colors"
                                     onClick={() => {
                                         setShowEditModal(false);
                                         resetForm();
@@ -1087,12 +1135,12 @@ const UsuariosSection = () => {
                                 </button>
                                 <button
                                     type="submit"
-                                    className={`${styles.btnSubmit} ${styles.btnSubmitOrange}`}
+                                    className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
                                     disabled={loadingUpdate}
                                 >
                                     {loadingUpdate ? (
                                         <>
-                                            <svg className={styles.spinner} width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                            <svg className="animate-spin" width="16" height="16" viewBox="0 0 16 16" fill="none">
                                                 <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeDasharray="31.4" strokeDashoffset="10" />
                                             </svg>
                                             Guardando...
@@ -1108,22 +1156,22 @@ const UsuariosSection = () => {
             )}
 
             {showCreateModal && (
-                <div className={styles.modalOverlay} onClick={() => setShowCreateModal(false)}>
-                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-                        <div className={styles.modalHeader}>
-                            <div className={styles.userIcon}>
+                <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowCreateModal(false)}>
+                    <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-between p-6 border-b border-slate-200">
+                            <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 bg-blue-100 text-blue-600">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                                     <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                 </svg>
                             </div>
-                            <h3 className={styles.modalTitle}>Crear Nuevo Usuario</h3>
-                            <button className={styles.closeBtn} onClick={() => setShowCreateModal(false)}>×</button>
+                            <h3 className="text-xl font-bold text-slate-800">Crear Nuevo Usuario</h3>
+                            <button className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors" onClick={() => setShowCreateModal(false)}>×</button>
                         </div>
 
-                        <form onSubmit={handleCreateUser} className={styles.modalForm}>
-                            <div className={styles.formRow}>
-                                <div className={styles.formGroup}>
-                                    <label>Nombre *</label>
+                        <form onSubmit={handleCreateUser} className="overflow-y-auto p-6 flex flex-col gap-5">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-700">Nombre *</label>
                                     <input
                                         type="text"
                                         name="nombre"
@@ -1131,10 +1179,11 @@ const UsuariosSection = () => {
                                         value={formData.nombre}
                                         onChange={handleInputChange}
                                         required
+                                        className="w-full h-9 px-3 rounded-md border border-slate-200 bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-600 transition"
                                     />
                                 </div>
-                                <div className={styles.formGroup}>
-                                    <label>Apellidos *</label>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-700">Apellidos *</label>
                                     <input
                                         type="text"
                                         name="apellidos"
@@ -1142,12 +1191,13 @@ const UsuariosSection = () => {
                                         value={formData.apellidos}
                                         onChange={handleInputChange}
                                         required
+                                        className="w-full h-9 px-3 rounded-md border border-slate-200 bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-600 transition"
                                     />
                                 </div>
                             </div>
 
-                            <div className={styles.formGroup}>
-                                <label>Número de Documento *</label>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-700">Número de Documento *</label>
                                 <input
                                     type="text"
                                     name="numeroDocumento"
@@ -1155,25 +1205,27 @@ const UsuariosSection = () => {
                                     value={formData.numeroDocumento}
                                     onChange={handleInputChange}
                                     required
+                                    className="w-full h-9 px-3 rounded-md border border-slate-200 bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-600 transition"
                                 />
-                                <small className={styles.helperText}>
+                                <small className="text-xs text-slate-500 italic">
                                     Este documento debe ser único en el sistema
                                 </small>
                             </div>
 
-                            <div className={styles.formRow}>
-                                <div className={styles.formGroup}>
-                                    <label>Teléfono *</label>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-700">Teléfono *</label>
                                     <input
                                         type="tel"
                                         name="telefono"
                                         value={formData.telefono}
                                         onChange={handleInputChange}
                                         required
+                                        className="w-full h-9 px-3 rounded-md border border-slate-200 bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-600 transition"
                                     />
                                 </div>
-                                <div className={styles.formGroup}>
-                                    <label>Correo Electrónico *</label>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-700">Correo Electrónico *</label>
                                     <input
                                         type="email"
                                         name="email"
@@ -1181,17 +1233,19 @@ const UsuariosSection = () => {
                                         value={formData.email}
                                         onChange={handleInputChange}
                                         required
+                                        className="w-full h-9 px-3 rounded-md border border-slate-200 bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-600 transition"
                                     />
                                 </div>
                             </div>
 
-                            <div className={styles.formGroup}>
-                                <label>Rol Asignado *</label>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-700">Rol Asignado *</label>
                                 <select
                                     name="rol"
                                     value={formData.rol}
                                     onChange={handleInputChange}
                                     required
+                                    className="w-full h-9 px-3 rounded-md border border-slate-200 bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-600 transition"
                                 >
                                     <option value="">Seleccionar rol...</option>
                                     {rolesDelSistema.map(rol => (
@@ -1203,7 +1257,7 @@ const UsuariosSection = () => {
                             </div>
 
                             {formData.rol === 'ponente' && (
-                                <div className={styles.formGroup}>
+                                <div className="space-y-2">
                                     <label>Especialidad</label>
                                     <input
                                         type="text"
@@ -1226,7 +1280,7 @@ const UsuariosSection = () => {
                             )}
 
                             {(formData.rol === 'gerente' || formData.rol === 'organizador') && (
-                                <div className={styles.formGroup}>
+                                <div className="space-y-2">
                                     <label>Empresa *</label>
                                     <select
                                         name="empresa"
@@ -1249,10 +1303,10 @@ const UsuariosSection = () => {
                                 </div>
                             )}
 
-                            <div className={styles.formRow}>
-                                <div className={styles.formGroup}>
-                                    <label>Contraseña *</label>
-                                    <div className={styles.passwordInputContainer}>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-700">Contraseña *</label>
+                                    <div className="relative">
                                         <input
                                             type={showPassword.contraseña ? "text" : "password"}
                                             name="contraseña"
@@ -1260,11 +1314,11 @@ const UsuariosSection = () => {
                                             value={formData.contraseña}
                                             onChange={handleInputChange}
                                             required
-                                            className={styles.passwordInput}
+                                            className="w-full h-10 px-3 pr-10 rounded-md border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-600"
                                         />
                                         <button
                                             type="button"
-                                            className={styles.passwordToggle}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
                                             onClick={() => togglePasswordVisibility('contraseña')}
                                         >
                                             {showPassword.contraseña ? (
@@ -1280,13 +1334,13 @@ const UsuariosSection = () => {
                                             )}
                                         </button>
                                     </div>
-                                    <small className={styles.helperText}>
+                                    <small className="text-xs text-slate-500 italic">
                                         Contraseña temporal para el usuario
                                     </small>
                                 </div>
-                                <div className={styles.formGroup}>
-                                    <label>Confirmar Contraseña *</label>
-                                    <div className={styles.passwordInputContainer}>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-slate-700">Confirmar Contraseña *</label>
+                                    <div className="relative">
                                         <input
                                             type={showPassword.confirmarContraseña ? "text" : "password"}
                                             name="confirmarContraseña"
@@ -1294,11 +1348,11 @@ const UsuariosSection = () => {
                                             value={formData.confirmarContraseña}
                                             onChange={handleInputChange}
                                             required
-                                            className={styles.passwordInput}
+                                            className="w-full h-10 px-3 pr-10 rounded-md border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-600"
                                         />
                                         <button
                                             type="button"
-                                            className={styles.passwordToggle}
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
                                             onClick={() => togglePasswordVisibility('confirmarContraseña')}
                                         >
                                             {showPassword.confirmarContraseña ? (
@@ -1317,10 +1371,10 @@ const UsuariosSection = () => {
                                 </div>
                             </div>
 
-                            <div className={styles.formActions}>
+                            <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 mt-2">
                                 <button
                                     type="button"
-                                    className={styles.btnCancel}
+                                    className="px-4 py-2 border border-slate-200 text-slate-700 bg-white rounded-lg hover:bg-slate-50 font-medium transition-colors"
                                     onClick={() => {
                                         setShowCreateModal(false);
                                         resetForm();
@@ -1328,7 +1382,7 @@ const UsuariosSection = () => {
                                 >
                                     Cancelar
                                 </button>
-                                <button type="submit" className={styles.btnSubmit}>
+                                <button type="submit" className="px-4 py-2 bg-brand-600 hover:bg-brand-600/90 text-white rounded-lg font-medium transition-colors disabled:opacity-50">
                                     Crear Usuario
                                 </button>
                             </div>
@@ -1338,62 +1392,62 @@ const UsuariosSection = () => {
             )}
 
             {showPasswordModal && credencialesUsuario && (
-                <div className={styles.modalOverlay} onClick={() => setShowPasswordModal(false)}>
-                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-                        <div className={styles.modalHeader}>
-                            <div className={`${styles.userIcon} ${styles.userIconGreen}`}>
+                <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowPasswordModal(false)}>
+                    <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center justify-between p-6 border-b border-slate-200">
+                            <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 bg-emerald-100 text-emerald-600">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
                                     <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                 </svg>
                             </div>
-                            <h3 className={styles.modalTitle}>Usuario Creado Exitosamente</h3>
-                            <button className={styles.closeBtn} onClick={() => setShowPasswordModal(false)}>×</button>
+                            <h3 className="text-xl font-bold text-slate-800">Usuario Creado Exitosamente</h3>
+                            <button className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors" onClick={() => setShowPasswordModal(false)}>×</button>
                         </div>
 
-                        <div className={styles.modalForm}>
-                            <div className={`${styles.successBanner} ${styles.mb20}`}>
-                                <p className={styles.successText}>
+                        <div className="overflow-y-auto p-6 flex flex-col gap-4">
+                            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 mb-5">
+                                <p className="text-emerald-800 font-medium pb-2 border-b border-emerald-200/50">
                                     {credencialesUsuario.mensaje}
                                 </p>
                             </div>
 
-                            <div className={`${styles.infoBanner} ${styles.mb16}`}>
-                                <h4 className={styles.infoBannerTitle}>Información del Usuario:</h4>
+                            <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-4 mt-4">
+                                <h4 className="text-sm font-semibold text-blue-900 mb-3">Información del Usuario:</h4>
 
-                                <div className={styles.infoGrid}>
-                                    <div className={styles.infoRow}>
-                                        <span className={styles.infoLabel}>Nombre:</span>
-                                        <span className={styles.infoValue}>{credencialesUsuario.nombre}</span>
+                                <div className="grid gap-2 text-sm">
+                                    <div className="flex flex-col sm:flex-row sm:gap-2">
+                                        <span className="text-slate-500 w-20">Nombre:</span>
+                                        <span className="font-medium text-slate-900 break-all">{credencialesUsuario.nombre}</span>
                                     </div>
-                                    <div className={styles.infoRow}>
-                                        <span className={styles.infoLabel}>Correo:</span>
-                                        <span className={styles.infoValue}>{credencialesUsuario.correo}</span>
+                                    <div className="flex flex-col sm:flex-row sm:gap-2">
+                                        <span className="text-slate-500 w-20">Correo:</span>
+                                        <span className="font-medium text-slate-900 break-all">{credencialesUsuario.correo}</span>
                                     </div>
-                                    <div className={styles.infoRow}>
-                                        <span className={styles.infoLabel}>Rol:</span>
-                                        <span className={`${styles.infoValue} ${styles.textCapitalize}`}>
+                                    <div className="flex flex-col sm:flex-row sm:gap-2">
+                                        <span className="text-slate-500 w-20">Rol:</span>
+                                        <span className="font-medium text-slate-900 break-all capitalize">
                                             {credencialesUsuario.rol}
                                         </span>
                                     </div>
                                     {credencialesUsuario.empresa !== 'N/A' && (
-                                        <div className={styles.infoRow}>
-                                            <span className={styles.infoLabel}>Empresa:</span>
-                                            <span className={styles.infoValue}>{credencialesUsuario.empresa}</span>
+                                        <div className="flex flex-col sm:flex-row sm:gap-2">
+                                            <span className="text-slate-500 w-20">Empresa:</span>
+                                            <span className="font-medium text-slate-900 break-all">{credencialesUsuario.empresa}</span>
                                         </div>
                                     )}
                                 </div>
                             </div>
 
-                            <div className={`${styles.warningBanner} ${styles.mb20}`}>
-                                <div className={styles.warningContent}>
+                            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-5">
+                                <div className="flex flex-col gap-1">
                                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                                         <path d="M10 0C4.5 0 0 4.5 0 10s4.5 10 10 10 10-4.5 10-10S15.5 0 10 0zm1 15H9v-2h2v2zm0-4H9V5h2v6z" fill="#f57c00" />
                                     </svg>
                                     <div>
-                                        <p className={styles.warningTitle}>
+                                        <p className="font-semibold text-amber-900 text-sm flex items-center gap-2">
                                             Contraseña Temporal Generada
                                         </p>
-                                        <p className={styles.warningText}>
+                                        <p className="text-amber-800 text-sm">
                                             Se ha generado una contraseña temporal y se ha enviado al correo electrónico del usuario.
                                             El usuario deberá cambiar esta contraseña en su primer inicio de sesión.
                                         </p>
@@ -1406,7 +1460,7 @@ const UsuariosSection = () => {
                                     setShowPasswordModal(false);
                                     setCredencialesUsuario(null);
                                 }}
-                                className={`${styles.btnSubmit} ${styles.btnSubmitGreen}`}
+                                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
                             >
                                 Entendido
                             </button>

@@ -1,14 +1,12 @@
 import { useState } from 'react';
 import { Eye, EyeOff, Mail, Lock, User, Phone, CreditCard, Briefcase } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
 import { authService } from '../../services/api/authService';
 import './register.css';
 import logo from '../../assets/evento-remove.png';
 
 export default function Register() {
   const navigate = useNavigate();
-  const { clearError } = useAuth();
   
   const [selectedRole, setSelectedRole] = useState('asistente');
   const [formData, setFormData] = useState({

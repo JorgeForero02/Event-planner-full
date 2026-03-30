@@ -25,29 +25,23 @@ class EventsAPI extends BaseService {
 
     obtenerEventosDisponibles = async () => {
         try {
-            console.log('🌐 Obteniendo eventos disponibles desde API...');
             const response = await this.fetch('/inscripciones/eventos-disponibles');
 
-            console.log('📊 Respuesta completa de eventos disponibles:', response);
-
             if (!response.success) {
-                console.warn('⚠️ La API no devolvié success=true para eventos disponibles:', response.message);
-                // No lanzar error, devolver estructura vacía
-                return { success: true, data: [] };
+                // [FRONTEND-FIX] F5: Propagar error en lugar de enmascarar como éxito
+                throw new Error(response.message || 'Error al obtener eventos disponibles');
             }
 
-            console.log(`✅ Encontrados ${response.data?.length || 0} eventos disponibles`);
             return response;
         } catch (error) {
-            console.error('❌ Error en obtenerEventosDisponibles:', error);
-            // En caso de error, devolver estructura vacía para no romper el flujo
-            return { success: true, data: [] };
+            console.error('Error en obtenerEventosDisponibles:', error);
+            throw error;
         }
     }
 
     getEventsByEmpresa = async (empresaId) => {
         try {
-            const response = await this.fetch(`/empresas/${empresaId}/eventos`);
+            const response = await this.fetch(`/eventos?id_empresa=${empresaId}`);
             return response.data || [];
         } catch (error) {
             console.error('Error fetching events by empresa:', error);

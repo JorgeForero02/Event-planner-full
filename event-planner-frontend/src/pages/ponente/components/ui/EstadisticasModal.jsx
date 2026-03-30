@@ -13,8 +13,10 @@ const EstadisticasModal = ({ encuestaId, onClose }) => {
 
     useEffect(() => {
         cargarEstadisticas();
+        const intervalo = setInterval(cargarEstadisticas, 10000);
+        return () => clearInterval(intervalo);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [encuestaId]);
-
     const cargarEstadisticas = async () => {
         try {
             setLoading(true);

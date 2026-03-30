@@ -103,6 +103,34 @@ class InscripcionController {
         }
     }
 
+    async cancelarInscripcion(req, res, next) {
+        const transaction = await InscripcionService.crearTransaccion();
+        try {
+            const { id } = req.params;
+            const usuario = req.usuario;
+
+            const resultado = await InscripcionService.cancelar(id, usuario.id, transaction);
+
+            if (!resultado.exito) {
+                await transaction.rollback();
+                return ApiResponse.error(res, resultado.mensaje, resultado.codigoEstado);
+            }
+
+            await AuditoriaService.registrar({
+                mensaje: `Usuario ${usuario.nombre} canceló inscripción al evento: ${resultado.evento.titulo}`,
+                tipo: 'PUT',
+                accion: 'cancelar_inscripcion',
+                usuario
+            });
+
+            await transaction.commit();
+            return ApiResponse.success(res, { id: resultado.inscripcion.id, estado: resultado.inscripcion.estado }, MENSAJES.CANCELACION_EXITOSA);
+        } catch (error) {
+            await transaction.rollback();
+            next(error);
+        }
+    }
+
     async confirmarInscripcion(req, res, next) {
         const transaction = await InscripcionService.crearTransaccion();
 

@@ -37,4 +37,12 @@ router.get(
     InscripcionController.confirmarInscripcion
 );
 
+// RF56 — Cancelar inscripción (solo el asistente dueño, antes del inicio del evento)
+router.patch(
+    '/:id/cancelar',
+    auth,
+    auditoriaMiddleware('PUT'),
+    InscripcionController.cancelarInscripcion
+);
+
 module.exports = router;

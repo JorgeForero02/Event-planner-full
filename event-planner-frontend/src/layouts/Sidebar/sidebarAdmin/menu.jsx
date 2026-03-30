@@ -1,14 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
-import styles from './menu.module.css';
+import { useNavigate, useLocation } from 'react-router-dom';
+import {
+    LayoutDashboard,
+    Shield,
+    UserCheck,
+    ChevronDown,
+    Menu as MenuIcon,
+    LogOut,
+    CalendarDays,
+} from 'lucide-react';
+import { cn } from '../../../lib/utils';
 
-import securityIcon from '../../../assets/security.png';
-import settingsIcon from '../../../assets/settings.png';
-import personIcon from '../../../assets/person.png';
-import hamburgerIcon from '../../../assets/hamburgerIcon.png';
-import expandIcon from '../../../assets/expand-arrow.png';
-import dashboardIcon from '../../../assets/dashboardIcon.png';
-import logoIcon from '../../../assets/evento-remove.png';
+const ICON_MAP = {
+    dashboard: LayoutDashboard,
+    seguridad: Shield,
+    afiliaciones: UserCheck,
+};
 
 const Menu = ({ onToggle }) => {
     const navigate = useNavigate();
@@ -23,14 +30,12 @@ const Menu = ({ onToggle }) => {
         {
             id: 'dashboard',
             label: 'Dashboard',
-            icon: dashboardIcon,
             hasSubmenu: false,
             path: '/admin/dashboard'
         },
         {
             id: 'seguridad',
             label: 'Seguridad',
-            icon: securityIcon,
             hasSubmenu: true,
             submenu: [
                 { id: 'roles', label: 'Roles', path: '/admin/roles' },
@@ -40,7 +45,6 @@ const Menu = ({ onToggle }) => {
         {
             id: 'afiliaciones',
             label: 'Afiliaciones',
-            icon: personIcon,
             hasSubmenu: true,
             submenu: [
                 { id: 'afiliaciones-pendientes', label: 'Afiliaciones Pendientes', path: '/admin/afiliaciones-pendientes' },
@@ -68,29 +72,22 @@ const Menu = ({ onToggle }) => {
             if (item.hasSubmenu && item.submenu) {
                 const hasActiveSubmenu = item.submenu.some(sub => sub.id === activeSection);
                 if (hasActiveSubmenu) {
-                    setExpandedMenus(prev => ({
-                        ...prev,
-                        [item.id]: true
-                    }));
+                    setExpandedMenus(prev => ({ ...prev, [item.id]: true }));
                 }
             }
         });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [activeSection, location]);
 
     const toggleMenu = () => {
         const newState = !isCollapsed;
         setIsCollapsed(newState);
-        if (onToggle) {
-            onToggle(newState);
-        }
+        if (onToggle) onToggle(newState);
     };
 
     const toggleSubmenu = (menuId) => {
         if (!isCollapsed) {
-            setExpandedMenus(prev => ({
-                ...prev,
-                [menuId]: !prev[menuId]
-            }));
+            setExpandedMenus(prev => ({ ...prev, [menuId]: !prev[menuId] }));
         }
     };
 
@@ -103,9 +100,7 @@ const Menu = ({ onToggle }) => {
     };
 
     const handleSubmenuClick = (submenuItem) => {
-        if (submenuItem.path) {
-            navigate(submenuItem.path);
-        }
+        if (submenuItem.path) navigate(submenuItem.path);
     };
 
     const handleLogout = () => {
@@ -115,134 +110,106 @@ const Menu = ({ onToggle }) => {
         navigate('/login');
     };
 
-    const isActive = (id) => {
-        return activeSection === id;
-    };
-
-    const isParentMenuActive = (item) => {
-        if (item.hasSubmenu) {
-            return false;
-        }
-        return activeSection === item.id;
-    };
-
-    const shouldShowAsActive = (item) => {
-        return isParentMenuActive(item);
-    };
-
-    const isSubmenuActive = (submenuItems) => {
-        return submenuItems?.some(item => activeSection === item.id);
-    };
-
-    const renderIcon = (icon) => {
-        return (
-            <img
-                className={styles.menuIcon}
-                src={icon}
-                alt="menu icon"
-                onError={(e) => {
-                    console.error('Error cargando icono:', icon);
-                    e.target.style.display = 'none';
-                }}
-            />
-        );
-    };
+    const isActive = (id) => activeSection === id;
+    const shouldShowAsActive = (item) => !item.hasSubmenu && activeSection === item.id;
 
     return (
-        <div className={`${styles.rectangleParent} ${isCollapsed ? styles.collapsed : ''}`}>
-            <div className={styles.groupChild} />
-            <button
-                className={styles.hamburgerIcon}
-                onClick={toggleMenu}
-                title={isCollapsed ? "Expandir menú" : "Colapsar menú"}
-            >
-                <img
-                    src={hamburgerIcon}
-                    alt="menu toggle"
-                    onError={(e) => {
-                        e.target.style.display = 'none';
-                        const parent = e.target.parentElement;
-                        if (!parent.querySelector('.fallbackHamburger')) {
-                            const fallback = document.createElement('div');
-                            fallback.className = 'fallbackHamburger';
-                            fallback.innerHTML = `
-                <div style="width: 20px; height: 2px; background: white; margin: 4px 0;"></div>
-                <div style="width: 20px; height: 2px; background: white; margin: 4px 0;"></div>
-                <div style="width: 20px; height: 2px; background: white; margin: 4px 0;"></div>
-              `;
-                            parent.appendChild(fallback);
-                        }
-                    }}
-                />
-            </button>
-            <div className={styles.logoSection}>
-                {!isCollapsed ? (
-                    <div className={styles.panelDeAdministracin}>Panel de Administración</div>
-                ) : (
-                    <img
-                        src={logoIcon}
-                        alt="Event Planner"
-                        className={styles.logoCollapsed}
-                    />
+        <aside className={cn(
+            'fixed left-0 top-0 z-[1000] h-screen bg-[#1A2332] text-white flex flex-col transition-all duration-300',
+            isCollapsed ? 'w-16' : 'w-64'
+        )}>
+            {/* Header */}
+            <div className="flex items-center justify-between px-3 py-4 border-b border-white/10 shrink-0">
+                {!isCollapsed && (
+                    <div className="flex items-center gap-2 overflow-hidden">
+                        <CalendarDays size={20} className="text-brand-400 shrink-0" />
+                        <span className="text-sm font-semibold truncate">Panel de Administración</span>
+                    </div>
                 )}
+                <button
+                    onClick={toggleMenu}
+                    title={isCollapsed ? 'Expandir menú' : 'Colapsar menú'}
+                    className={cn(
+                        'rounded-lg p-2 text-white/70 hover:text-white hover:bg-white/10 transition-colors',
+                        isCollapsed && 'mx-auto'
+                    )}
+                >
+                    <MenuIcon size={18} />
+                </button>
             </div>
-            <div className={styles.menuContainer}>
-                {menuItems.map((item) => (
-                    <div key={item.id} className={styles.menuItem}>
-                        <div
-                            className={`${styles.menuItemContent} ${shouldShowAsActive(item) ? styles.activeMenuItem : ''
-                                } ${item.id === 'dashboard' ? styles.dashboardItem : ''}`}
-                            onClick={() => handleMenuClick(item)}
-                            title={isCollapsed ? item.label : ''}
-                        >
-                            {renderIcon(item.icon)}
-                            {!isCollapsed && (
-                                <>
-                                    <span className={styles.menuLabel}>{item.label}</span>
-                                    {item.hasSubmenu && (
-                                        <div className={`${styles.expandIcon} ${expandedMenus[item.id] ? styles.expanded : ''}`}>
-                                            <img
-                                                src={expandIcon}
-                                                alt="expand"
-                                                onError={(e) => {
-                                                    e.target.style.display = 'none';
-                                                    e.target.parentElement.textContent = '▼';
-                                                }}
-                                            />
-                                        </div>
-                                    )}
-                                </>
+
+            {/* Nav items */}
+            <nav className="flex-1 overflow-y-auto py-3 space-y-0.5 px-2">
+                {menuItems.map((item) => {
+                    const Icon = ICON_MAP[item.id] || LayoutDashboard;
+                    const active = shouldShowAsActive(item);
+                    const submenuActive = item.hasSubmenu && item.submenu?.some(s => isActive(s.id));
+
+                    return (
+                        <div key={item.id}>
+                            <button
+                                onClick={() => handleMenuClick(item)}
+                                title={isCollapsed ? item.label : ''}
+                                className={cn(
+                                    'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                                    (active || submenuActive)
+                                        ? 'bg-brand-600 text-white'
+                                        : 'text-white/70 hover:text-white hover:bg-white/10',
+                                    isCollapsed && 'justify-center'
+                                )}
+                            >
+                                <Icon size={18} className="shrink-0" />
+                                {!isCollapsed && (
+                                    <>
+                                        <span className="flex-1 text-left">{item.label}</span>
+                                        {item.hasSubmenu && (
+                                            <ChevronDown size={14} className={cn(
+                                                'transition-transform',
+                                                expandedMenus[item.id] ? 'rotate-180' : ''
+                                            )} />
+                                        )}
+                                    </>
+                                )}
+                            </button>
+
+                            {item.hasSubmenu && expandedMenus[item.id] && !isCollapsed && (
+                                <div className="mt-0.5 ml-9 space-y-0.5">
+                                    {item.submenu.map((subItem) => (
+                                        <button
+                                            key={subItem.id}
+                                            onClick={() => handleSubmenuClick(subItem)}
+                                            className={cn(
+                                                'w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors',
+                                                isActive(subItem.id)
+                                                    ? 'bg-brand-500/30 text-brand-300'
+                                                    : 'text-white/60 hover:text-white hover:bg-white/10'
+                                            )}
+                                        >
+                                            {subItem.label}
+                                        </button>
+                                    ))}
+                                </div>
                             )}
                         </div>
+                    );
+                })}
+            </nav>
 
-                        {item.hasSubmenu && expandedMenus[item.id] && !isCollapsed && (
-                            <div className={styles.submenu}>
-                                {item.submenu.map((subItem) => (
-                                    <div
-                                        key={subItem.id}
-                                        className={`${styles.submenuItem} ${isActive(subItem.id) ? styles.activeSubmenuItem : ''}`}
-                                        onClick={() => handleSubmenuClick(subItem)}
-                                    >
-                                        {subItem.label}
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                ))}
+            {/* Logout */}
+            <div className="px-2 py-3 border-t border-white/10 shrink-0">
+                <button
+                    onClick={handleLogout}
+                    title="Cerrar Sesión"
+                    className={cn(
+                        'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-rose-500/20 transition-colors',
+                        isCollapsed && 'justify-center'
+                    )}
+                >
+                    <LogOut size={18} className="shrink-0" />
+                    {!isCollapsed && <span>Cerrar Sesión</span>}
+                </button>
             </div>
-
-            <button
-                className={styles.logoutButton}
-                onClick={handleLogout}
-                title="Cerrar Sesión"
-            >
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className={styles.logoutIcon}>
-                    <path d="M13 3h3a2 2 0 012 2v10a2 2 0 01-2 2h-3M8 16l-5-5 5-5M3 11h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                {!isCollapsed && <span>Cerrar Sesión</span>}
-            </button>
-        </div>
+        </aside>
     );
 };
 

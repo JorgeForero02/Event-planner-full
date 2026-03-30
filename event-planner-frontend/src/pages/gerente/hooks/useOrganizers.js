@@ -26,8 +26,8 @@ export const useOrganizers = () => {
 
   useEffect(() => {
     cargarEmpresa();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
   const cargarEmpresa = async () => {
     try {
       setState(prev => ({ ...prev, loadingEmpresa: true, apiError: '' }));

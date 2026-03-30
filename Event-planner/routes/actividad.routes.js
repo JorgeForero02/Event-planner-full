@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router(); 
 const { auth, isOrganizadorOGerente } = require('../middlewares/auth');
 const auditoriaMiddleware = require('../middlewares/auditoria.middleware');
+// [BACKEND-FIX] B4: Importar middleware de ownership para actividades
+const { verificarPermisoActividad } = require('../middlewares/verificarPermisos');
 const actividadController = require('../controllers/actividad.controller');
 
 router.get(
@@ -14,7 +16,8 @@ router.get(
 router.put(
     '/:actividadId',
     auth,
-    isOrganizadorOGerente, 
+    isOrganizadorOGerente,
+    verificarPermisoActividad,
     auditoriaMiddleware('PUT'),
     actividadController.actualizarActividad
 );
@@ -22,7 +25,8 @@ router.put(
 router.delete(
     '/:actividadId',
     auth,
-    isOrganizadorOGerente, 
+    isOrganizadorOGerente,
+    verificarPermisoActividad,
     auditoriaMiddleware('DELETE'),
     actividadController.eliminarActividad
 );

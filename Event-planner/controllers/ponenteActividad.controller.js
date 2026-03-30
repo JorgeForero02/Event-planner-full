@@ -12,7 +12,8 @@ class PonenteActividadController {
             const { id_ponente, id_actividad, estado, notas } = req.body;
             const usuario = req.usuario;
 
-            if (!['admin', 'organizador', 'gerente'].includes(usuario.rol)) {
+            // [BACKEND-FIX] B8: Corregido 'admin' → 'administrador'
+            if (!['administrador', 'organizador', 'gerente'].includes(usuario.rol)) {
                 await transaction.rollback();
                 return res.status(403).json({
                     success: false,
@@ -90,7 +91,8 @@ class PonenteActividadController {
         try {
             const usuario = req.usuario;
 
-            if (!['admin', 'organizador', 'gerente'].includes(usuario.rol)) {
+            // [BACKEND-FIX] B8: Corregido 'admin' → 'administrador'
+            if (!['administrador', 'organizador', 'gerente'].includes(usuario.rol)) {
                 return res.status(403).json({
                     success: false,
                     message: MENSAJES.SIN_PERMISO_VER
@@ -320,7 +322,8 @@ class PonenteActividadController {
                 });
             }
 
-            if (asignacion.ponente.id_usuario !== usuario.id && !['admin', 'organizador', 'gerente'].includes(usuario.rol)) {
+            // [BACKEND-FIX] B8: Corregido 'admin' → 'administrador'
+            if (asignacion.ponente.id_usuario !== usuario.id && !['administrador', 'organizador', 'gerente'].includes(usuario.rol)) {
                 await transaction.rollback();
                 return res.status(403).json({
                     success: false,
@@ -381,7 +384,8 @@ class PonenteActividadController {
             const { aprobada, comentarios } = req.body;
             const usuario = req.usuario;
 
-            if (!['admin', 'organizador', 'gerente'].includes(usuario.rol)) {
+            // [BACKEND-FIX] B8: Corregido 'admin' → 'administrador'
+            if (!['administrador', 'organizador', 'gerente'].includes(usuario.rol)) {
                 await transaction.rollback();
                 return res.status(403).json({
                     success: false,
@@ -429,7 +433,8 @@ class PonenteActividadController {
             const { estado, notas } = req.body;
             const usuario = req.usuario;
 
-            if (!['admin', 'organizador', 'gerente'].includes(usuario.rol)) {
+            // [BACKEND-FIX] B8: Corregido 'admin' → 'administrador'
+            if (!['administrador', 'organizador', 'gerente'].includes(usuario.rol)) {
                 await transaction.rollback();
                 return res.status(403).json({
                     success: false,
@@ -492,7 +497,8 @@ class PonenteActividadController {
             const { ponenteId, actividadId } = req.params;
             const usuario = req.usuario; 
 
-            if (!['admin', 'organizador', 'gerente'].includes(usuario.rol)) {
+            // [BACKEND-FIX] B8: Corregido 'admin' → 'administrador'
+            if (!['administrador', 'organizador', 'gerente'].includes(usuario.rol)) {
                 await transaction.rollback();
                 return res.status(403).json({
                     success: false,

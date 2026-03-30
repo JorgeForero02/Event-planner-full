@@ -21,11 +21,19 @@ router.put(
 );
 
 router.delete(
-    '/:ubicacionId', 
+    '/:ubicacionId',
     auth,
     isOrganizadorOGerente,
     auditoriaMiddleware('DELETE'),
     ubicacionController.eliminarUbicacion
+);
+
+// RF24 — Deshabilitar/habilitar ubicación sin borrar histórico
+router.patch(
+    '/:ubicacionId/toggle-estado',
+    auth,
+    isOrganizadorOGerente,
+    ubicacionController.toggleEstadoUbicacion
 );
 
 module.exports = router;

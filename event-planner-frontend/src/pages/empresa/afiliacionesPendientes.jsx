@@ -65,13 +65,13 @@ const AfiliacionesPendientes = () => {
 
   const attemptFallbackPromotion = async (requesterId, empresaId, token) => {
     try {
-      const promoteResp = await fetch(`${API_URL}/promover-gerente/${requesterId}`, {
+      const promoteResp = await fetch(`${API_URL}/auth/promover-gerente`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ rol: 'gerente', roleData: { empresa_id: empresaId } })
+        body: JSON.stringify({ id_usuario: requesterId, id_empresa: empresaId })
       });
 
       if (promoteResp.ok) {

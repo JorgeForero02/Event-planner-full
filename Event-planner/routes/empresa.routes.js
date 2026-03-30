@@ -8,12 +8,22 @@ const auditoriaMiddleware = require('../middlewares/auditoria.middleware');
 
 router.get('/', auth, isAdminGerenteOrOrganizador, EmpresaController.getAll);
 router.get('/pendientes', auth, isAdministrador, EmpresaController.getPendientes);
+router.get('/aprobadas', auth, isAdministrador, EmpresaController.getAprobadas);
+router.get('/rechazadas', auth, isAdministrador, EmpresaController.getRechazadas);
 router.get('/:id', auth, isAdminGerenteOrOrganizador, EmpresaController.getById);
 router.post('/', auth, isAsistenteAdministrador, EmpresaController.create);
 router.patch('/:id/aprobar', auth, isAdministrador, EmpresaController.aprobarEmpresa);
 router.put('/:id', auth, isGerenteOrAdmin, EmpresaController.update);
 router.delete('/:id', auth, isAdministrador, EmpresaController.delete);
 router.get('/:id/equipo', auth, isAdminGerenteOrOrganizador, EmpresaController.getEquipo);
+
+// RF28 — Estadísticas de uso de ubicaciones y salas
+router.get(
+    '/:empresaId/ubicaciones/stats',
+    auth,
+    isGerenteOrAdmin,
+    UbicacionController.obtenerStatsUbicaciones
+);
 
 // --- RUTAS NUEVAS PARA UBICACIONES ANIDADAS ---
 router.post(

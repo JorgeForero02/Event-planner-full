@@ -26,14 +26,15 @@ const Empresa = () => {
 
   useEffect(() => {
     fetchPaises();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
   useEffect(() => {
     if (formData.id_pais) {
       fetchCiudades(formData.id_pais);
     } else {
       setCiudades([]);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.id_pais]);
 
   const fetchPaises = async () => {
@@ -148,6 +149,7 @@ const Empresa = () => {
               
               // Si las ciudades tienen id_pais, filtrar por país
               if (ciudadesData.length > 0 && ciudadesData[0].id_pais !== undefined) {
+                // eslint-disable-next-line eqeqeq
                 ciudadesData = ciudadesData.filter(ciudad => ciudad.id_pais == idPais);
               }
               
@@ -179,6 +181,7 @@ const Empresa = () => {
             const todasLasCiudades = Array.isArray(result.data) ? result.data : [];
             // Filtrar ciudades por país en el frontend
             ciudadesData = todasLasCiudades.filter(ciudad => 
+              // eslint-disable-next-line eqeqeq
               ciudad.id_pais == idPais || ciudad.pais_id == idPais || ciudad.idPais == idPais
             );
             console.log(`✅ ${ciudadesData.length} ciudades filtradas de ${todasLasCiudades.length} totales`);

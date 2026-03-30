@@ -1,5 +1,4 @@
 import { useState, useCallback } from 'react';
-import { adminService } from '../services/adminService';
 import { API_URL } from '../config/apiConfig';
 
 export const useEmpresas = () => {
@@ -70,7 +69,7 @@ export const useEmpresas = () => {
         // ✅ ELIMINAR el window.confirm - ya tienes tu modal personalizado
         try {
             const token = localStorage.getItem('access_token');
-            const promoverAsistente = await adminService.promoverAGerente(creador, id);
+
             const response = await fetch(`${API_URL}/empresas/${id}/aprobar`, {
                 method: 'PATCH',
                 headers: {

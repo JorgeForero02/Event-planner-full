@@ -1,4 +1,4 @@
-const { Evento, Empresa, Usuario, Actividad, Inscripcion, Lugar, Asistente, Ponente, PonenteActividad, AdministradorEmpresa } = require('../models');
+const { Evento, Empresa, Usuario, Actividad, Inscripcion, Lugar, Asistente, Ponente, PonenteActividad, AdministradorEmpresa, Asistencia, Encuesta, RespuestaEncuesta, sequelize: db } = require('../models');
 const { ESTADOS, MODALIDADES } = require('../constants/evento.constants');
 const { Op } = require('sequelize');
 const notificacionService = require('./notificacion.service');
@@ -20,6 +20,8 @@ class EventoService {
         return formatter.format(new Date());
     }
 
+    // [BACKEND-FIX] B6: Refactorizar auto-finalización para evitar race conditions.
+    // Usa UPDATE con WHERE atómico para prevenir doble-finalización por requests concurrentes.
     async _actualizarEstadoFinalizado(evento) {
         if (!evento || evento.estado === ESTADOS.CANCELADO || evento.estado === ESTADOS.FINALIZADO) {
             return evento;
@@ -29,15 +31,26 @@ class EventoService {
 
         if (evento.estado === ESTADOS.PUBLICADO && fechaHoy > evento.fecha_fin) {
             try {
-                await evento.update({ estado: ESTADOS.FINALIZADO });
+                // UPDATE atómico: solo actualiza si el estado sigue siendo PUBLICADO
+                const [filasAfectadas] = await Evento.update(
+                    { estado: ESTADOS.FINALIZADO },
+                    { where: { id: evento.id, estado: ESTADOS.PUBLICADO } }
+                );
 
-                const transaction = await this.crearTransaccion();
-                try {
-                    await this.enviarEncuestasSatisfaccion(evento.id, transaction);
-                    await transaction.commit();
-                } catch (encuestaError) {
-                    await transaction.rollback();
-                    console.error('Error al enviar encuestas de satisfacción:', encuestaError);
+                // Solo enviar encuestas si ESTE request logró el cambio (evita duplicados)
+                if (filasAfectadas > 0) {
+                    evento.estado = ESTADOS.FINALIZADO;
+                    const transaction = await this.crearTransaccion();
+                    try {
+                        await this.enviarEncuestasSatisfaccion(evento.id, transaction);
+                        await transaction.commit();
+                    } catch (encuestaError) {
+                        await transaction.rollback();
+                        console.error('Error al enviar encuestas de satisfacción:', encuestaError);
+                    }
+                } else {
+                    // Otro request ya lo finalizó — recargar estado actual
+                    await evento.reload();
                 }
             } catch (error) {
                 console.error(`Error al auto-finalizar evento ${evento.id}:`, error.message);
@@ -183,16 +196,22 @@ class EventoService {
                     model: Actividad,
                     as: 'actividades',
                     attributes: ['id_actividad', 'titulo', 'fecha_actividad']
+                },
+                // [BACKEND-FIX] L2: Incluir inscripciones confirmadas para conteo en frontend
+                {
+                    model: Inscripcion,
+                    as: 'inscripciones',
+                    attributes: ['id'],
+                    where: { estado: 'Confirmada' },
+                    required: false
                 }
             ],
             order: [['fecha_creacion', 'DESC']]
         });
 
-        const eventosActualizados = await Promise.all(
-            eventos.map(evento => this._actualizarEstadoFinalizado(evento))
-        );
-
-        return eventosActualizados;
+        // [BACKEND-FIX] B6: No auto-finalizar en listados masivos (evita race conditions).
+        // La auto-finalización solo ocurre en buscarUno() para el evento individual.
+        return eventos;
     }
 
     async buscarUno(whereClause) {
@@ -237,7 +256,8 @@ class EventoService {
     }
 
     construirActualizaciones(datos) {
-        const camposPermitidos = ['titulo', 'descripcion', 'modalidad', 'hora', 'cupos', 'estado'];
+        // [BACKEND-FIX] B13: Añadir fecha_inicio y fecha_fin al whitelist
+        const camposPermitidos = ['titulo', 'descripcion', 'modalidad', 'hora', 'cupos', 'estado', 'fecha_inicio', 'fecha_fin'];
         const actualizaciones = {};
         camposPermitidos.forEach(campo => {
             if (datos[campo] !== undefined) {
@@ -318,6 +338,93 @@ class EventoService {
         return {
             participantes: Array.from(notificadosMap.values()),
             creador: creadorJson
+        };
+    }
+
+    // RF80 — Reporte de evento: inscritos, asistencias, tasa asistencia, encuestas
+    async obtenerReporte(eventoId) {
+        const evento = await Evento.findByPk(eventoId, { attributes: ['id', 'titulo'] });
+        if (!evento) return null;
+
+        const totalInscritos = await Inscripcion.count({
+            where: { id_evento: eventoId, estado: 'Confirmada' }
+        });
+
+        const inscripcionIds = await Inscripcion.findAll({
+            where: { id_evento: eventoId, estado: 'Confirmada' },
+            attributes: ['id']
+        }).then(rows => rows.map(r => r.id));
+
+        const totalAsistencias = inscripcionIds.length > 0
+            ? await Asistencia.count({ where: { inscripcion: { [Op.in]: inscripcionIds } } })
+            : 0;
+
+        const tasaAsistencia = totalInscritos > 0
+            ? Math.round((totalAsistencias / totalInscritos) * 100)
+            : 0;
+
+        const totalEncuestasEnviadas = await RespuestaEncuesta.count({
+            include: [{
+                model: Encuesta,
+                as: 'encuesta',
+                where: { id_evento: eventoId },
+                required: true,
+                attributes: []
+            }]
+        });
+
+        const totalEncuestasRespondidas = await RespuestaEncuesta.count({
+            where: { estado: 'completada' },
+            include: [{
+                model: Encuesta,
+                as: 'encuesta',
+                where: { id_evento: eventoId },
+                required: true,
+                attributes: []
+            }]
+        });
+
+        const tasaRespuesta = totalEncuestasEnviadas > 0
+            ? Math.round((totalEncuestasRespondidas / totalEncuestasEnviadas) * 100)
+            : 0;
+
+        return {
+            id_evento: eventoId,
+            titulo: evento.titulo,
+            total_inscritos: totalInscritos,
+            total_asistencias: totalAsistencias,
+            tasa_asistencia: tasaAsistencia,
+            encuestas_enviadas: totalEncuestasEnviadas,
+            encuestas_respondidas: totalEncuestasRespondidas,
+            tasa_respuesta: tasaRespuesta
+        };
+    }
+
+    // RF81 — Presupuesto total del evento (suma de actividades)
+    async obtenerPresupuestoTotal(eventoId) {
+        const evento = await Evento.findByPk(eventoId, { attributes: ['id', 'titulo'] });
+        if (!evento) return null;
+
+        const resultado = await Actividad.findOne({
+            where: { id_evento: eventoId },
+            attributes: [[db.fn('SUM', db.col('presupuesto')), 'total']],
+            raw: true
+        });
+
+        const actividades = await Actividad.findAll({
+            where: { id_evento: eventoId },
+            attributes: ['id_actividad', 'titulo', 'presupuesto']
+        });
+
+        return {
+            id_evento: eventoId,
+            titulo: evento.titulo,
+            presupuesto_total: parseFloat(resultado?.total || 0),
+            actividades: actividades.map(a => ({
+                id: a.id_actividad,
+                titulo: a.titulo,
+                presupuesto: parseFloat(a.presupuesto || 0)
+            }))
         };
     }
 

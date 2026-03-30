@@ -1,13 +1,16 @@
 import { useState } from 'react';
+// eslint-disable-next-line no-unused-vars
 import ActividadCard from '../ui/ActividadCard';
 import styles from '../styles/DashboardSection.module.css';
 
 const DashboardSection = ({ actividades, loading }) => {
+    // eslint-disable-next-line no-unused-vars
     const [filter, setFilter] = useState('todas');
 
     // Asegurar que actividades siempre sea un array
     const actividadesSeguras = actividades || [];
     
+    // eslint-disable-next-line no-unused-vars
     const actividadesFiltradas = actividadesSeguras.filter(actividad => {
         if (filter === 'pendientes') return actividad.estado === 'pendiente';
         if (filter === 'aceptadas') return actividad.estado === 'aceptado';

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useLocation, useMatch } from 'react-router-dom';
-import { Calendar, Users, CalendarCheck, Settings, Book, FileText } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Calendar, Users, CalendarCheck, Book, FileText } from 'lucide-react';
 
 export const useSidebar = () => {
     const navigate = useNavigate();
@@ -41,6 +41,7 @@ export const useSidebar = () => {
             setUser(userData);
             setPasswordData(prev => ({ ...prev, correo: userData.correo || '' }));
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // SOLUCIÓN: Lógica mejorada para detectar rutas anidadas
@@ -61,8 +62,8 @@ export const useSidebar = () => {
                 setActiveSection(section);
             }
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [location]);
-
     const handleMenuClick = (sectionId) => {
         setActiveSection(sectionId);
         const item = menuItems.find(m => m.id === sectionId);
@@ -120,7 +121,7 @@ export const useSidebar = () => {
         setIsLoading(true);
 
         try {
-            const response = await fetch(`${API_URL}/auth/cambiar-contrasena`, {
+            const response = await fetch(`${API_URL}/auth/recuperar-contrasena`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -128,7 +129,7 @@ export const useSidebar = () => {
                 },
                 body: JSON.stringify({
                     correo: passwordData.correo,
-                    contraseñaNueva: passwordData.contraseñaNueva
+                    contraseña: passwordData.contraseñaNueva
                 })
             });
 

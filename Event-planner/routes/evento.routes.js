@@ -43,4 +43,19 @@ router.get(
     actividadController.obtenerActividadesPorEvento
 );
 
+// RF80 — Reporte de evento
+router.get(
+    '/:eventoId/reporte',
+    auth,
+    isOrganizadorOGerente,
+    eventoController.obtenerReporte
+);
+
+// RF81 — Presupuesto total del evento
+router.get(
+    '/:eventoId/presupuesto',
+    auth,
+    eventoController.obtenerPresupuesto
+);
+
 module.exports = router;

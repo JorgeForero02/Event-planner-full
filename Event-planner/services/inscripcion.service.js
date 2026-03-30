@@ -313,6 +313,37 @@ class InscripcionService {
         };
     }
 
+    async cancelar(inscripcionId, usuarioId, transaction) {
+        const inscripcion = await Inscripcion.findByPk(inscripcionId, {
+            include: [{ model: Evento, as: 'evento' }],
+            transaction,
+            lock: transaction.LOCK.UPDATE
+        });
+
+        if (!inscripcion) {
+            return { exito: false, mensaje: MENSAJES.INSCRIPCION_NO_ENCONTRADA, codigoEstado: 404 };
+        }
+
+        // Verificar que la inscripción pertenece al usuario autenticado
+        const asistente = await Asistente.findOne({ where: { id_usuario: usuarioId }, transaction });
+        if (!asistente || inscripcion.id_asistente !== asistente.id_asistente) {
+            return { exito: false, mensaje: MENSAJES.SIN_PERMISO_CANCELAR, codigoEstado: 403 };
+        }
+
+        if (inscripcion.estado !== ESTADOS.CONFIRMADA) {
+            return { exito: false, mensaje: MENSAJES.ESTADO_NO_CANCELABLE, codigoEstado: 400 };
+        }
+
+        const fechaHoy = this._obtenerFechaHoy();
+        if (fechaHoy >= inscripcion.evento.fecha_inicio) {
+            return { exito: false, mensaje: MENSAJES.EVENTO_YA_INICIO, codigoEstado: 400 };
+        }
+
+        await inscripcion.update({ estado: ESTADOS.CANCELADA }, { transaction });
+
+        return { exito: true, inscripcion, evento: inscripcion.evento };
+    }
+
     async _encontrarOCrearAsistente(usuarioId, transaction) {
         let asistente = await Asistente.findOne({
             where: { id_usuario: usuarioId },
@@ -334,8 +365,9 @@ class InscripcionService {
 
         if (evento.cupos === null) return true;
 
+        // [BACKEND-FIX] B7: Solo contar inscripciones Confirmadas para cupo (excluir Pendiente/Cancelada)
         const inscritosCount = await Inscripcion.count({
-            where: { id_evento: eventoId },
+            where: { id_evento: eventoId, estado: ESTADOS.CONFIRMADA },
             transaction
         });
 

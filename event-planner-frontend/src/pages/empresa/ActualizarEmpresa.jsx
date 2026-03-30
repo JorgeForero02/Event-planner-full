@@ -15,7 +15,7 @@ import '../../pages/empresa/ActualizarEmpresa.css';
 const ActualizarEmpresa = () => {
     const navigate = useNavigate();
 
-    const { user, empresaOriginal, isLoading, loadError, cargarEmpresa } = useDatosEmpresa();
+    const { empresaOriginal, isLoading, loadError, cargarEmpresa } = useDatosEmpresa();
     const { formData, errors, isSubmitting, handleChange, enviarFormulario, inicializarFormulario } = useFormularioEmpresa(empresaOriginal);
     const { hasCambiado, hayCambiosPendientes } = useRastreadorCambios(empresaOriginal, formData);
 

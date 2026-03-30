@@ -13,7 +13,12 @@ const MENSAJES = {
     ERROR_CREAR: 'Error al crear la ubicación',
     ERROR_ACTUALIZAR: 'Error al actualizar ubicación',
     ERROR_ELIMINAR: 'Error al eliminar ubicación',
-    ERROR_OBTENER: 'Error al obtener ubicación'
+    ERROR_OBTENER: 'Error al obtener ubicación',
+    HABILITADA: 'Ubicación habilitada exitosamente',
+    DESHABILITADA: 'Ubicación deshabilitada exitosamente',
+    TIENE_EVENTOS_FUTUROS: 'No se puede deshabilitar: la ubicación tiene salas con actividades en eventos futuros activos',
+    SIN_PERMISO_TOGGLE: 'No tiene permisos para cambiar el estado de esta ubicación',
+    ERROR_TOGGLE: 'Error al cambiar el estado de la ubicación'
 };
 
 const MENSAJES_VALIDACION = {

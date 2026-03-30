@@ -1,6 +1,6 @@
 import React from 'react';
+import { CalendarDays } from 'lucide-react';
 import EventCard from './EventCard';
-import styles from '../../styles/eventosPage.module.css';
 
 const EventsList = ({
     eventos,
@@ -13,18 +13,20 @@ const EventsList = ({
 }) => {
     if (eventos.length === 0) {
         return (
-            <div className={styles.noEventsCard}>
-                <div className={styles.noEventsIcon}>📅</div>
-                <h3>No hay eventos disponibles</h3>
-                <p>No se encontraron eventos con los filtros aplicados.</p>
+            <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
+                <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center">
+                    <CalendarDays size={28} className="text-slate-400" />
+                </div>
+                <div>
+                    <h3 className="text-sm font-semibold text-slate-700">No hay eventos disponibles</h3>
+                    <p className="text-xs text-slate-400 mt-1">No se encontraron eventos con los filtros aplicados.</p>
+                </div>
             </div>
         );
     }
 
-    const gridClass = sidebarCollapsed ? styles.eventsGridCollapsed : styles.eventsGridExpanded;
-
     return (
-        <div className={`${styles.eventsGrid} ${gridClass}`}>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {eventos.map((evento) => (
                 <EventCard
                     key={evento.id}

@@ -1,6 +1,5 @@
 import React from 'react';
 import styles from '../styles/EventModal.module.css';
-import { formatFecha, debugFecha } from '../../../asistente/utils/dateUtils';
 import { safeRender } from '../../utils/objectUtils';
 
 const EventModal = ({ evento, onClose, formatFecha, formatFechaCompleta }) => {
@@ -38,6 +37,7 @@ const EventModal = ({ evento, onClose, formatFecha, formatFechaCompleta }) => {
         return Math.round((cuposDisponibles / cupoTotal) * 100);
     };
 
+    // eslint-disable-next-line no-unused-vars
     const porcentajeDisponible = calcularPorcentajeDisponibilidad();
 
     // Función para obtener el organizador de forma segura

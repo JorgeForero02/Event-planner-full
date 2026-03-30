@@ -40,6 +40,12 @@ const Lugar = sequelize.define('Lugar', {
   descripcion: {
     type: DataTypes.TEXT,
     allowNull: true
+  },
+  activo: {
+    type: DataTypes.TINYINT(1),
+    allowNull: false,
+    defaultValue: 1,
+    comment: '1 = habilitado, 0 = deshabilitado'
   }
 }, {
   tableName: 'Lugar',

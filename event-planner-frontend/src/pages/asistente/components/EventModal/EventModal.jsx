@@ -1,10 +1,10 @@
 import React from 'react';
 import styles from './EventModal.module.css';
-import { formatFecha, debugFecha } from '../../utils/dateUtils';
+import { debugFecha } from '../../utils/dateUtils';
 
 const EventModal = ({ evento, onClose, formatFecha, formatFechaCompleta }) => {
     const [ponentesPorActividad, setPonentePorActividad] = React.useState({});
-    const [cargandoPonentes, setCargandoPonentes] = React.useState(false);
+    const [, setCargandoPonentes] = React.useState(false);
     const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
     // Debug para verificar toda la información del evento
@@ -60,7 +60,8 @@ const EventModal = ({ evento, onClose, formatFecha, formatFechaCompleta }) => {
             }
         };
 
-        cargarPonentes();
+cargarPonentes();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [evento.actividades]);
 
     // ✅ Función para formatear el número de cupos
@@ -98,6 +99,7 @@ const EventModal = ({ evento, onClose, formatFecha, formatFechaCompleta }) => {
         return `${hora12}:${minutes} ${ampm}`;
     };
 
+    // eslint-disable-next-line no-unused-vars
     const porcentajeDisponible = calcularPorcentajeDisponibilidad();
     const actividadesOrdenadas = obtenerActividadesOrdenadas();
 

@@ -2,7 +2,7 @@ import React from 'react';
 import { usePlaces } from '../hooks/usePlaces';
 import GerenteSidebar from '../../../layouts/Sidebar/sidebarGerente/GerenteSidebar';
 import Header from '../../../layouts/Header/header';
-import PageHeader from '../components/shared/PageHeader';
+import Footer from '../../../layouts/FooterAsistente/footer';
 import SearchBar from '../components/shared/SearchBar';
 import PlacesList from '../components/lists/PlacesList';
 import PlaceForm from '../components/forms/PlaceForm';
@@ -10,16 +10,12 @@ import EditPlaceModal from '../components/modals/EditPlaceModal';
 import DeleteConfirmationModal from '../components/modals/DeleteConfirmationModal';
 import NotificationSystem from '../components/shared/NotificationSystem';
 import LoadingState from '../components/shared/LoadingState';
-import styles from '../styles/lugares.module.css';
 
 const LugaresContainer = () => {
     const {
-        lugares,
         filteredLugares,
-        empresas,
         ubicaciones,
         searchTerm,
-        filterEmpresa,
         empresaSeleccionada,
         loading,
         sidebarCollapsed,
@@ -32,7 +28,7 @@ const LugaresContainer = () => {
         handleCreate,
         handleUpdate,
         handleDelete,
-        handleFilterChange,
+        handleToggle,
         openCreateModal,
         openEditModal,
         openDeleteModal,
@@ -44,58 +40,64 @@ const LugaresContainer = () => {
         closeNotification
     } = usePlaces();
 
+    if (loading) {
+        return (
+            <div className="flex min-h-screen bg-slate-50 items-center justify-center">
+                <LoadingState message="Cargando lugares..." />
+            </div>
+        );
+    }
+
     return (
-        <div className={styles.lugaresPage}>
+        <div className="flex min-h-screen bg-slate-50">
             <GerenteSidebar onToggle={handleSidebarToggle} />
+            <div className={`shrink-0 transition-all duration-300 ${sidebarCollapsed ? 'w-16' : 'w-64'}`} />
 
             <NotificationSystem
                 notifications={notifications}
                 onClose={closeNotification}
             />
 
-            <div className={`${styles.mainContent} ${sidebarCollapsed ? styles.sidebarCollapsed : styles.sidebarExpanded}`}>
+            <div className="flex-1 flex flex-col min-w-0">
                 <Header />
 
-                <div className={styles.lugaresContainer}>
-                    <div className={styles.lugaresHeader}>
-                        <div className={styles.headerTitle}>
-                            <h1>Lugares</h1>
+                <main className="flex-1 overflow-auto p-6 space-y-5">
+                    <div className="flex items-start justify-between gap-4">
+                        <div>
+                            <h1 className="text-xl font-bold text-slate-800">Lugares</h1>
                             {empresaSeleccionada && (
-                                <p className={styles.empresaInfo}>
-                                    Empresa: {empresaSeleccionada.nombre}
+                                <p className="text-sm text-slate-500 mt-0.5">
+                                    Empresa: <span className="font-medium text-slate-700">{empresaSeleccionada.nombre}</span>
                                 </p>
                             )}
                         </div>
                         <button
-                            className={styles.btnCreate}
                             onClick={openCreateModal}
                             disabled={!empresaSeleccionada}
+                            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-brand-600 text-white text-sm font-medium hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
                             + Crear Lugar
                         </button>
                     </div>
 
-                    <div className={styles.lugaresContent}>
-                        <div className={styles.filtersSection}>
-                            <SearchBar
-                                value={searchTerm}
-                                onChange={handleSearchChange}
-                                placeholder="Buscar por nombre o descripción..."
-                            />
-                        </div>
+                    <SearchBar
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                        placeholder="Buscar por nombre o descripcion..."
+                    />
 
-                        <PlacesList
-                            lugares={filteredLugares}
-                            onEdit={openEditModal}
-                            onDelete={openDeleteModal}
-                        />
-                    </div>
-                </div>
+                    <PlacesList
+                        lugares={filteredLugares}
+                        onEdit={openEditModal}
+                        onToggle={handleToggle}
+                    />
+                </main>
+
+                <Footer />
             </div>
 
             {showModal && empresaSeleccionada && (
                 <PlaceForm
-                    title="Crear Nuevo Lugar"
                     formData={formData}
                     ubicaciones={ubicaciones}
                     empresa={empresaSeleccionada}

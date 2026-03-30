@@ -10,7 +10,9 @@ import {
     MapPin,
     Building2,
     Video,
-    Link as LinkIcon
+    Link as LinkIcon,
+    DollarSign,
+    AlertCircle
 } from 'lucide-react';
 import {
     obtenerEventoPorId,
@@ -48,9 +50,11 @@ const CrearActividadPage = () => {
         tipo: 'presencial',
         id_lugares: [],
         link_virtual: '',
+        presupuesto: '',
     });
 
     const [errores, setErrores] = useState({});
+    const [errorSubmit, setErrorSubmit] = useState(null);
 
     useEffect(() => {
         const cargarDatos = async () => {
@@ -180,6 +184,7 @@ const CrearActividadPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!validarFormulario()) return;
+        setErrorSubmit(null);
 
         try {
             setGuardando(true);
@@ -196,7 +201,8 @@ const CrearActividadPage = () => {
                 url:
                     formData.tipo === 'virtual' || formData.tipo === 'hibrida'
                         ? formData.link_virtual
-                        : null
+                        : null,
+                presupuesto: formData.presupuesto ? parseFloat(formData.presupuesto) : 0
             };
 
             console.log('Datos a enviar:', datosEnviar);
@@ -222,16 +228,13 @@ const CrearActividadPage = () => {
                     },
                     getHeaders()
                 );
-
-                alert("¡Invitación enviada! Notificaremos al ponente si decide aceptar participar en la actividad.");
             }
-
 
             navigate(`/organizador/eventos/${eventoId}/agenda`);
 
         } catch (error) {
             console.error('Error completo:', error);
-            alert(`Error: ${error.response?.data?.message || 'Error al crear la actividad'}`);
+            setErrorSubmit(error.response?.data?.message || 'Error al crear la actividad');
         } finally {
             setGuardando(false);
         }
@@ -370,6 +373,22 @@ const CrearActividadPage = () => {
                                 {errores.hora_fin && <span className="error-message">{errores.hora_fin}</span>}
                             </div>
                         </div>
+
+                        <div className="form-group-actividad">
+                            <label className="form-label-actividad">
+                                <DollarSign size={18} />
+                                Presupuesto
+                            </label>
+                            <input
+                                type="number"
+                                min="0"
+                                step="0.01"
+                                value={formData.presupuesto}
+                                onChange={(e) => handleInputChange('presupuesto', e.target.value)}
+                                className="form-input-actividad"
+                                placeholder="0.00"
+                            />
+                        </div>
                     </div>
 
                     <div className="form-section-actividad">
@@ -489,6 +508,13 @@ const CrearActividadPage = () => {
                                     </div>
                                 )}
                             </div>
+                        </div>
+                    )}
+
+                    {errorSubmit && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 16px', marginBottom: '16px', borderRadius: '8px', backgroundColor: '#fef2f2', border: '1px solid #fca5a5', color: '#991b1b', fontSize: '0.9rem' }}>
+                            <AlertCircle size={16} style={{ flexShrink: 0 }} />
+                            <span>{errorSubmit}</span>
                         </div>
                     )}
 

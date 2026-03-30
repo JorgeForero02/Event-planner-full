@@ -1,5 +1,5 @@
 import { Eye, EyeOff, Shield, AlertCircle, Lock } from 'lucide-react';
-import React, { useState } from 'react';
+import React from 'react';
 import { useAdminLogin } from '../components/useAdminLogin';
 import logo from '../assets/evento-remove.png';
 import './AdminLogin.css';

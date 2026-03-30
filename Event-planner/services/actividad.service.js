@@ -32,7 +32,7 @@ class ActividadService {
     }
 
     async crear(eventoId, datosActividad, evento, transaction) {
-        const { titulo, hora_inicio, hora_fin, descripcion, fecha_actividad, url, lugares } = datosActividad;
+        const { titulo, hora_inicio, hora_fin, descripcion, fecha_actividad, url, lugares, presupuesto } = datosActividad;
         const actividad = await Actividad.create({
             id_evento: eventoId,
             titulo,
@@ -40,7 +40,8 @@ class ActividadService {
             hora_fin,
             descripcion,
             fecha_actividad,
-            url
+            url,
+            presupuesto: presupuesto ?? 0
         }, { transaction });
 
         if (lugares && Array.isArray(lugares) && lugares.length > 0) {
@@ -154,7 +155,7 @@ class ActividadService {
 
     _construirObjetoActualizacion(campos) {
         const actualizaciones = {};
-        const camposPermitidos = ['titulo', 'hora_inicio', 'hora_fin', 'descripcion', 'fecha_actividad', 'url'];
+        const camposPermitidos = ['titulo', 'hora_inicio', 'hora_fin', 'descripcion', 'fecha_actividad', 'url', 'presupuesto'];
         camposPermitidos.forEach(campo => {
             if (campos[campo] !== undefined) {
                 actualizaciones[campo] = campos[campo];

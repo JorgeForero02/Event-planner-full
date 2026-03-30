@@ -222,6 +222,73 @@ class UbicacionController {
         }
     }
 
+    async toggleEstadoUbicacion(req, res) {
+        const transaction = await UbicacionService.crearTransaccion();
+        try {
+            const { ubicacionId } = req.params;
+            const usuario = req.usuario;
+
+            const ubicacion = await UbicacionService.buscarPorId(ubicacionId, transaction);
+            if (!ubicacion) {
+                await transaction.rollback();
+                return res.status(404).json({ success: false, message: MENSAJES.NO_ENCONTRADA });
+            }
+
+            const tienePermiso = PermisosService.verificarAccesoEmpresa(
+                usuario.rol, usuario.rolData?.id_empresa, ubicacion.id_empresa
+            );
+            if (!tienePermiso) {
+                await transaction.rollback();
+                return res.status(403).json({ success: false, message: MENSAJES.SIN_PERMISO_TOGGLE });
+            }
+
+            const resultado = await UbicacionService.toggleEstado(ubicacionId, transaction);
+            if (!resultado.exito) {
+                await transaction.rollback();
+                return res.status(resultado.codigoEstado || 400).json({ success: false, message: resultado.mensaje });
+            }
+
+            await AuditoriaService.registrar({
+                mensaje: `Ubicación ${ubicacion.direccion} ${resultado.habilitada ? 'habilitada' : 'deshabilitada'}`,
+                tipo: 'PUT',
+                accion: resultado.habilitada ? 'habilitar_ubicacion' : 'deshabilitar_ubicacion',
+                usuario: { id: usuario.id, nombre: usuario.nombre }
+            });
+
+            await transaction.commit();
+            const mensaje = resultado.habilitada ? MENSAJES.HABILITADA : MENSAJES.DESHABILITADA;
+            return res.json({ success: true, message: mensaje, data: resultado.ubicacion });
+        } catch (error) {
+            await transaction.rollback();
+            console.error('Error al cambiar estado de ubicación:', error);
+            return res.status(500).json({ success: false, message: MENSAJES.ERROR_TOGGLE, error: error.message });
+        }
+    }
+
+    async obtenerStatsUbicaciones(req, res) {
+        try {
+            const { empresaId } = req.params;
+            const usuario = req.usuario;
+
+            const tienePermiso = PermisosService.verificarAccesoEmpresa(
+                usuario.rol, usuario.rolData?.id_empresa, empresaId
+            );
+            if (!tienePermiso) {
+                return res.status(403).json({ success: false, message: MENSAJES.SIN_PERMISO_VER });
+            }
+
+            const resultado = await UbicacionService.obtenerStats(empresaId);
+            if (!resultado.exito) {
+                return res.status(404).json({ success: false, message: resultado.mensaje });
+            }
+
+            return res.json({ success: true, message: 'Estadísticas de ubicaciones obtenidas', data: resultado.stats });
+        } catch (error) {
+            console.error('Error al obtener stats de ubicaciones:', error);
+            return res.status(500).json({ success: false, message: MENSAJES.ERROR_OBTENER, error: error.message });
+        }
+    }
+
     async eliminarUbicacion(req, res) {
         const transaction = await UbicacionService.crearTransaccion();
         try {

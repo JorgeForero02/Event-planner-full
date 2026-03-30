@@ -349,6 +349,15 @@ class EncuestaController {
                 });
             }
 
+            // [BACKEND-FIX] B9: Verificar que el asistente pertenece al usuario autenticado
+            const asistente = await Asistente.findByPk(id_asistente);
+            if (!asistente || asistente.id_usuario !== req.usuario.id) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'No tienes permiso para completar esta encuesta como este asistente'
+                });
+            }
+
             const respuesta = await EncuestaService.marcarComoCompletada(id_encuesta, id_asistente);
 
             return res.json({

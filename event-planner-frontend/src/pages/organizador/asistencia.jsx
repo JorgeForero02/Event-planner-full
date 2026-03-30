@@ -1,6 +1,6 @@
 // File: GestionAsistentes.jsx
 import React, { useState, useEffect } from 'react';
-import { Search, Download, Eye, Users, AlertCircle } from 'lucide-react';
+import { Search, Eye, Users, AlertCircle } from 'lucide-react';
 import Sidebar from './Sidebar';
 import asistenciaService from '../../components/asistenciaService';
 import './asistencia.css';
@@ -36,13 +36,14 @@ export default function GestionAsistentes() {
         };
 
         cargarEventos();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
         if (!selectedEventoId) return;
         cargarAsistentes(selectedEventoId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedEventoId]);
-
     const cargarAsistentes = async (idEvento) => {
         setLoading(true);
         setError(null);
@@ -124,6 +125,7 @@ export default function GestionAsistentes() {
         }
 
         setFilteredAsistentes(filtered);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchTerm, filtroEstado, asistentes]);
 
     const totalInscritos = asistentes.length;

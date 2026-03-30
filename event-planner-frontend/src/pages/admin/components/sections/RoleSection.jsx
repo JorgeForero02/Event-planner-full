@@ -1,5 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import styles from './roles.module.css';
+import { Search, Info, Edit, AlertCircle, CheckCircle2, X } from 'lucide-react';
+import { Input } from '../../../../components/ui/input';
+import { Button } from '../../../../components/ui/button';
+import { Badge } from '../../../../components/ui/badge';
+import { Card, CardHeader, CardContent } from '../../../../components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../../../../components/ui/table';
 
 const SYSTEM_ROLES = [
   {
@@ -61,7 +73,6 @@ const useRolesState = () => {
         if (savedRoles) {
           setRoles(JSON.parse(savedRoles));
         } else {
-          // Primera vez: guardar roles del sistema
           localStorage.setItem('rolesState', JSON.stringify(SYSTEM_ROLES));
           setRoles(SYSTEM_ROLES);
         }
@@ -98,76 +109,21 @@ const Notification = ({ notification, onClose }) => {
   if (!notification) return null;
 
   return (
-    <div className={`${styles.notification} ${styles[notification.type]}`}>
-      <div className={styles.notificationContent}>
-        <div className={styles.notificationIcon}>
-          {notification.type === 'success' ? '✓' : '✗'}
-        </div>
-        <p className={styles.notificationMessage}>{notification.message}</p>
-        <button
-          className={styles.notificationClose}
-          onClick={onClose}
-        >
-          ×
-        </button>
-      </div>
+    <div className={`flex items-center gap-3 p-4 mb-4 rounded-lg border ${
+      notification.type === 'success' 
+        ? 'bg-emerald-50 border-emerald-200 text-emerald-800' 
+        : 'bg-rose-50 border-rose-200 text-rose-800'
+    }`}>
+      {notification.type === 'success' ? (
+        <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+      ) : (
+        <AlertCircle className="h-5 w-5 text-rose-500" />
+      )}
+      <p className="flex-1 text-sm font-medium">{notification.message}</p>
+      <button onClick={onClose} className="rounded-md hover:bg-black/5 p-1 transition-colors">
+        <X className="h-4 w-4" />
+      </button>
     </div>
-  );
-};
-
-const ActionButton = ({ rol, onToggle, disabled }) => {
-  const getButtonTitle = () => {
-    if (disabled) return 'Rol del sistema no modificable';
-    return rol.activo ? 'Desactivar rol' : 'Activar rol';
-  };
-
-  return (
-    <button
-      className={`${styles.actionBtn} ${disabled ? styles.disabled : ''}`}
-      onClick={() => !disabled && onToggle(rol.id)}
-      title={getButtonTitle()}
-      disabled={disabled}
-    >
-      <svg viewBox="0 0 24 24" fill="none">
-        <path 
-          d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" 
-          stroke="currentColor" 
-          strokeWidth="2" 
-          strokeLinecap="round" 
-          strokeLinejoin="round"
-        />
-      </svg>
-    </button>
-  );
-};
-
-const RoleTableRow = ({ rol, onToggleStatus }) => {
-  return (
-    <tr key={rol.id}>
-      <td className={styles.rolName}>
-        <div className={styles.rolInfo}>
-          <span>{rol.nombre}</span>
-          {rol.esSistema && (
-            <span className={styles.systemBadge}>Sistema</span>
-          )}
-        </div>
-      </td>
-      <td>
-        <span className={`${styles.badge} ${rol.activo ? styles.badgeActive : styles.badgeInactive}`}>
-          {rol.activo ? 'Activo' : 'Inactivo'}
-        </span>
-      </td>
-      <td className={styles.description}>{rol.descripcion}</td>
-      <td>
-        <div className={styles.actions}>
-          <ActionButton 
-            rol={rol} 
-            onToggle={onToggleStatus}
-            disabled={!rol.editable}
-          />
-        </div>
-      </td>
-    </tr>
   );
 };
 
@@ -195,87 +151,109 @@ const RolesSection = () => {
     );
   };
 
-  const handleResetRoles = () => {
-    updateRoles(SYSTEM_ROLES);
-    showNotification('success', 'Roles restablecidos a estado inicial');
-  };
-
   const filteredRoles = roles.filter(rol =>
     rol.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
     rol.descripcion.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  if (loading) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.loadingSpinner}>Cargando roles...</div>
-      </div>
-    );
-  }
-
   return (
-    <div className={styles.container}>
+    <div className="space-y-6">
       <Notification 
         notification={notification} 
         onClose={() => showNotification(null)} 
       />
 
-      <div className={styles.header}>
-        <div className={styles.titule}>Gestión de Roles</div>
-        <div className={styles.subtitule}>Listado de Roles del Sistema</div>
+      <div className="flex flex-col gap-2">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Gestión de Roles</h1>
+        <p className="text-slate-500">Listado y administración de roles del sistema</p>
       </div>
 
-      <div className={styles.searchContainer}>
-        <div className={styles.searchBox}>
-          <img src={require('../../../../assets/search.png')} alt="Busqueda" />
-          <input
-            type="text"
-            placeholder="Buscar por nombre o descripción..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className={styles.searchInput}
-          />
-        </div>
-      </div>
-
-      <div className={styles.tableContainer}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Rol</th>
-              <th>Estado</th>
-              <th>Descripción</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredRoles.map(rol => (
-              <RoleTableRow 
-                key={rol.id} 
-                rol={rol} 
-                onToggleStatus={handleToggleStatus}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="relative w-full sm:w-72">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
+              <Input
+                type="text"
+                placeholder="Buscar por nombre o descripción..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9"
               />
-            ))}
-          </tbody>
-        </table>
-
-        {filteredRoles.length === 0 && (
-          <div className={styles.noResults}>
-            No se encontraron roles que coincidan con la búsqueda
+            </div>
           </div>
-        )}
-      </div>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-md border overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Rol</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Descripción</TableHead>
+                  <TableHead className="text-right">Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="h-24 text-center">Cargando roles...</TableCell>
+                  </TableRow>
+                ) : filteredRoles.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="h-24 text-center text-slate-500">
+                      No se encontraron roles que coincidan con la búsqueda.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredRoles.map(rol => (
+                    <TableRow key={rol.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-slate-900">{rol.nombre}</span>
+                          {rol.esSistema && (
+                            <Badge variant="outline" className="bg-slate-50 text-xs">Sistema</Badge>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={
+                          rol.activo 
+                            ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100/80" 
+                            : "bg-slate-100 text-slate-700 hover:bg-slate-100/80"
+                        }>
+                          {rol.activo ? 'Activo' : 'Inactivo'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-slate-600">{rol.descripcion}</TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleToggleStatus(rol.id)}
+                          title={!rol.editable ? 'Rol del sistema no modificable' : (rol.activo ? 'Desactivar rol' : 'Activar rol')}
+                          disabled={!rol.editable}
+                          className="h-8 w-8 text-slate-500 hover:text-brand-600 disabled:opacity-50"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
 
-      <div className={styles.infoNote}>
-        <svg className={styles.infoIcon} viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-          <path d="M12 16V12M12 8H12.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-        </svg>
-        <span>
-          Los roles marcados como "Sistema" no pueden ser modificados. 
-          Solo los roles editables pueden activarse o desactivarse.
-          Los roles inactivos no estarán disponibles al crear nuevos usuarios.
-        </span>
+      <div className="flex items-start gap-3 rounded-lg bg-blue-50 p-4 text-sm text-blue-900">
+        <Info className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-600" />
+        <div>
+          <p>Los roles marcados como "Sistema" no pueden ser modificados.</p>
+          <p>Solo los roles editables pueden activarse o desactivarse.</p>
+          <p>Los roles inactivos no estarán disponibles al crear nuevos usuarios.</p>
+        </div>
       </div>
     </div>
   );

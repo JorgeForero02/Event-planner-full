@@ -137,6 +137,28 @@ export const useInscriptions = () => {
         return dentroDelRango;
     };
 
+    const handleCancelarInscripcion = async (inscripcion) => {
+        try {
+            const token = getToken();
+            if (!token) {
+                throw new Error('No se encontró token de autenticación');
+            }
+            await inscriptionService.cancelInscription(inscripcion.id, token);
+            await cargarMisInscripciones();
+        } catch (error) {
+            setError(error.message);
+            throw error;
+        }
+    };
+
+    const puedeCancelar = (inscripcion) => {
+        if (inscripcion.estado !== 'Confirmada') return false;
+        const evento = inscripcion.evento;
+        if (!evento?.fecha_inicio) return false;
+        const hoy = new Date().toISOString().split('T')[0];
+        return hoy < evento.fecha_inicio;
+    };
+
     const inscribirseEnEvento = async (eventId) => {
         const token = getToken();
         if (!token) {
@@ -150,8 +172,8 @@ export const useInscriptions = () => {
 
     useEffect(() => {
         cargarMisInscripciones();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-
     return {
         misInscripciones,
         eventosInscritos,
@@ -163,6 +185,8 @@ export const useInscriptions = () => {
         cargarMisInscripciones,
         inscribirseEnEvento,
         handleRegistrarAsistencia,
-        puedeRegistrarAsistencia
+        puedeRegistrarAsistencia,
+        handleCancelarInscripcion,
+        puedeCancelar
     };
 };

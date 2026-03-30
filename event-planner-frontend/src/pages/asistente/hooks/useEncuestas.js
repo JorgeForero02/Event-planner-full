@@ -10,7 +10,7 @@ export const useEncuestas = () => {
 
     const { user } = useAuth();
 
-    const getUserId = () => {
+    const getUserId = useCallback(() => {
         if (user) {
             if (user.rolData && user.rolData.id_asistente) {
                 return user.rolData.id_asistente;
@@ -23,7 +23,7 @@ export const useEncuestas = () => {
                 'id': user.id,
             };
 
-            for (const [key, value] of Object.entries(posiblesIds)) {
+            for (const [, value] of Object.entries(posiblesIds)) {
                 if (value !== undefined && value !== null) {
                     return value;
                 }
@@ -45,7 +45,8 @@ export const useEncuestas = () => {
         }
 
         return null;
-    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user]);
 
     const obtenerEncuestas = useCallback(async (opciones = {}) => {
         const { actividadId, eventoId, tipoEncuesta } = opciones;
@@ -70,21 +71,21 @@ export const useEncuestas = () => {
                 let encuestasFiltradas = todasLasEncuestas.filter(encuesta => {
                     if (tipoEncuesta === 'satisfaccion_evento') {
                         return encuesta.tipo_encuesta === 'satisfaccion_evento' &&
-                            encuesta.id_evento == eventoId &&
+                            encuesta.id_evento === eventoId &&
                             encuesta.id_actividad === null;
                     }
 
                     if (tipoEncuesta && tipoEncuesta !== 'satisfaccion_evento') {
                         if (actividadId) {
                             return encuesta.tipo_encuesta === tipoEncuesta &&
-                                encuesta.id_actividad == actividadId;
+                                encuesta.id_actividad === actividadId;
                         } else {
                             return encuesta.tipo_encuesta === tipoEncuesta;
                         }
                     }
 
                     if (actividadId) {
-                        return encuesta.id_actividad == actividadId;
+                        return encuesta.id_actividad === actividadId;
                     }
 
                     return true;
@@ -105,7 +106,7 @@ export const useEncuestas = () => {
                         // Buscar si ya existe una respuesta de este usuario
                         const respuestasExistentes = encuesta.respuestas || [];
                         const respuestaExistenteIndex = respuestasExistentes.findIndex(
-                            r => r.id_asistente == userId
+                            r => r.id_asistente === userId
                         );
 
                         if (respuestaExistenteIndex >= 0) {
@@ -150,6 +151,7 @@ export const useEncuestas = () => {
         } finally {
             setLoading(false);
         }
+                // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [getUserId]);
 
     const obtenerEncuestasPorActividad = useCallback(async (actividadId, tipoEncuesta = null) => {
@@ -202,7 +204,7 @@ export const useEncuestas = () => {
                         // Buscar si ya existe una respuesta de este asistente
                         const respuestasExistentes = encuesta.respuestas || [];
                         const respuestaExistenteIndex = respuestasExistentes.findIndex(
-                            r => r.id_asistente == userId
+                            r => r.id_asistente === userId
                         );
 
                         const nuevaRespuesta = {
@@ -287,7 +289,7 @@ export const useEncuestas = () => {
 
         // Buscar la respuesta específica de este asistente
         const respuestaAsistente = encuesta.respuestas.find(
-            respuesta => respuesta.id_asistente == userId
+            respuesta => respuesta.id_asistente === userId
         );
 
         console.log('👤 Respuesta encontrada para el asistente:', {
@@ -316,6 +318,7 @@ export const useEncuestas = () => {
 
         console.log('❓ Estado indeterminado, usando pendiente');
         return { estado: 'pendiente', texto: 'Pendiente' };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     return {

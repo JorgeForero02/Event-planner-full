@@ -49,6 +49,12 @@ const Actividad = sequelize.define('Actividad', {
       model: 'Evento',
       key: 'id'
     }
+  },
+  presupuesto: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false,
+    defaultValue: 0.00,
+    comment: 'Presupuesto asignado a esta actividad en COP'
   }
 }, {
   tableName: 'Actividad',

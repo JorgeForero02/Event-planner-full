@@ -21,6 +21,7 @@ const EventosSection = ({ onEventoSelect }) => {
     }
   }, [eventos, selectedEvento, onEventoSelect]);
 
+  // eslint-disable-next-line no-unused-vars
   const handleEventoSelect = (evento) => {
     setSelectedEvento(evento);
     onEventoSelect(evento);

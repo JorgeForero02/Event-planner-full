@@ -1,35 +1,37 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import styles from './menu.module.css';
-
-import securityIcon from '../../assets/security.png';
-import settingsIcon from '../../assets/settings.png';
-import personIcon from '../../assets/person.png';
-import hamburgerIcon from '../../assets/hamburgerIcon.png';
-import expandIcon from '../../assets/expand-arrow.png';
-import dashboardIcon from '../../assets/dashboardIcon.png';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { 
+  LayoutDashboard, 
+  Shield, 
+  Users, 
+  Menu as MenuIcon,
+  ChevronDown,
+  LogOut
+} from 'lucide-react';
 import logoIcon from '../../assets/evento-remove.png';
 
-const Menu = ({ onToggle, onSectionChange, activeSection }) => {
+const Menu = ({ onToggle, onSectionChange }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const activeSection = location.pathname.split('/').pop() || 'dashboard';
+
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState({
     seguridad: false, 
-    afiliaciones: false,
-    configuracion: false
+    afiliaciones: false
   });
 
   const menuItems = [
     {
       id: 'dashboard',
       label: 'Dashboard',
-      icon: dashboardIcon,
+      icon: LayoutDashboard,
       hasSubmenu: false
     },
     {
       id: 'seguridad',
       label: 'Seguridad',
-      icon: securityIcon,
+      icon: Shield,
       hasSubmenu: true,
       submenu: [
         { id: 'roles', label: 'Roles' },
@@ -39,25 +41,19 @@ const Menu = ({ onToggle, onSectionChange, activeSection }) => {
     {
       id: 'afiliaciones',
       label: 'Afiliaciones',
-      icon: personIcon,
+      icon: Users,
       hasSubmenu: true,
       submenu: [
         { id: 'afiliaciones-pendientes', label: 'Afiliaciones Pendientes' },
         { id: 'afiliaciones-aprobadas', label: 'Afiliaciones Aprobadas' },
         { id: 'afiliaciones-rechazadas', label: 'Afiliaciones Rechazadas' }
       ]
-    },
-    {
-      id: 'configuracion',
-      label: 'Configuración',
-      icon: settingsIcon,
-      hasSubmenu: false
     }
   ];
 
   // Auto-expandir menú si hay un subitem activo
   useEffect(() => {
-    menuItems.forEach(item => {
+    menuItems.forEach((item) => {
       if (item.hasSubmenu && item.submenu) {
         const hasActiveSubmenu = item.submenu.some(sub => sub.id === activeSection);
         if (hasActiveSubmenu) {
@@ -68,6 +64,7 @@ const Menu = ({ onToggle, onSectionChange, activeSection }) => {
         }
       }
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeSection]);
 
   const toggleMenu = () => {
@@ -91,6 +88,7 @@ const Menu = ({ onToggle, onSectionChange, activeSection }) => {
     if (item.hasSubmenu && !isCollapsed) {
       toggleSubmenu(item.id);
     } else if (!item.hasSubmenu) {
+      navigate(`/admin/${item.id}`);
       if (onSectionChange) {
         onSectionChange(item.id);
       }
@@ -98,6 +96,7 @@ const Menu = ({ onToggle, onSectionChange, activeSection }) => {
   };
 
   const handleSubmenuClick = (submenuItem) => {
+    navigate(`/admin/${submenuItem.id}`);
     if (onSectionChange) {
       onSectionChange(submenuItem.id);
     }
@@ -121,124 +120,102 @@ const Menu = ({ onToggle, onSectionChange, activeSection }) => {
     return activeSection === item.id;
   };
 
-  const shouldShowAsActive = (item) => {
-    return isParentMenuActive(item);
-  };
-
-  const isSubmenuActive = (submenuItems) => {
-    return submenuItems?.some(item => activeSection === item.id);
-  };
-
-  const renderIcon = (icon) => {
-    return (
-      <img 
-        className={styles.menuIcon} 
-        src={icon} 
-        alt="menu icon"
-        onError={(e) => {
-          console.error('Error cargando icono:', icon);
-          e.target.style.display = 'none';
-        }}
-      />
-    );
-  };
-
   return (
-    <div className={`${styles.rectangleParent} ${isCollapsed ? styles.collapsed : ''}`}>
-      <div className={styles.groupChild} />
-      <button 
-        className={styles.hamburgerIcon} 
-        onClick={toggleMenu} 
-        title={isCollapsed ? "Expandir menú" : "Colapsar menú"}
-      >
-        <img 
-          src={hamburgerIcon} 
-          alt="menu toggle"
-          onError={(e) => {
-            e.target.style.display = 'none';
-            const parent = e.target.parentElement;
-            if (!parent.querySelector('.fallbackHamburger')) {
-              const fallback = document.createElement('div');
-              fallback.className = 'fallbackHamburger';
-              fallback.innerHTML = `
-                <div style="width: 20px; height: 2px; background: white; margin: 4px 0;"></div>
-                <div style="width: 20px; height: 2px; background: white; margin: 4px 0;"></div>
-                <div style="width: 20px; height: 2px; background: white; margin: 4px 0;"></div>
-              `;
-              parent.appendChild(fallback);
-            }
-          }}
-        />
-      </button>
-      <div className={styles.logoSection}>
+    <aside 
+      className={`fixed left-0 top-0 z-[1000] h-screen bg-[#1A2332] text-white flex flex-col transition-all duration-300 ${
+        isCollapsed ? 'w-16' : 'w-64'
+      }`}
+    >
+      {/* Header / Logo section */}
+      <div className="flex items-center justify-between p-4 h-16 shrink-0 border-b border-white/10">
         {!isCollapsed ? (
-          <div className={styles.panelDeAdministracin}>Panel de Administración</div>
+          <div className="font-bold text-lg truncate pr-2">Panel Admin</div>
         ) : (
           <img 
             src={logoIcon} 
             alt="Event Planner" 
-            className={styles.logoCollapsed}
+            className="w-8 h-8 object-contain hidden" 
           />
         )}
+        <button 
+          onClick={toggleMenu} 
+          title={isCollapsed ? "Expandir menú" : "Colapsar menú"}
+          className={`p-1.5 rounded-md hover:bg-white/10 transition-colors ${isCollapsed ? 'mx-auto' : ''}`}
+        >
+          <MenuIcon size={20} />
+        </button>
       </div>
-      <div className={styles.menuContainer}>
-        {menuItems.map((item) => (
-          <div key={item.id} className={styles.menuItem}>
-            <div 
-              className={`${styles.menuItemContent} ${
-                shouldShowAsActive(item) ? styles.activeMenuItem : ''
-              } ${item.id === 'dashboard' ? styles.dashboardItem : ''}`}
-              onClick={() => handleMenuClick(item)}
-              title={isCollapsed ? item.label : ''}
-            >
-              {renderIcon(item.icon)}
-              {!isCollapsed && (
-                <>
-                  <span className={styles.menuLabel}>{item.label}</span>
-                  {item.hasSubmenu && (
-                    <div className={`${styles.expandIcon} ${expandedMenus[item.id] ? styles.expanded : ''}`}>
-                      <img 
-                        src={expandIcon} 
-                        alt="expand" 
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                          e.target.parentElement.textContent = '▼';
-                        }}
-                      />
-                    </div>
+
+      {/* Menu Navigation */}
+      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+        {menuItems.map((item) => {
+          const active = isParentMenuActive(item);
+          const isExpanded = expandedMenus[item.id];
+          const Icon = item.icon;
+
+          return (
+            <div key={item.id} className="mb-1">
+              <button
+                onClick={() => handleMenuClick(item)}
+                title={isCollapsed ? item.label : ''}
+                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors ${
+                  active 
+                    ? 'bg-blue-600 text-white shadow-md' 
+                    : 'text-slate-300 hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                <div className="flex items-center gap-3 truncate">
+                  <Icon size={20} className="shrink-0" />
+                  {!isCollapsed && (
+                    <span className="truncate font-medium">{item.label}</span>
                   )}
-                </>
+                </div>
+                {!isCollapsed && item.hasSubmenu && (
+                  <ChevronDown 
+                    size={16} 
+                    className={`transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} 
+                  />
+                )}
+              </button>
+
+              {/* Submenu rendering */}
+              {item.hasSubmenu && isExpanded && !isCollapsed && (
+                <div className="ml-9 mt-1 space-y-1">
+                  {item.submenu.map((subItem) => {
+                    const subActive = isActive(subItem.id);
+                    return (
+                      <button
+                        key={subItem.id}
+                        onClick={() => handleSubmenuClick(subItem)}
+                        className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                          subActive 
+                            ? 'bg-white/10 text-white font-medium' 
+                            : 'text-slate-400 hover:bg-white/10 hover:text-white'
+                        }`}
+                      >
+                        {subItem.label}
+                      </button>
+                    );
+                  })}
+                </div>
               )}
             </div>
+          );
+        })}
+      </nav>
 
-            {item.hasSubmenu && expandedMenus[item.id] && !isCollapsed && (
-              <div className={styles.submenu}>
-                {item.submenu.map((subItem) => (
-                  <div
-                    key={subItem.id}
-                    className={`${styles.submenuItem} ${isActive(subItem.id) ? styles.activeSubmenuItem : ''}`}
-                    onClick={() => handleSubmenuClick(subItem)}
-                  >
-                    {subItem.label}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
+      {/* Footer / Logout Button */}
+      <div className="p-4 border-t border-white/10 shrink-0">
+        <button 
+          onClick={handleLogout}
+          title="Cerrar Sesión"
+          className="w-full flex items-center justify-center lg:justify-start gap-3 px-3 py-2.5 rounded-lg text-slate-300 hover:bg-rose-500/10 hover:text-rose-500 transition-colors"
+        >
+          <LogOut size={20} className="shrink-0" />
+          {!isCollapsed && <span className="font-medium">Cerrar Sesión</span>}
+        </button>
       </div>
-
-      <button 
-        className={styles.logoutButton}
-        onClick={handleLogout}
-        title="Cerrar Sesión"
-      >
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className={styles.logoutIcon}>
-          <path d="M13 3h3a2 2 0 012 2v10a2 2 0 01-2 2h-3M8 16l-5-5 5-5M3 11h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-        {!isCollapsed && <span>Cerrar Sesión</span>}
-      </button>
-    </div>
+    </aside>
   );
 };
 

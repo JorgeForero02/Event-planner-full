@@ -21,6 +21,19 @@ router.get(
     EncuestaController.obtenerEncuestas
 );
 
+// [BACKEND-FIX] B10: Rutas literales ANTES de rutas con :encuestaId para evitar que Express las capture como parámetro
+router.get(
+    '/respuestas/asistentes',
+    auth,
+    EncuestaController.obtenerRespuestasEncuestaAsistentes
+);
+
+router.post(
+    '/completar',
+    auth,
+    EncuestaController.completarEncuesta
+);
+
 router.get(
     '/:encuestaId',
     auth,
@@ -58,18 +71,6 @@ router.get(
     isAdminGerenteOrganizadorOrPonente,
     validarPermiso,
     EncuestaController.obtenerEstadisticas
-);
-
-router.get(
-    '/respuestas/asistentes',
-    auth,
-    EncuestaController.obtenerRespuestasEncuestaAsistentes
-);
-
-router.post(
-    '/completar',
-    auth,
-    EncuestaController.completarEncuesta
 );
 
 module.exports = router;

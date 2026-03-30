@@ -738,3 +738,40 @@
         width: 100%;
     }
 }
+
+/* [UI-FIX] U2: Banner de error inline */
+.error-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    color: #b91c1c;
+    font-size: 14px;
+    margin-bottom: 16px;
+}
+
+.error-banner svg {
+    flex-shrink: 0;
+}
+
+.error-banner span {
+    flex: 1;
+}
+
+.error-banner-close {
+    background: none;
+    border: none;
+    color: #b91c1c;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+}
+
+.error-banner-close:hover {
+    background-color: #fecaca;
+}

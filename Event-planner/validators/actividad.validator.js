@@ -1,5 +1,5 @@
 const { MENSAJES_VALIDACION } = require('../constants/actividad.constants');
-const { Actividad, Lugar, Ponente, PonenteActividad, LugarActividad } = require('../models');
+const { Actividad, Lugar, Ponente, PonenteActividad, LugarActividad, Inscripcion } = require('../models');
 const { Op } = require('sequelize');
 
 class ActividadValidator {
@@ -100,6 +100,22 @@ class ActividadValidator {
         }
 
         return null; 
+    }
+
+    async validarCapacidadSala(idsLugares, eventoId) {
+        if (!idsLugares || idsLugares.length === 0) return null;
+
+        const inscritosConfirmados = await Inscripcion.count({
+            where: { id_evento: eventoId, estado: 'Confirmada' }
+        });
+
+        for (const lugarId of idsLugares) {
+            const lugar = await Lugar.findByPk(lugarId, { attributes: ['id', 'nombre', 'capacidad'] });
+            if (lugar && lugar.capacidad !== null && inscritosConfirmados > lugar.capacidad) {
+                return `La sala "${lugar.nombre}" tiene capacidad para ${lugar.capacidad} persona(s) y el evento tiene ${inscritosConfirmados} inscritos confirmados.`;
+            }
+        }
+        return null;
     }
 
     _detectarSolapamientoHorario(inicio1, fin1, inicio2, fin2) {

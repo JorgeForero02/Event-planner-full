@@ -91,7 +91,7 @@ const EncuestaModal = ({
                                                     {/* Buscar la respuesta específica del asistente */}
                                                     {(() => {
                                                         const respuestaAsistente = encuesta.respuestas?.find(
-                                                            r => r.id_asistente == idAsistente
+                                                            r => r.id_asistente === idAsistente
                                                         );
                                                         return respuestaAsistente?.fecha_completado
                                                             ? new Date(respuestaAsistente.fecha_completado).toLocaleDateString()

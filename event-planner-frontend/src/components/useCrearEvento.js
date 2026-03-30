@@ -27,7 +27,7 @@ export const useEvento = (idEvento = null) => {
     });
 
     const [actividades, setActividades] = useState([
-        { titulo: '', descripcion: '', fecha_actividad: '', hora_inicio: '', hora_fin: '' }
+        { titulo: '', descripcion: '', fecha_actividad: '', hora_inicio: '', hora_fin: '', presupuesto: '' }
     ]);
 
     const [mensaje, setMensaje] = useState({ tipo: '', texto: '' });
@@ -106,6 +106,7 @@ export const useEvento = (idEvento = null) => {
                             : "",
                         hora_inicio: a.hora_inicio ?? "",
                         hora_fin: a.hora_fin ?? "",
+                        presupuesto: a.presupuesto ?? "",
                         esExistente: true,
                     }))
                     : [{
@@ -114,6 +115,7 @@ export const useEvento = (idEvento = null) => {
                         fecha_actividad: "",
                         hora_inicio: "",
                         hora_fin: "",
+                        presupuesto: "",
                         esExistente: false,
                     }]
             );
@@ -172,8 +174,6 @@ export const useEvento = (idEvento = null) => {
                 ? await actualizarEvento(idEvento, sanitized)
                 : await crearEvento({ ...sanitized, id_empresa: empresa.id });
 
-            console.log("Respuesta backend:", eventoGuardado);
-
             const eventoId = idEvento || eventoGuardado?.data?.id;
 
             for (const act of actividades) {
@@ -185,10 +185,10 @@ export const useEvento = (idEvento = null) => {
 
             setMostrarModalExito(true);
         } catch (err) {
-            // Log completo del error
             console.error("Error al guardar evento:", err);
-            console.error("Respuesta completa del backend (si existe):", err.response);
-            setMensaje({ tipo: 'error', texto: 'Error al guardar el evento' });
+            const backendMsg = err?.response?.data?.message || err?.message || null;
+            const texto = backendMsg || 'Error al guardar el evento';
+            setMensaje({ tipo: 'error', texto });
             setMostrarModalError(true);
         }
         finally {
@@ -228,8 +228,8 @@ export const useEvento = (idEvento = null) => {
         };
 
         cargarDatos();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [idEvento]);
-
     useEffect(() => {
         if (mostrarModalExito) {
             const timer = setTimeout(() => {
@@ -237,6 +237,7 @@ export const useEvento = (idEvento = null) => {
             }, 2000);
             return () => clearTimeout(timer);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [mostrarModalExito, handleCerrarModal]);
 
     return {

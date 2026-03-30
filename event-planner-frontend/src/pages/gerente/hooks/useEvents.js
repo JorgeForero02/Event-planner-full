@@ -156,10 +156,11 @@ export const useEvents = () => {
 
   useEffect(() => {
     cargarEventos();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
   useEffect(() => {
     aplicarFiltros();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.searchTerm, state.filtroOrganizador, state.eventos]);
 
   const aplicarFiltros = useCallback(() => {

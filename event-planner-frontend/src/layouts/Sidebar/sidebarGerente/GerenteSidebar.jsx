@@ -1,15 +1,15 @@
-// src/components/GerenteSidebar.jsx
+// src/layouts/Sidebar/sidebarGerente/GerenteSidebar.jsx
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import './GerenteSidebar.css';
-import dashboardIcon from '../../../assets/dashboardIcon.png';
-import empresa from '../../../assets/person.png';
-import triangulo from '../../../assets/expand-arrow.png';
-import campana from '../../../assets/notifications.png';
-import settings from '../../../assets/settings.png';
-import hamburgerIcon from '../../../assets/hamburgerIcon.png';
-import logoIcon from '../../../assets/evento-remove.png';
-import calendarEvento from '../../../assets/calendarEvento.png'
+import {
+    LayoutDashboard,
+    Building2,
+    CalendarDays,
+    ChevronDown,
+    Menu as MenuIcon,
+    LogOut,
+} from 'lucide-react';
+import { cn } from '../../../lib/utils';
 
 const GerenteSidebar = ({ onToggle }) => {
     const navigate = useNavigate();
@@ -20,20 +20,12 @@ const GerenteSidebar = ({ onToggle }) => {
     const toggleSidebar = () => {
         const newCollapsedState = !isCollapsed;
         setIsCollapsed(newCollapsedState);
-
-        if (onToggle) {
-            onToggle(newCollapsedState);
-        }
-
-        if (newCollapsedState) {
-            setEmpresaOpen(false);
-        }
+        if (onToggle) onToggle(newCollapsedState);
+        if (newCollapsedState) setEmpresaOpen(false);
     };
 
     const handleEmpresaClick = () => {
-        if (!isCollapsed) {
-            setEmpresaOpen(!empresaOpen);
-        }
+        if (!isCollapsed) setEmpresaOpen(!empresaOpen);
     };
 
     const handleLogout = () => {
@@ -44,127 +36,128 @@ const GerenteSidebar = ({ onToggle }) => {
 
     const isActive = (path) => location.pathname === path;
 
+    const empresaSubItems = [
+        { path: '/gerente/actualizar-empresa', label: 'Actualizar Información' },
+        { path: '/gerente/ubicaciones',        label: 'Ubicaciones'            },
+        { path: '/gerente/lugares',            label: 'Lugares'                },
+        { path: '/gerente/crear-organizador',  label: 'Crear Organizador'      },
+    ];
+
+    const empresaActive = empresaSubItems.some(s => isActive(s.path));
+
     return (
-        <aside className={`gerente-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
-            <div className="sidebar-header">
+        <aside className={cn(
+            'fixed left-0 top-0 z-[1000] h-screen bg-[#1A2332] text-white flex flex-col transition-all duration-300',
+            isCollapsed ? 'w-16' : 'w-64'
+        )}>
+            {/* Header */}
+            <div className="flex items-center justify-between px-3 py-4 border-b border-white/10 shrink-0">
+                {!isCollapsed && (
+                    <span className="text-sm font-semibold truncate">Panel de Gerente</span>
+                )}
                 <button
-                    className="hamburger-btn"
                     onClick={toggleSidebar}
                     title={isCollapsed ? 'Expandir menú' : 'Colapsar menú'}
-                >
-                    <img
-                        src={hamburgerIcon}
-                        alt="menu toggle"
-                        onError={(e) => {
-                            e.target.style.display = 'none';
-                            const parent = e.target.parentElement;
-                            if (!parent.querySelector('.fallbackHamburger')) {
-                                const fallback = document.createElement('div');
-                                fallback.className = 'fallbackHamburger';
-                                fallback.innerHTML = `
-                  <div style="width: 20px; height: 2px; background: white; margin: 4px 0;"></div>
-                  <div style="width: 20px; height: 2px; background: white; margin: 4px 0;"></div>
-                  <div style="width: 20px; height: 2px; background: white; margin: 4px 0;"></div>
-                `;
-                                parent.appendChild(fallback);
-                            }
-                        }}
-                    />
-                </button>
-                <div className="logo-section">
-                    {!isCollapsed ? (
-                        <div className="panel-title">Panel de Gerente </div>
-                    ) : (
-                        <img
-                            src={logoIcon}
-                            alt="Event Planner"
-                            className="logo-collapsed"
-                        />
+                    className={cn(
+                        'rounded-lg p-2 text-white/70 hover:text-white hover:bg-white/10 transition-colors',
+                        isCollapsed && 'mx-auto'
                     )}
-                </div>
+                >
+                    <MenuIcon size={18} />
+                </button>
             </div>
 
-            <nav className="sidebar-nav">
+            {/* Nav */}
+            <nav className="flex-1 overflow-y-auto py-3 space-y-0.5 px-2">
+                {/* Dashboard */}
                 <button
-                    className={`nav-item ${isActive('/gerente') ? 'active' : ''}`}
                     onClick={() => navigate('/gerente')}
                     title={isCollapsed ? 'Dashboard' : ''}
+                    className={cn(
+                        'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                        isActive('/gerente')
+                            ? 'bg-brand-600 text-white'
+                            : 'text-white/70 hover:text-white hover:bg-white/10',
+                        isCollapsed && 'justify-center'
+                    )}
                 >
-                    <img src={dashboardIcon} alt="Dashboard Icon" />
-                    {!isCollapsed && <span className="nav-text">Dashboard</span>}
+                    <LayoutDashboard size={18} className="shrink-0" />
+                    {!isCollapsed && <span>Dashboard</span>}
                 </button>
 
-                <div className="nav-group">
+                {/* Empresa (submenu) */}
+                <div>
                     <button
-                        className={`nav-item ${empresaOpen ? 'open' : ''}`}
                         onClick={handleEmpresaClick}
                         title={isCollapsed ? 'Empresa' : ''}
+                        className={cn(
+                            'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                            empresaActive
+                                ? 'bg-brand-600 text-white'
+                                : 'text-white/70 hover:text-white hover:bg-white/10',
+                            isCollapsed && 'justify-center'
+                        )}
                     >
-                        <img src={empresa} alt="Empresa Icon" />
+                        <Building2 size={18} className="shrink-0" />
                         {!isCollapsed && (
                             <>
-                                <span className="nav-text">Empresa</span>
-                                <img
-                                    src={triangulo}
-                                    alt="Triangulo Icon"
-                                    className={`expand-icon ${empresaOpen ? 'expanded' : ''}`}
-                                />
+                                <span className="flex-1 text-left">Empresa</span>
+                                <ChevronDown size={14} className={cn(
+                                    'transition-transform',
+                                    empresaOpen ? 'rotate-180' : ''
+                                )} />
                             </>
                         )}
                     </button>
 
                     {empresaOpen && !isCollapsed && (
-                        <div className="subnav">
-                            <button
-                                className={`subnav-item ${isActive('/gerente/actualizar-empresa') ? 'active' : ''}`}
-                                onClick={() => navigate('/gerente/actualizar-empresa')}
-                            >
-                                Actualizar Información
-                            </button>
-
-                            <button
-                                className={`subnav-item ${isActive('/gerente/ubicaciones') ? 'active' : ''}`}
-                                onClick={() => navigate('/gerente/ubicaciones')}
-                            >
-                                Ubicaciones
-                            </button>
-
-                            <button
-                                className={`subnav-item ${isActive('/gerente/lugares') ? 'active' : ''}`}
-                                onClick={() => navigate('/gerente/lugares')}
-                            >
-                                Lugares
-                            </button>
-
-                            <button
-                                className={`subnav-item ${isActive('/gerente/crear-organizador') ? 'active' : ''}`}
-                                onClick={() => navigate('/gerente/crear-organizador')}
-                            >
-                                Crear Organizador
-                            </button>
+                        <div className="mt-0.5 ml-9 space-y-0.5">
+                            {empresaSubItems.map(({ path, label }) => (
+                                <button
+                                    key={path}
+                                    onClick={() => navigate(path)}
+                                    className={cn(
+                                        'w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition-colors',
+                                        isActive(path)
+                                            ? 'bg-brand-500/30 text-brand-300'
+                                            : 'text-white/60 hover:text-white hover:bg-white/10'
+                                    )}
+                                >
+                                    {label}
+                                </button>
+                            ))}
                         </div>
                     )}
                 </div>
 
+                {/* Eventos */}
                 <button
-                    className={`nav-item ${isActive('/gerente/eventos') ? 'active' : ''}`}
                     onClick={() => navigate('/gerente/eventos')}
                     title={isCollapsed ? 'Eventos' : ''}
+                    className={cn(
+                        'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                        isActive('/gerente/eventos')
+                            ? 'bg-brand-600 text-white'
+                            : 'text-white/70 hover:text-white hover:bg-white/10',
+                        isCollapsed && 'justify-center'
+                    )}
                 >
-                    <img src={calendarEvento} alt="Evento Icon" />
-                    {!isCollapsed && <span className="nav-text">Eventos</span>}
+                    <CalendarDays size={18} className="shrink-0" />
+                    {!isCollapsed && <span>Eventos</span>}
                 </button>
             </nav>
 
-            <div className="sidebar-footer">
+            {/* Logout */}
+            <div className="px-2 py-3 border-t border-white/10 shrink-0">
                 <button
-                    className="logout-btn"
                     onClick={handleLogout}
                     title="Cerrar Sesión"
+                    className={cn(
+                        'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/70 hover:text-white hover:bg-rose-500/20 transition-colors',
+                        isCollapsed && 'justify-center'
+                    )}
                 >
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="logout-icon">
-                        <path d="M13 3h3a2 2 0 012 2v10a2 2 0 01-2 2h-3M8 16l-5-5 5-5M3 11h11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+                    <LogOut size={18} className="shrink-0" />
                     {!isCollapsed && <span>Cerrar Sesión</span>}
                 </button>
             </div>

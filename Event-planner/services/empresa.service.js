@@ -1,4 +1,4 @@
-const { Empresa, Usuario, AdministradorEmpresa } = require('../models');
+const { Empresa, Usuario, AdministradorEmpresa, Asistente, Pais, Ciudad, sequelize } = require('../models');
 const { MENSAJES, ESTADOS, ROLES } = require('../constants/empresa.constants');
 
 class EmpresaService {
@@ -32,11 +32,40 @@ class EmpresaService {
     async crear(datos, rol, usuarioId) {
         const estado = rol === 'asistente' ? ESTADOS.PENDIENTE : ESTADOS.ACTIVO;
 
+        // [BACKEND-FIX] B3: Whitelist de campos para prevenir mass-assignment
+        const camposPermitidos = ['nit', 'nombre', 'direccion', 'telefono', 'correo', 'id_pais', 'id_ciudad'];
+        const datosFiltrados = {};
+        camposPermitidos.forEach(campo => {
+            if (datos[campo] !== undefined) {
+                datosFiltrados[campo] = datos[campo];
+            }
+        });
+
         const empresaData = {
-            ...datos,
+            ...datosFiltrados,
             estado,
             ...(rol === 'asistente' && { id_creador: usuarioId })
         };
+
+        // [BACKEND-FIX] B11: Validar existencia de FK y unicidad de NIT antes de crear
+        if (datosFiltrados.id_pais) {
+            const pais = await Pais.findByPk(datosFiltrados.id_pais);
+            if (!pais) {
+                throw new Error('El país especificado no existe');
+            }
+        }
+        if (datosFiltrados.id_ciudad) {
+            const ciudad = await Ciudad.findByPk(datosFiltrados.id_ciudad);
+            if (!ciudad) {
+                throw new Error('La ciudad especificada no existe');
+            }
+        }
+        if (datosFiltrados.nit) {
+            const empresaExistente = await Empresa.findOne({ where: { nit: datosFiltrados.nit } });
+            if (empresaExistente) {
+                throw new Error('Ya existe una empresa registrada con este NIT');
+            }
+        }
 
         const empresa = await Empresa.create(empresaData);
 
@@ -62,8 +91,17 @@ class EmpresaService {
             };
         }
 
+        // [BACKEND-FIX] B3: Whitelist de campos para prevenir mass-assignment
+        const camposPermitidos = ['nit', 'nombre', 'direccion', 'telefono', 'correo', 'id_pais', 'id_ciudad'];
+        const datosFiltrados = {};
+        camposPermitidos.forEach(campo => {
+            if (datos[campo] !== undefined) {
+                datosFiltrados[campo] = datos[campo];
+            }
+        });
+
         const datosAnteriores = { ...empresa.toJSON() };
-        await empresa.update(datos);
+        await empresa.update(datosFiltrados);
 
         return {
             exito: true,
@@ -118,6 +156,20 @@ class EmpresaService {
         });
     }
 
+    async obtenerAprobadas() {
+        return await Empresa.findAll({
+            where: { estado: ESTADOS.ACTIVO },
+            order: [['id', 'DESC']]
+        });
+    }
+
+    async obtenerRechazadas() {
+        return await Empresa.findAll({
+            where: { estado: ESTADOS.RECHAZADO },
+            order: [['id', 'DESC']]
+        });
+    }
+
     async procesarAprobacion(id, aprobar, motivo) {
         const empresa = await Empresa.findByPk(id);
 
@@ -137,15 +189,37 @@ class EmpresaService {
             };
         }
 
-        const nuevoEstado = aprobar ? ESTADOS.ACTIVO : ESTADOS.RECHAZADO;
-        await empresa.update({ estado: nuevoEstado });
+        // [BACKEND-FIX] B12: Coerción booleana explícita para evitar que "false" (string) sea truthy
+        const aprobado = aprobar === true || aprobar === 'true';
+        const nuevoEstado = aprobado ? ESTADOS.ACTIVO : ESTADOS.RECHAZADO;
 
         let creador = null;
-        if (empresa.id_creador) {
-            creador = await Usuario.findByPk(empresa.id_creador);
-        }
 
-        const mensaje = aprobar ? MENSAJES.APROBADA : MENSAJES.RECHAZADA;
+        await sequelize.transaction(async (t) => {
+            await empresa.update({ estado: nuevoEstado }, { transaction: t });
+
+            if (empresa.id_creador) {
+                creador = await Usuario.findByPk(empresa.id_creador, { transaction: t });
+            }
+
+            // Ascender al asistente a gerente cuando la empresa es aprobada
+            if (aprobado && empresa.id_creador) {
+                // Eliminar la fila de Asistente
+                await Asistente.destroy({
+                    where: { id_usuario: empresa.id_creador },
+                    transaction: t
+                });
+
+                // Registrar como gerente de la empresa recién aprobada
+                await AdministradorEmpresa.create({
+                    id_usuario: empresa.id_creador,
+                    id_empresa: empresa.id,
+                    es_Gerente: ROLES.GERENTE
+                }, { transaction: t });
+            }
+        });
+
+        const mensaje = aprobado ? MENSAJES.APROBADA : MENSAJES.RECHAZADA;
 
         return {
             exito: true,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import CrearEncuestaModal from './CrearEncuestaModal';
 
 const EditarEncuestaModal = ({
@@ -44,6 +44,7 @@ const EditarEncuestaModal = ({
     };
 
     // Validar si se pueden editar ciertos campos según el estado
+    // eslint-disable-next-line no-unused-vars
     const getCamposEditablesSegunEstado = () => {
         const camposDisponibles = [...camposEditables];
 

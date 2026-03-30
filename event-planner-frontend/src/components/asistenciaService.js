@@ -46,4 +46,5 @@ class AsistenciaService {
     }
 }
 
-export default new AsistenciaService();
+const asistenciaService = new AsistenciaService();
+export default asistenciaService;

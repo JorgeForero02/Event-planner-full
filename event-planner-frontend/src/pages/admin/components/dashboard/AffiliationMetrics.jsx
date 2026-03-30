@@ -1,4 +1,8 @@
-import styles from '../../admin.module.css';
+import React from 'react';
+import { Card, CardHeader, CardTitle, CardContent } from '../../../../components/ui/card';
+import { Button } from '../../../../components/ui/button';
+import { RefreshCw, AlertCircle, Building2, Clock, CheckCircle2, XCircle } from 'lucide-react';
+import { cn } from '../../../../lib/utils';
 
 const AffiliationMetrics = ({
   data,
@@ -8,58 +12,40 @@ const AffiliationMetrics = ({
 }) => {
   if (loading) {
     return (
-      <div className={`${styles.card} ${styles.affiliationCard}`}>
-        <div className={styles.cardHeader}>
-          <h3 className={styles.cardTitle}>Gestión de Afiliaciones</h3>
-          <button className={styles.refreshBtn} disabled>⏳</button>
-        </div>
-        <div className={styles.cardContent}>
-          <div className={styles.loading}>
-            <div className={styles.loadingSpinner}></div>
-            <p>Cargando datos de afiliaciones...</p>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+          <CardTitle className="text-xl font-bold">Gestión de Afiliaciones</CardTitle>
+          <Button variant="ghost" size="icon" disabled>
+            <RefreshCw className="h-4 w-4 animate-spin text-slate-500" />
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center justify-center py-10">
+            <RefreshCw className="h-8 w-8 animate-spin text-brand-600 mb-4" />
+            <p className="text-slate-500 font-medium">Cargando datos de afiliaciones...</p>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     );
   }
 
-  if (error) {
+  if (error || !data) {
     return (
-      <div className={`${styles.card} ${styles.affiliationCard}`}>
-        <div className={styles.cardHeader}>
-          <h3 className={styles.cardTitle}>Gestión de Afiliaciones</h3>
-          <button className={styles.refreshBtn} onClick={onRefresh}>🔄</button>
-        </div>
-        <div className={styles.cardContent}>
-          <div className={styles.errorContainer}>
-            <div className={styles.errorIcon}>⚠️</div>
-            <p className={styles.error}>{error}</p>
-            <button className={styles.retryButton} onClick={onRefresh}>
-              Reintentar
-            </button>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+          <CardTitle className="text-xl font-bold">Gestión de Afiliaciones</CardTitle>
+          <Button variant="ghost" size="icon" onClick={onRefresh}>
+            <RefreshCw className="h-4 w-4 text-slate-500" />
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col items-center justify-center py-10 bg-red-50 rounded-xl border border-red-100">
+            <AlertCircle className="h-10 w-10 text-red-500 mb-4" />
+            <p className="text-red-600 font-medium mb-4">{error || 'Datos no disponibles'}</p>
+            <Button variant="outline" onClick={onRefresh}>Reintentar</Button>
           </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!data) {
-    return (
-      <div className={`${styles.card} ${styles.affiliationCard}`}>
-        <div className={styles.cardHeader}>
-          <h3 className={styles.cardTitle}>Gestión de Afiliaciones</h3>
-          <button className={styles.refreshBtn} onClick={onRefresh}>🔄</button>
-        </div>
-        <div className={styles.cardContent}>
-          <div className={styles.errorContainer}>
-            <div className={styles.errorIcon}>📊</div>
-            <p className={styles.error}>Datos no disponibles</p>
-            <button className={styles.retryButton} onClick={onRefresh}>
-              Reintentar
-            </button>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -76,78 +62,108 @@ const AffiliationMetrics = ({
   };
 
   return (
-    <div className={`${styles.card} ${styles.affiliationCard}`}>
-      <div className={styles.cardHeader}>
-        <div className={styles.cardTitleSection}>
-          <h3 className={styles.cardTitle}>Gestión de Afiliaciones</h3>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between bg-slate-50 border-b border-slate-100 pb-4">
+        <div>
+          <CardTitle className="text-xl font-bold text-slate-800">Gestión de Afiliaciones</CardTitle>
         </div>
-        <button
-          className={styles.refreshBtn}
+        <Button
+          variant="outline"
+          size="icon"
           onClick={onRefresh}
           title="Actualizar datos"
         >
-          🔄
-        </button>
-      </div>
+          <RefreshCw className="h-4 w-4 text-slate-600" />
+        </Button>
+      </CardHeader>
 
-      <div className={styles.cardContent}>
-        <div className={styles.affiliationDashboard}>
-          <div className={styles.statsGrid}>
-            <StatCard
-              type="pending"
-              count={pendientes}
-              label="Pendientes"
-              percentage={calculatePercentage(pendientes)}
-              icon="⏳"
-            />
+      <CardContent className="pt-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <StatCard
+            type="pending"
+            count={pendientes}
+            label="Pendientes"
+            percentage={calculatePercentage(pendientes)}
+            icon={<Clock className="w-5 h-5" />}
+          />
 
-            <StatCard
-              type="approved"
-              count={aprobadas}
-              label="Aprobadas"
-              percentage={calculatePercentage(aprobadas)}
-              icon="✅"
-            />
+          <StatCard
+            type="approved"
+            count={aprobadas}
+            label="Aprobadas"
+            percentage={calculatePercentage(aprobadas)}
+            icon={<CheckCircle2 className="w-5 h-5" />}
+          />
 
-            <StatCard
-              type="rejected"
-              count={rechazadas}
-              label="Rechazadas"
-              percentage={calculatePercentage(rechazadas)}
-              icon="❌"
-            />
-          </div>
+          <StatCard
+            type="rejected"
+            count={rechazadas}
+            label="Rechazadas"
+            percentage={calculatePercentage(rechazadas)}
+            icon={<XCircle className="w-5 h-5" />}
+          />
+        </div>
 
-          <div className={styles.totalSection}>
-            <div className={styles.totalCard}>
-              <div className={styles.totalInfo}>
-                <div className={styles.totalLabel}>Total Empresas</div>
-                <div className={styles.totalNumber}>{totalEmpresas}</div>
-              </div>
+        <div className="bg-slate-50 rounded-xl p-6 border border-slate-100 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-white rounded-lg shadow-sm">
+              <Building2 className="w-6 h-6 text-brand-600" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-500">Total Empresas Registradas</p>
+              <p className="text-2xl font-bold text-slate-800">{totalEmpresas}</p>
             </div>
           </div>
         </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+const StatCard = ({ type, count, label, percentage, icon }) => {
+  const styles = {
+    pending: {
+      bg: 'bg-amber-50 border-amber-100',
+      text: 'text-amber-700',
+      iconBg: 'bg-amber-100',
+      bar: 'bg-amber-500'
+    },
+    approved: {
+      bg: 'bg-emerald-50 border-emerald-100',
+      text: 'text-emerald-700',
+      iconBg: 'bg-emerald-100',
+      bar: 'bg-emerald-500'
+    },
+    rejected: {
+      bg: 'bg-rose-50 border-rose-100',
+      text: 'text-rose-700',
+      iconBg: 'bg-rose-100',
+      bar: 'bg-rose-500'
+    }
+  };
+
+  const currentStyle = styles[type];
+
+  return (
+    <div className={cn("rounded-xl border p-5 flex flex-col gap-4 transition-transform hover:-translate-y-1", currentStyle.bg)}>
+      <div className="flex justify-between items-start">
+        <div>
+          <p className="text-4xl font-bold text-slate-800 mb-1">{count}</p>
+          <p className={cn("text-sm font-semibold uppercase tracking-wider", currentStyle.text)}>{label}</p>
+        </div>
+        <div className={cn("p-2 rounded-lg", currentStyle.iconBg, currentStyle.text)}>
+          {icon}
+        </div>
+      </div>
+      
+      <div className="w-full bg-white/60 rounded-full h-2.5 overflow-hidden">
+        <div
+          className={cn("h-full rounded-full [width:var(--bar-w)]", currentStyle.bar)}
+          style={{ '--bar-w': `${percentage}%` }}
+        />
       </div>
     </div>
   );
 };
-
-const StatCard = ({ type, count, label, percentage, icon }) => (
-  <div className={`${styles.statCard} ${styles[`${type}Stat`]}`}>
-    <div className={styles.statHeader}>
-      <div className={styles.statIcon}>{icon}</div>
-      <div className={styles.statInfo}>
-        <div className={styles.statNumber}>{count}</div>
-        <div className={styles.statLabel}>{label}</div>
-      </div>
-    </div>
-    <div className={styles.statProgress}>
-      <div
-        className={styles.progressBar}
-        style={{ width: `${percentage}%` }}
-      ></div>
-    </div>
-  </div>
-);
 
 export default AffiliationMetrics;

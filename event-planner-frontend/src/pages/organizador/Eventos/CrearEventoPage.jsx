@@ -2,15 +2,19 @@ import React from "react";
 import {
     Calendar,
     Building2,
-    CheckCircle,
+    CheckCircle2,
     AlertCircle,
     ArrowLeft,
     Save,
 } from "lucide-react";
 
 import Sidebar from "../Sidebar";
-import "./CrearEventoPage.css";
 import { useEvento } from "../../../components/useCrearEvento";
+import { Button } from "../../../components/ui/button";
+import { Input } from "../../../components/ui/input";
+import { Label } from "../../../components/ui/label";
+import { Alert, AlertDescription } from "../../../components/ui/alert";
+import { cn } from "../../../lib/utils";
 
 const CrearEventoPage = () => {
     const {
@@ -32,10 +36,11 @@ const CrearEventoPage = () => {
 
     if (loading) {
         return (
-            <div className="crear-evento-page">
-                <div className="loading-container">
-                    <div className="spinner"></div>
-                    <p>Cargando información...</p>
+            <div className="flex min-h-screen bg-slate-50">
+                <Sidebar />
+                <div className="flex-1 flex flex-col items-center justify-center gap-3 ml-[280px]">
+                    <div className="h-8 w-8 rounded-full border-4 border-brand-600 border-t-transparent animate-spin" />
+                    <p className="text-slate-500 text-sm">Cargando información...</p>
                 </div>
             </div>
         );
@@ -43,29 +48,24 @@ const CrearEventoPage = () => {
 
     if (!empresa) {
         return (
-            <div className="crear-evento-page">
-                <div className="crear-evento-container">
-                    <div className="error-container">
-                        <AlertCircle size={64} color="#dc3545" />
-                        <h2>Error al Cargar Información</h2>
-                        <p>No se pudo obtener la información de tu empresa.</p>
+            <div className="flex min-h-screen bg-slate-50">
+                <Sidebar />
+                <div className="flex-1 flex items-center justify-center p-6 ml-[280px]">
+                    <div className="bg-white rounded-2xl border border-slate-200 shadow-card p-10 max-w-md w-full text-center space-y-4">
+                        <AlertCircle size={64} className="mx-auto text-rose-500" />
+                        <h2 className="text-xl font-semibold text-slate-800">Error al Cargar Información</h2>
+                        <p className="text-slate-500 text-sm">No se pudo obtener la información de tu empresa.</p>
 
                         {mensaje?.texto && (
-                            <div className={`mensaje-alert alert-error`}>
+                            <div className="flex items-center gap-2 rounded-lg bg-rose-50 border border-rose-200 px-4 py-3 text-sm text-rose-700">
+                                <AlertCircle size={16} className="shrink-0" />
                                 <span>{mensaje.texto}</span>
                             </div>
                         )}
 
-                        <div className="error-actions">
-                            <button onClick={handleVolver} className="btn-cancelar-crear">
-                                Volver
-                            </button>
-                            <button
-                                onClick={() => window.location.reload()}
-                                className="btn-submit-crear"
-                            >
-                                Reintentar
-                            </button>
+                        <div className="flex justify-center gap-3 pt-2">
+                            <Button variant="outline" onClick={handleVolver}>Volver</Button>
+                            <Button onClick={() => window.location.reload()}>Reintentar</Button>
                         </div>
                     </div>
                 </div>
@@ -101,64 +101,68 @@ const CrearEventoPage = () => {
     };
 
     return (
-        <div className="crear-evento-page">
+        <div className="flex min-h-screen bg-slate-50">
             <Sidebar />
 
-            <div className="crear-evento-container">
+            <div className="flex-1 overflow-auto p-6 ml-[280px]">
+                <div className="max-w-2xl mx-auto">
 
-                <div className="page-header-crear">
-                    <button onClick={handleVolver} className="btn-back">
+                {/* Header */}
+                <div className="flex items-center gap-3 mb-6">
+                    <button
+                        onClick={handleVolver}
+                        className="rounded-lg p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                        aria-label="Volver"
+                    >
                         <ArrowLeft size={20} />
                     </button>
-                    <div className="header-content-crear">
-                        <Calendar size={28} className="header-icon" />
-                        <h1 className="page-title-crear">Crear Nuevo Evento</h1>
+                    <div className="flex items-center gap-2">
+                        <Calendar size={24} className="text-brand-600" />
+                        <h1 className="text-xl font-semibold text-slate-800">Crear Nuevo Evento</h1>
                     </div>
                 </div>
 
-                <div className="empresa-info-header">
-                    <Building2 size={20} />
+                {/* Empresa info */}
+                <div className="flex items-center gap-2 text-sm text-slate-600 bg-brand-50 border border-brand-100 rounded-lg px-4 py-3 mb-6">
+                    <Building2 size={16} className="text-brand-600 shrink-0" />
                     <span>
-                        Organizando para: <strong>{empresa.nombre}</strong>
+                        Organizando para: <strong className="text-slate-800">{empresa.nombre}</strong>
                     </span>
                 </div>
 
+                {/* Alert message */}
                 {mensaje?.texto && (
-                    <div
-                        className={`mensaje-alert ${mensaje.tipo === "exito" ? "alert-exito" : "alert-error"
-                            }`}
-                    >
-                        {mensaje.tipo === "exito" ? (
-                            <CheckCircle size={20} />
-                        ) : (
-                            <AlertCircle size={20} />
-                        )}
-                        <span>{mensaje.texto}</span>
-                    </div>
+                    <Alert variant={mensaje.tipo === 'exito' ? 'default' : 'destructive'} className="mb-6">
+                        {mensaje.tipo === 'exito'
+                            ? <CheckCircle2 size={16} />
+                            : <AlertCircle size={16} />
+                        }
+                        <AlertDescription>{mensaje.texto}</AlertDescription>
+                    </Alert>
                 )}
 
-                <form onSubmit={handleSubmit} className="form-crear-evento">
+                {/* Form */}
+                <form onSubmit={handleSubmit} className="bg-white rounded-2xl border border-slate-200 shadow-card p-6 space-y-5">
 
-                    {/* Título */}
-                    <div className="form-group-crear">
-                        <label className="form-label-crear">Nombre del Evento *</label>
-                        <input
+                    <div className="space-y-1.5">
+                        <Label htmlFor="crear-titulo">Nombre del Evento *</Label>
+                        <Input
+                            id="crear-titulo"
                             type="text"
                             value={formData.titulo}
                             onChange={(e) => handleInputChange("titulo", e.target.value)}
                             placeholder="Ej: Conferencia 2025"
-                            className="form-input-crear"
                             required
                         />
                     </div>
 
-                    {/* Modalidad */}
-                    <div className="form-group-crear">
-                        <label className="form-label-crear">Modalidad *</label>
+                    <div className="space-y-1.5">
+                        <Label htmlFor="crear-modalidad">Modalidad *</Label>
                         <select
+                            id="crear-modalidad"
                             value={formData.modalidad}
                             onChange={(e) => handleInputChange("modalidad", e.target.value)}
-                            className="form-select-crear"
+                            className="flex h-9 w-full rounded-md border border-slate-300 bg-white px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:border-brand-500"
                         >
                             <option value="Presencial">Presencial</option>
                             <option value="Virtual">Virtual</option>
@@ -166,102 +170,83 @@ const CrearEventoPage = () => {
                         </select>
                     </div>
 
-                    {/* Fechas */}
-                    <div className="form-row-crear">
-
-                        <div className="form-group-crear">
-                            <label className="form-label-crear">Fecha de Inicio *</label>
-                            <input
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                            <Label htmlFor="crear-fecha-inicio">Fecha de Inicio *</Label>
+                            <Input
+                                id="crear-fecha-inicio"
                                 type="date"
                                 value={fixDate(formData.fecha_inicio)}
-                                onChange={(e) =>
-                                    handleInputChange("fecha_inicio", e.target.value)
-                                }
-                                className="form-input-crear"
+                                onChange={(e) => handleInputChange("fecha_inicio", e.target.value)}
                                 required
                             />
                         </div>
-
-                        <div className="form-group-crear">
-                            <label className="form-label-crear">Fecha de Fin *</label>
-                            <input
+                        <div className="space-y-1.5">
+                            <Label htmlFor="crear-fecha-fin">Fecha de Fin *</Label>
+                            <Input
+                                id="crear-fecha-fin"
                                 type="date"
                                 value={fixDate(formData.fecha_fin)}
                                 onChange={(e) => handleInputChange("fecha_fin", e.target.value)}
-                                className="form-input-crear"
                                 required
                             />
                         </div>
                     </div>
 
-                    {/* HORA INICIO AGREGADA */}
-                    <div className="form-group-crear">
-                        <label className="form-label-crear">Hora de Inicio *</label>
-                        <input
+                    <div className="space-y-1.5">
+                        <Label htmlFor="crear-hora">Hora de Inicio *</Label>
+                        <Input
+                            id="crear-hora"
                             type="time"
                             value={formData.hora || ""}
                             onChange={(e) => handleHoraInicio(e.target.value)}
-                            className="form-input-crear"
                             required
                         />
                     </div>
-                    {/* Cupos */}
-                    <div className="form-group-crear">
-                        <label className="form-label-crear">Cupos</label>
-                        <input
+
+                    <div className="space-y-1.5">
+                        <Label htmlFor="crear-cupos">Cupos</Label>
+                        <Input
+                            id="crear-cupos"
                             type="number"
                             min="0"
                             value={formData.cupos || ""}
                             onChange={(e) => handleInputChange("cupos", e.target.value)}
                             placeholder="Ej: 100"
-                            className="form-input-crear"
                         />
                     </div>
 
-                    {/* Descripción adicional */}
-                    <div className="form-group-crear">
-                        <label className="form-label-crear">Descripción Adicional</label>
+                    <div className="space-y-1.5">
+                        <Label htmlFor="crear-descripcion">Descripción Adicional</Label>
                         <textarea
+                            id="crear-descripcion"
                             value={formData.descripcion}
-                            onChange={(e) =>
-                                handleInputChange("descripcion", e.target.value)
-                            }
-                            className="form-textarea-crear"
-                            rows="5"
+                            onChange={(e) => handleInputChange("descripcion", e.target.value)}
+                            rows={5}
+                            className="flex min-h-[80px] w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:border-brand-500 resize-y"
                         />
                     </div>
 
-                    {/* Botones */}
-                    <div className="form-actions-crear">
-                        <button
-                            type="button"
-                            onClick={handleVolver}
-                            className="btn-cancelar-crear"
-                        >
+                    <div className="flex justify-end gap-3 pt-2 border-t border-slate-100">
+                        <Button type="button" variant="outline" onClick={handleVolver}>
                             Cancelar
-                        </button>
-
-                        <button
-                            type="submit"
-                            disabled={enviando}
-                            className="btn-submit-crear"
-                        >
-                            <Save size={20} />
+                        </Button>
+                        <Button type="submit" disabled={enviando} className="gap-2">
+                            <Save size={16} />
                             {enviando ? "Creando..." : "Crear Evento"}
-                        </button>
+                        </Button>
                     </div>
                 </form>
+            </div>
             </div>
 
             {/* Modal Éxito */}
             {mostrarModalExito && (
-                <div className="modal-overlay">
-                    <div className="modal-exito">
-                        <CheckCircle size={48} color="#28a745" />
-                        <h2>¡Evento creado exitosamente!</h2>
-                        <button className="btn-submit-crear" onClick={handleCerrarModal}>
-                            Aceptar
-                        </button>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white rounded-2xl shadow-modal p-8 max-w-sm w-full mx-4 text-center space-y-4">
+                        <CheckCircle2 size={48} className="mx-auto text-emerald-500" />
+                        <h2 className="text-xl font-semibold text-slate-800">¡Evento creado exitosamente!</h2>
+                        <Button onClick={handleCerrarModal} className="w-full">Aceptar</Button>
                     </div>
                 </div>
             )}

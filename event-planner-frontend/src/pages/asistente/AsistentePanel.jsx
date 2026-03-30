@@ -75,7 +75,9 @@ const AsistentePanel = () => {
         cargarMisInscripciones,
         inscribirseEnEvento,
         handleRegistrarAsistencia,
-        puedeRegistrarAsistencia
+        puedeRegistrarAsistencia,
+        handleCancelarInscripcion,
+        puedeCancelar
     } = useInscriptions();
 
     const filtrarEventosPorBusqueda = (eventos) => {
@@ -433,6 +435,8 @@ const AsistentePanel = () => {
                         inscripcionRegistrando={inscripcionRegistrando}
                         handleRegistrarAsistencia={handleRegistrarAsistenciaDirecta}
                         puedeRegistrarAsistencia={puedeRegistrarAsistencia}
+                        handleCancelarInscripcion={handleCancelarInscripcion}
+                        puedeCancelar={puedeCancelar}
                         formatFecha={formatFecha}
                         formatHora={formatHora}
                         onViewEvents={() => setVistaActual('eventos')}

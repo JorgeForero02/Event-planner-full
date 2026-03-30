@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import styles from './Dashboard.module.css';
 import Calendar from '../../../../assets/calendar.png';
 import Users from '../../../../assets/person.png';
-import CheckCircle from '../../../../assets/notifications.png';
 import EventIcon from '../../../../assets/cupos.png';
 import Clock from '../../../../assets/clock.png';
 import Location from '../../../../assets/lugar.png';
@@ -86,7 +85,7 @@ const Dashboard = () => {
         }
     };
 
-    // Función para obtener actividades próximas
+    // eslint-disable-next-line no-unused-vars
     const obtenerActividadesProximas = async () => {
         if (misInscripciones.length === 0) return;
 

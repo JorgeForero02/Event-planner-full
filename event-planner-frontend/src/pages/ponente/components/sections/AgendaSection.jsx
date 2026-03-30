@@ -15,8 +15,8 @@ const AgendaSection = ({ evento }) => {
         if (evento) {
             loadAgendaEvento();
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [evento]);
-
     const loadAgendaEvento = async () => {
         try {
             const actividades = await cargarAgendaPorEvento(evento.id);

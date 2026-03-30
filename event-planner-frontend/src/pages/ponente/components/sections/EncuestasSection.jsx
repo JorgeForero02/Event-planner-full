@@ -16,16 +16,15 @@ const EncuestasSection = ({ eventos = [], ponenteId }) => {
     const [showEstadisticasModal, setShowEstadisticasModal] = useState(false);
     const [encuestaSeleccionada, setEncuestaSeleccionada] = useState(null);
     const [alerta, setAlerta] = useState(null);
+    // eslint-disable-next-line no-unused-vars
     const [isRefreshing, setIsRefreshing] = useState(false);
 
     const {
         encuestas,
         loading,
         error,
-        enviando,
         obtenerEncuestasPorEvento,
         obtenerEncuestasPorActividad,
-        obtenerTodasEncuestas,
         crearEncuesta,
         actualizarEncuesta,
         eliminarEncuesta,
@@ -33,7 +32,6 @@ const EncuestasSection = ({ eventos = [], ponenteId }) => {
         filtrarPorTipo,
         filtrarPorEstado,
         obtenerEstadisticasGenerales,
-        verificarEncuestaExistente
     } = useEncuestasPonente();
 
     const actividadesFiltradas = useMemo(() => {
@@ -68,6 +66,7 @@ const EncuestasSection = ({ eventos = [], ponenteId }) => {
         if (!ponenteId) {
             console.error('No se recibió ponenteId');
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ponenteId]);
 
     const cargarEncuestas = async () => {
@@ -89,8 +88,8 @@ const EncuestasSection = ({ eventos = [], ponenteId }) => {
 
     useEffect(() => {
         cargarEncuestas();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedEvento, selectedActividad]);
-
     const encuestasFiltradas = useMemo(() => {
         let filtradas = encuestas;
 
@@ -199,12 +198,14 @@ const EncuestasSection = ({ eventos = [], ponenteId }) => {
             const response = await enviarEncuestaMasiva(encuestaId);
 
             if (response.success) {
+                // eslint-disable-next-line no-unused-vars
                 const totalEnviadas = response.data?.data?.total_enviadas || 0;
                 const asistentes = response.data?.data?.asistentes || [];
 
                 let mensaje = `Encuesta enviada`;
 
                 if (asistentes.length > 0) {
+                    // eslint-disable-next-line no-unused-vars
                     const nombres = asistentes.map(a => a.nombre).join(', ');
                     mensaje = `Encuesta enviada`;
                 }

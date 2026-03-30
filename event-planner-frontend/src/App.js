@@ -5,6 +5,11 @@ import Dashboard from './components/Dashboard';
 import Admin from './pages/admin/admin';
 import PrivateRoute from './components/PrivateRoute';
 import AdminRoute from './components/AdminRoute';
+// [FRONTEND-SYNC] F2: Importar nuevos route guards por rol
+import GerenteRoute from './components/GerenteRoute';
+import OrganizadorRoute from './components/OrganizadorRoute';
+import PonenteRoute from './components/PonenteRoute';
+import AsistenteRoute from './components/AsistenteRoute';
 import Empresa from './pages/empresa/empresa';
 import AdminLogin from './pages/AdminLogin';
 import Register from './pages/auth/register';
@@ -65,63 +70,63 @@ function App() {
             }
           />
 
-          {/* Rutas de Gerente */}
+          {/* Rutas de Gerente — protegidas por GerenteRoute (F2) */}
           <Route
             path="/gerente"
             element={
-              <PrivateRoute>
+              <GerenteRoute>
                 <GerenteDashboard />
-              </PrivateRoute>
+              </GerenteRoute>
             }
           />
           <Route
             path="/gerente/crear-organizador"
             element={
-              <PrivateRoute>
+              <GerenteRoute>
                 <CrearOrganizadorContainer />
-              </PrivateRoute>
+              </GerenteRoute>
             }
           />
           <Route
             path="/gerente/ubicaciones"
             element={
-              <PrivateRoute>
+              <GerenteRoute>
                 <UbicacionesContainer />
-              </PrivateRoute>
+              </GerenteRoute>
             }
           />
           <Route
             path="/gerente/lugares"
             element={
-              <PrivateRoute>
+              <GerenteRoute>
                 <LugaresContainer />
-              </PrivateRoute>
+              </GerenteRoute>
             }
           />
           <Route
             path="/gerente/eventos"
             element={
-              <PrivateRoute>
+              <GerenteRoute>
                 <EventosContainer />
-              </PrivateRoute>
+              </GerenteRoute>
             }
           />
           <Route
             path="/gerente/actualizar-empresa"
             element={
-              <PrivateRoute>
+              <GerenteRoute>
                 <ActualizarEmpresa />
-              </PrivateRoute>
+              </GerenteRoute>
             }
           />
 
-          {/* Rutas para Asistente - CORREGIDAS */}
+          {/* Rutas para Asistente — protegidas por AsistenteRoute (F2) */}
           <Route
             path="/asistente/*"
             element={
-              <PrivateRoute>
+              <AsistenteRoute>
                 <Asistente />
-              </PrivateRoute>
+              </AsistenteRoute>
             }
           />
 
@@ -129,43 +134,51 @@ function App() {
           <Route
             path="/asistente/dashboard"
             element={
-              <PrivateRoute>
+              <AsistenteRoute>
                 <Asistente />
-              </PrivateRoute>
+              </AsistenteRoute>
             }
           />
           <Route
             path="/asistente/eventos"
             element={
-              <PrivateRoute>
+              <AsistenteRoute>
                 <Asistente />
-              </PrivateRoute>
+              </AsistenteRoute>
             }
           />
           <Route
             path="/asistente/agenda"
             element={
-              <PrivateRoute>
+              <AsistenteRoute>
                 <Asistente />
-              </PrivateRoute>
+              </AsistenteRoute>
             }
           />
           <Route
             path="/asistente/inscripciones"
             element={
-              <PrivateRoute>
+              <AsistenteRoute>
                 <Asistente />
-              </PrivateRoute>
+              </AsistenteRoute>
+            }
+          />
+          <Route
+            path="/asistente/empresa"
+            element={
+              <AsistenteRoute>
+                <Empresa />
+              </AsistenteRoute>
             }
           />
 
-          {/* Ruta para gestión de empresa */}
+          {/* Ruta para gestión de empresa — protegidas por GerenteRoute (F2) */}
           <Route
             path="/empresa"
             element={
-              <PrivateRoute>
+              <GerenteRoute>
                 <Empresa />
-              </PrivateRoute>
+              </GerenteRoute>
             }
           />
 
@@ -173,136 +186,165 @@ function App() {
           <Route
             path="/empresa/afiliaciones-aprobadas"
             element={
-              <PrivateRoute>
+              <GerenteRoute>
                 <AfiliacionesAprobadas />
-              </PrivateRoute>
+              </GerenteRoute>
             }
           />
           <Route
             path="/empresa/afiliaciones-pendientes"
             element={
-              <PrivateRoute>
+              <GerenteRoute>
                 <AfiliacionesPendientes />
-              </PrivateRoute>
+              </GerenteRoute>
             }
           />
           <Route
             path="/empresa/afiliaciones-rechazadas"
             element={
-              <PrivateRoute>
+              <GerenteRoute>
                 <AfiliacionesRechazadas />
-              </PrivateRoute>
+              </GerenteRoute>
             }
           />
 
-          {/*Rutas Organizador)*/}
+          {/* Rutas Organizador — protegidas por OrganizadorRoute (F1+F2) */}
           <Route
             path="/organizador"
             element={
-              <PrivateRoute>
+              <OrganizadorRoute>
                 <OrganizerDashboard />
-              </PrivateRoute>
+              </OrganizadorRoute>
             }
           />
-          <Route path="/organizador/eventos" element={<EventosPageOrganizador />} />
-          <Route path="/organizador/eventos/crear" element={<CrearEventoPage />} />
-          <Route path="/organizador/eventos/editar/:id" element={<EditarEventoPage />} />
-          <Route path="/organizador/eventos/:eventoId/agenda" element={<GestionarAgendaPage />} />
+          <Route
+            path="/organizador/eventos"
+            element={
+              <OrganizadorRoute>
+                <EventosPageOrganizador />
+              </OrganizadorRoute>
+            }
+          />
+          <Route
+            path="/organizador/eventos/crear"
+            element={
+              <OrganizadorRoute>
+                <CrearEventoPage />
+              </OrganizadorRoute>
+            }
+          />
+          <Route
+            path="/organizador/eventos/editar/:id"
+            element={
+              <OrganizadorRoute>
+                <EditarEventoPage />
+              </OrganizadorRoute>
+            }
+          />
+          <Route
+            path="/organizador/eventos/:eventoId/agenda"
+            element={
+              <OrganizadorRoute>
+                <GestionarAgendaPage />
+              </OrganizadorRoute>
+            }
+          />
           <Route
             path="/organizador/eventos/:eventoId/actividades/crear"
-            element={<CrearActividadPage />}
+            element={
+              <OrganizadorRoute>
+                <CrearActividadPage />
+              </OrganizadorRoute>
+            }
           />
-
           <Route
             path="/organizador/actividades/:idActividad/editar"
-            element={<EditarActividadPage />}
+            element={
+              <OrganizadorRoute>
+                <EditarActividadPage />
+              </OrganizadorRoute>
+            }
           />
-
-
           <Route
             path="/organizador/agenda"
-            element={<ActividadesPage />}
+            element={
+              <OrganizadorRoute>
+                <ActividadesPage />
+              </OrganizadorRoute>
+            }
           />
-
           <Route
             path="/organizador/reportes"
             element={
-              <PrivateRoute>
+              <OrganizadorRoute>
                 <EstadisticasAsistencia />
-              </PrivateRoute>
+              </OrganizadorRoute>
             }
           />
-
           <Route
             path="/organizador/encuestas"
             element={
-              <PrivateRoute>
+              <OrganizadorRoute>
                 <EncuestasManager />
-              </PrivateRoute>
+              </OrganizadorRoute>
             }
           />
-
           <Route
             path="/organizador/asistentes"
             element={
-              <PrivateRoute>
+              <OrganizadorRoute>
                 <GestionAsistentes />
-              </PrivateRoute>
+              </OrganizadorRoute>
             }
           />
-
           <Route
             path="/organizador/notificaciones"
             element={
-              <PrivateRoute>
+              <OrganizadorRoute>
                 <OrganizadorNotificaciones />
-              </PrivateRoute>
+              </OrganizadorRoute>
             }
           />
 
-          {/* Rutas Ponente */}
+          {/* Rutas Ponente — protegidas por PonenteRoute (F2) */}
           <Route
             path="/ponente"
             element={
-              <PrivateRoute>
+              <PonenteRoute>
                 <PonenteDashboard />
-              </PrivateRoute>
+              </PonenteRoute>
             }
           />
-
           <Route
             path="/ponente/dashboard"
             element={
-              <PrivateRoute>
+              <PonenteRoute>
                 <PonenteDashboard />
-              </PrivateRoute>
+              </PonenteRoute>
             }
           />
-
           <Route
             path="/ponente/eventos"
             element={
-              <PrivateRoute>
+              <PonenteRoute>
                 <PonenteDashboard />
-              </PrivateRoute>
+              </PonenteRoute>
             }
           />
-
           <Route
             path="/ponente/agenda"
             element={
-              <PrivateRoute>
+              <PonenteRoute>
                 <PonenteDashboard />
-              </PrivateRoute>
+              </PonenteRoute>
             }
           />
-
           <Route
             path="/ponente/actividades"
             element={
-              <PrivateRoute>
+              <PonenteRoute>
                 <PonenteDashboard />
-              </PrivateRoute>
+              </PonenteRoute>
             }
           />
           {/* Ruta por defecto */}

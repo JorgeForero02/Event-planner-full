@@ -14,7 +14,12 @@ const MENSAJES = {
     ERROR_CREAR: 'Error al crear el lugar',
     ERROR_ACTUALIZAR: 'Error al actualizar lugar',
     ERROR_ELIMINAR: 'Error al eliminar lugar',
-    ERROR_OBTENER: 'Error al obtener lugar'
+    ERROR_OBTENER: 'Error al obtener lugar',
+    HABILITADO: 'Sala habilitada exitosamente',
+    DESHABILITADO: 'Sala deshabilitada exitosamente',
+    TIENE_ACTIVIDADES_FUTURAS: 'No se puede deshabilitar: la sala tiene actividades asignadas en eventos futuros activos',
+    SIN_PERMISO_TOGGLE: 'No tiene permisos para cambiar el estado de esta sala',
+    ERROR_TOGGLE: 'Error al cambiar el estado de la sala'
 };
 
 const MENSAJES_VALIDACION = {

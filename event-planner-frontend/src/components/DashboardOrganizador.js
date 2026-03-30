@@ -107,8 +107,8 @@ export const useOrganizerDashboard = () => {
     useEffect(() => {
         loadUserFromStorage();
         fetchEventos();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-
     const openPasswordModal = () => {
         setShowPasswordModal(true);
         setPasswordError('');
@@ -160,7 +160,7 @@ export const useOrganizerDashboard = () => {
         setIsLoading(true);
 
         try {
-            const response = await fetch(`${API_URL}/auth/cambiar-contrasena`, {
+            const response = await fetch(`${API_URL}/auth/recuperar-contrasena`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -168,7 +168,7 @@ export const useOrganizerDashboard = () => {
                 },
                 body: JSON.stringify({
                     correo: passwordData.correo,
-                    contraseñaNueva: passwordData.contraseñaNueva
+                    contraseña: passwordData.contraseñaNueva
                 })
             });
 

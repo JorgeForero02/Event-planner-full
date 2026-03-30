@@ -17,7 +17,12 @@ const MENSAJES = {
     ENLACE_INVALIDO: 'El enlace de confirmación no es válido o ha expirado.',
     YA_CONFIRMADA: 'Ya has confirmado tu asistencia a este evento.',
     EVENTO_FINALIZADO: 'No puedes inscribirte a un evento que ya ha finalizado.',
-    CUPO_ALCANZADO_CONFIRMACION: 'Lo sentimos, mientras confirmabas, el evento ha alcanzado su cupo máximo.'
+    CUPO_ALCANZADO_CONFIRMACION: 'Lo sentimos, mientras confirmabas, el evento ha alcanzado su cupo máximo.',
+    CANCELACION_EXITOSA: 'Tu inscripción ha sido cancelada exitosamente.',
+    INSCRIPCION_NO_ENCONTRADA: 'Inscripción no encontrada.',
+    SIN_PERMISO_CANCELAR: 'No tienes permiso para cancelar esta inscripción.',
+    EVENTO_YA_INICIO: 'No puedes cancelar una inscripción de un evento que ya ha iniciado.',
+    ESTADO_NO_CANCELABLE: 'Solo se pueden cancelar inscripciones en estado Confirmada.'
 };
 
 const MENSAJES_VALIDACION = {

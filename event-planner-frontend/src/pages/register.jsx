@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { Eye, EyeOff, Mail, Lock, User, Phone, CreditCard, Briefcase } from 'lucide-react';
-import '../pages/register.css';
-import logo from '../assets/evento-remove.png';
+import { Eye, EyeOff, Mail, Lock, User, Phone, CreditCard, Briefcase, CalendarDays, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { cn } from '../lib/utils';
 
 export default function Register() {
   const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
@@ -125,198 +127,168 @@ export default function Register() {
 
   if (success) {
     return (
-      <div className="success-container">
-        <div className="success-card">
-          <div className="success-icon">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
+      <div className="min-h-screen bg-gradient-to-br from-[#142B6F] via-brand-700 to-brand-500 flex items-center justify-center">
+        <div className="bg-white rounded-2xl shadow-modal p-10 max-w-sm w-full mx-4 text-center space-y-4">
+          <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-emerald-100 text-emerald-600 mx-auto">
+            <CheckCircle2 size={32} />
           </div>
-          <h2 className="success-title">¡Registro Exitoso!</h2>
-          <p className="success-message">Tu cuenta ha sido creada. Redirigiendo al inicio de sesión...</p>
+          <h2 className="text-2xl font-bold text-slate-800">¡Registro Exitoso!</h2>
+          <p className="text-slate-500 text-sm">Tu cuenta ha sido creada. Redirigiendo al inicio de sesión...</p>
         </div>
       </div>
     );
   }
 
+  const roles = [
+    { id: 'asistente', label: 'Asistente', description: 'Participante', Icon: User },
+    { id: 'ponente',   label: 'Ponente',   description: 'Expositor',    Icon: Briefcase },
+  ];
+
+  const inputFields = [
+    { name: 'nombre',   label: 'Nombre Completo',  type: 'text',  Icon: User,        required: true },
+    { name: 'cedula',   label: 'Cédula',            type: 'text',  Icon: CreditCard,  required: true },
+    { name: 'telefono', label: 'Teléfono',          type: 'tel',   Icon: Phone,       required: false },
+    { name: 'correo',   label: 'Correo Electrónico',type: 'email', Icon: Mail,        required: true },
+  ];
+
   return (
-    <div className="register-container">
-      <div className="register-card">
-        <div className="register-header">
-          <div className="register-logo">
-            <img src={logo} alt="Logo" />
+    <div className="min-h-screen bg-gradient-to-br from-[#142B6F] via-brand-700 to-brand-500 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-modal w-full max-w-md p-8 space-y-6">
+
+        {/* Logo */}
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center h-12 w-12 rounded-xl bg-brand-100 text-brand-600 mb-2">
+            <CalendarDays size={24} />
+          </div>
+          <h1 className="text-2xl font-bold text-slate-800">Crear Cuenta</h1>
+        </div>
+
+        {/* Role selection */}
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-slate-600">Selecciona tu tipo de cuenta</p>
+          <div className="grid grid-cols-2 gap-3">
+            {roles.map(({ id, label, description, Icon }) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => handleRoleSelect(id)}
+                className={cn(
+                  'flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all text-sm font-medium',
+                  selectedRole === id
+                    ? 'border-brand-600 bg-brand-50 text-brand-700'
+                    : 'border-slate-200 text-slate-600 hover:border-brand-300 hover:bg-slate-50'
+                )}
+              >
+                <Icon size={24} />
+                <span className="font-semibold">{label}</span>
+                <span className="text-xs opacity-70">{description}</span>
+              </button>
+            ))}
           </div>
         </div>
 
-        <div className="role-selection">
-          <p className="role-selection-title">Selecciona tu tipo de cuenta</p>
-          <div className="register-role-grid">
-            <button
-              type="button"
-              onClick={() => handleRoleSelect('asistente')}
-              className={`role-button ${selectedRole === 'asistente' ? 'active' : ''}`}
-            >
-              <div className="role-icon">
-                <User />
+        {/* Form fields */}
+        <div className="space-y-4">
+          {inputFields.map(({ name, label, type, Icon, required }) => (
+            <div key={name} className="space-y-1.5">
+              <Label htmlFor={`reg-${name}`}>
+                {label}{' '}
+                {!required && <span className="text-slate-400 font-normal">(opcional)</span>}
+              </Label>
+              <div className="relative">
+                <Icon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Input
+                  id={`reg-${name}`}
+                  type={type}
+                  name={name}
+                  value={formData[name]}
+                  onChange={handleInputChange}
+                  className="pl-9"
+                  required={required}
+                />
               </div>
-              <h3 className="role-name">Asistente</h3>
-              <p className="role-description">Participante</p>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleRoleSelect('ponente')}
-              className={`role-button ${selectedRole === 'ponente' ? 'active' : ''}`}
-            >
-              <div className="role-icon">
-                <Briefcase />
-              </div>
-              <h3 className="role-name">Ponente</h3>
-              <p className="role-description">Expositor</p>
-            </button>
-          </div>
-        </div>
-
-        <div className="form-container">
-          <div className="form-group">
-            <label className="form-label">Nombre Completo</label>
-            <div className="input-wrapper">
-              <User className="input-icon" />
-              <input
-                type="text"
-                name="nombre"
-                value={formData.nombre}
-                onChange={handleInputChange}
-                className="form-input"
-              />
             </div>
-          </div>
+          ))}
 
-          <div className="form-group">
-            <label className="form-label">Cédula</label>
-            <div className="input-wrapper">
-              <CreditCard className="input-icon" />
-              <input
-                type="text"
-                name="cedula"
-                value={formData.cedula}
-                onChange={handleInputChange}
-                className="form-input"
-              />
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">
-              Teléfono <span className="optional">(opcional)</span>
-            </label>
-            <div className="input-wrapper">
-              <Phone className="input-icon" />
-              <input
-                type="tel"
-                name="telefono"
-                value={formData.telefono}
-                onChange={handleInputChange}
-                className="form-input"
-              />
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Correo Electrónico</label>
-            <div className="input-wrapper">
-              <Mail className="input-icon" />
-              <input
-                type="email"
-                name="correo"
-                value={formData.correo}
-                onChange={handleInputChange}
-                className="form-input"
-              />
-            </div>
-          </div>
-
+          {/* Ponente speciality */}
           {selectedRole === 'ponente' && (
-            <div className="form-group">
-              <label className="form-label">Especialidad</label>
-              <div className="input-wrapper">
-                <Briefcase className="input-icon" />
-                <input
+            <div className="space-y-1.5">
+              <Label htmlFor="reg-especialidad">Especialidad</Label>
+              <div className="relative">
+                <Briefcase size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Input
+                  id="reg-especialidad"
                   type="text"
                   name="especialidad"
                   value={formData.especialidad}
                   onChange={handleInputChange}
-                  className="form-input"
                   placeholder="Ej: Marketing Digital, Tecnología, etc."
+                  className="pl-9"
                 />
               </div>
             </div>
           )}
 
-          <div className="form-group">
-            <label className="form-label">Contraseña</label>
-            <div className="input-wrapper">
-              <Lock className="input-icon" />
-              <input
+          {/* Password */}
+          <div className="space-y-1.5">
+            <Label htmlFor="reg-password">Contraseña</Label>
+            <div className="relative">
+              <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Input
+                id="reg-password"
                 type={showPassword ? 'text' : 'password'}
                 name="contraseña"
                 value={formData.contraseña}
                 onChange={handleInputChange}
-                className="form-input"
+                className="pl-9 pr-10"
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="password-toggle"
-              >
-                {showPassword ? <Eye /> : <EyeOff />}
+              <button type="button" onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
               </button>
             </div>
           </div>
 
-          <div className="form-group">
-            <label className="form-label">Confirmar Contraseña</label>
-            <div className="input-wrapper">
-              <Lock className="input-icon" />
-              <input
+          {/* Confirm password */}
+          <div className="space-y-1.5">
+            <Label htmlFor="reg-confirm">Confirmar Contraseña</Label>
+            <div className="relative">
+              <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Input
+                id="reg-confirm"
                 type={showConfirmPassword ? 'text' : 'password'}
                 name="confirmarContraseña"
                 value={formData.confirmarContraseña}
                 onChange={handleInputChange}
-                className="form-input"
+                className="pl-9 pr-10"
               />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="password-toggle"
-              >
-                {showConfirmPassword ? <Eye /> : <EyeOff />}
+              <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                {showConfirmPassword ? <Eye size={16} /> : <EyeOff size={16} />}
               </button>
             </div>
           </div>
 
+          {/* Error */}
           {error && (
-            <div className="error-message">
+            <div className="flex items-center gap-2 rounded-lg bg-rose-50 border border-rose-200 px-4 py-3 text-sm text-rose-700">
+              <AlertCircle size={16} className="shrink-0" />
               <p>{error}</p>
             </div>
           )}
 
-          <button
-            type="button"
-            onClick={handleRegister}
-            disabled={loading}
-            className="submit-button"
-          >
-            {loading ? 'Registrando...' : 'Crear Cuenta'}
-          </button>
+          <Button type="button" onClick={handleRegister} disabled={loading} className="w-full">
+            {loading ? (
+              <><span className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" /> Registrando...</>
+            ) : 'Crear Cuenta'}
+          </Button>
         </div>
 
-        <div className="footer-text">
-          <p>
-            ¿Ya tienes cuenta?{' '}
-            <a href="/login">Inicia sesión aquí</a>
-          </p>
-        </div>
+        {/* Footer */}
+        <p className="text-center text-sm text-slate-500">
+          ¿Ya tienes cuenta?{' '}
+          <a href="/login" className="text-brand-600 font-medium hover:underline">Inicia sesión aquí</a>
+        </p>
       </div>
     </div>
   );

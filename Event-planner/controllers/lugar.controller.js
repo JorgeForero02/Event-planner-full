@@ -221,6 +221,49 @@ class LugarController {
         }
     }
 
+    async toggleEstadoLugar(req, res) {
+        const transaction = await LugarService.crearTransaccion();
+        try {
+            const { lugarId } = req.params;
+            const usuario = req.usuario;
+
+            const lugar = await LugarService.buscarPorId(lugarId, transaction);
+            if (!lugar) {
+                await transaction.rollback();
+                return res.status(404).json({ success: false, message: MENSAJES.NO_ENCONTRADO });
+            }
+
+            const tienePermiso = PermisosService.verificarAccesoEmpresa(
+                usuario.rol, usuario.rolData?.id_empresa, lugar.id_empresa
+            );
+            if (!tienePermiso) {
+                await transaction.rollback();
+                return res.status(403).json({ success: false, message: MENSAJES.SIN_PERMISO_TOGGLE });
+            }
+
+            const resultado = await LugarService.toggleEstado(lugarId, transaction);
+            if (!resultado.exito) {
+                await transaction.rollback();
+                return res.status(resultado.codigoEstado || 400).json({ success: false, message: resultado.mensaje });
+            }
+
+            await AuditoriaService.registrar({
+                mensaje: `Sala ${lugar.nombre} ${resultado.habilitado ? 'habilitada' : 'deshabilitada'}`,
+                tipo: 'PUT',
+                accion: resultado.habilitado ? 'habilitar_sala' : 'deshabilitar_sala',
+                usuario: { id: usuario.id, nombre: usuario.nombre }
+            });
+
+            await transaction.commit();
+            const mensaje = resultado.habilitado ? MENSAJES.HABILITADO : MENSAJES.DESHABILITADO;
+            return res.json({ success: true, message: mensaje, data: resultado.lugar });
+        } catch (error) {
+            await transaction.rollback();
+            console.error('Error al cambiar estado de sala:', error);
+            return res.status(500).json({ success: false, message: MENSAJES.ERROR_TOGGLE, error: error.message });
+        }
+    }
+
     async eliminarLugar(req, res) {
         const transaction = await LugarService.crearTransaccion();
         try {

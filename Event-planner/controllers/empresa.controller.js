@@ -174,6 +174,26 @@ class EmpresaController {
     }
   }
 
+  async getAprobadas(req, res, next) {
+    try {
+      const empresasAprobadas = await EmpresaService.obtenerAprobadas();
+
+      return ApiResponse.success(res, empresasAprobadas, MENSAJES.LISTA_OBTENIDA);
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getRechazadas(req, res, next) {
+    try {
+      const empresasRechazadas = await EmpresaService.obtenerRechazadas();
+
+      return ApiResponse.success(res, empresasRechazadas, MENSAJES.LISTA_OBTENIDA);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async aprobarEmpresa(req, res, next) {
     try {
       const { id } = req.params;

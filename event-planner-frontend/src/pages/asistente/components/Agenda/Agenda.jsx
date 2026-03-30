@@ -4,7 +4,6 @@ import Calendar from '../../../../assets/calendar.png';
 import Clock from '../../../../assets/clock.png';
 import Location from '../../../../assets/lugar.png';
 import EventIcon from '../../../../assets/evento.png';
-import SpeakerIcon from '../../../../assets/information.png';
 import { formatFecha, formatHora } from '../../utils/dateUtils';
 import agendaService from '../../../../services/agendaService';
 
@@ -114,13 +113,14 @@ const Agenda = ({ misInscripciones, onRegisterAttendance }) => {
         if (actividades.length > 0) {
             aplicarFiltros(actividades, filtroEvento);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [filtroEvento, actividades]);
 
     useEffect(() => {
         obtenerEventosInscritos();
         obtenerActividadesAgenda();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [misInscripciones, filtro]);
-
     const handleFiltroEventoChange = (event) => {
         setFiltroEvento(event.target.value);
     };

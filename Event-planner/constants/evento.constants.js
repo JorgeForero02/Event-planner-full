@@ -28,7 +28,10 @@ const MENSAJES_VALIDACION = {
     FECHAS_INVALIDAS: 'La fecha de inicio debe ser anterior a la fecha de fin',
     EMPRESA_NO_EXISTE: 'La empresa especificada no existe',
     EMPRESA_NO_APROBADA: 'Solo se pueden crear eventos en empresas aprobadas',
-    ESTADO_INVALIDO: 'Estado no válido.'
+    ESTADO_INVALIDO: 'Estado no válido.',
+    // [BACKEND-FIX] B5: Mensajes faltantes para validación de estado
+    EVENTO_CANCELADO: 'No se puede modificar un evento cancelado.',
+    EVENTO_FINALIZADO: 'No se puede modificar un evento finalizado.'
 };
 
 module.exports = {

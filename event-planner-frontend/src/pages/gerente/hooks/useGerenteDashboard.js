@@ -17,8 +17,8 @@ export const useGerenteDashboard = () => {
 
   useEffect(() => {
     initializeDashboard();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
   const initializeDashboard = async () => {
     try {
       setState(prev => ({ ...prev, loading: true, error: null }));

@@ -105,9 +105,11 @@ export default function Login() {
 
         {/* Form */}
         <form className="form" onSubmit={handleSubmit}>
-          <label>Correo Electrónico</label>
+          {/* [UI-FIX] U1: Asociar labels con inputs via htmlFor/id */}
+          <label htmlFor="login-email">Correo Electrónico</label>
           <div className="input-group">
             <input
+              id="login-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -116,9 +118,10 @@ export default function Login() {
             />
           </div>
 
-          <label>Contraseña</label>
+          <label htmlFor="login-password">Contraseña</label>
           <div className="input-group">
             <input
+              id="login-password"
               type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -136,6 +139,7 @@ export default function Login() {
           </div>
 
           <div className="form-options">
+            {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
             <a
               href="#"
               className="forgot"
@@ -156,6 +160,7 @@ export default function Login() {
         {/* Registro */}
         <p className="register-text">
           ¿No tienes cuenta?{' '}
+          {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
           <a
             href="#"
             onClick={(e) => {

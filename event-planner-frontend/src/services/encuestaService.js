@@ -251,7 +251,7 @@ class EncuestaService extends BaseService {
         try {
             console.log('🔍 encuestaService.obtenerEventosConActividades - Iniciando');
 
-            const response = await this.fetch('/ponente-actividad/eventos-con-actividades');
+            const response = await this.fetch('/eventos');
 
             console.log('✅ Eventos con actividades obtenidos:', response);
 
@@ -260,7 +260,7 @@ class EncuestaService extends BaseService {
                 response.data = response.data.map(evento => ({
                     ...evento,
                     actividades: evento.actividades ? evento.actividades.map(actividad => ({
-                        id: actividad.id_actividad, // ¡IMPORTANTE!
+                        id: actividad.id_actividad,
                         id_actividad: actividad.id_actividad,
                         titulo: actividad.titulo,
                         fecha_actividad: actividad.fecha_actividad,

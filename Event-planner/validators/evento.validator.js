@@ -53,7 +53,8 @@ class EventoValidator {
         return { esValida: true };
     }
 
-    validarActualizacion(datos) {
+    // [BACKEND-FIX] B13: Aceptar evento actual para cruzar fechas parciales
+    validarActualizacion(datos, eventoActual = {}) {
         const { titulo, modalidad, fecha_inicio, fecha_fin } = datos;
 
         if (titulo !== undefined && (!titulo || titulo.trim().length < 3)) {
@@ -64,15 +65,21 @@ class EventoValidator {
             return MENSAJES_VALIDACION.MODALIDAD_INVALIDA;
         }
 
-        if (fecha_inicio && fecha_fin && new Date(fecha_inicio) > new Date(fecha_fin)) {
+        // Usar fecha del request o la actual del evento para validación cruzada
+        const fechaInicioEfectiva = fecha_inicio || eventoActual.fecha_inicio;
+        const fechaFinEfectiva = fecha_fin || eventoActual.fecha_fin;
+
+        if (fechaInicioEfectiva && fechaFinEfectiva &&
+            new Date(fechaInicioEfectiva) > new Date(fechaFinEfectiva)) {
             return MENSAJES_VALIDACION.FECHAS_INVALIDAS;
         }
 
         return null;
     }
 
+    // [BACKEND-FIX] B5: Corregido ESTADOS.includes() → Object.values(ESTADOS).includes()
     validarEstado(estadoActual, nuevoEstado) {
-        if (!ESTADOS.includes(nuevoEstado)) {
+        if (nuevoEstado !== undefined && !Object.values(ESTADOS).includes(nuevoEstado)) {
             return MENSAJES_VALIDACION.ESTADO_INVALIDO;
         }
 

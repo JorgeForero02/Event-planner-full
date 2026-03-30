@@ -1,69 +1,62 @@
 import React from 'react';
-import { Pencil, Trash2 } from 'lucide-react';
-import styles from '../../styles/ubicaciones.module.css';
+import { Pencil, Power, PowerOff } from 'lucide-react';
 
-const LocationsList = ({ ubicaciones, onEdit, onDelete }) => {
-    console.log('📊 Datos de ubicaciones recibidos:', ubicaciones);
+const LocationsList = ({ ubicaciones, onEdit, onToggle }) => {
+    const getCiudadNombre = (ubicacion) =>
+        ubicacion.ciudad_nombre || ubicacion.ciudad?.nombre || ubicacion.nombre_ciudad || ubicacion.ciudad || 'Sin ciudad';
 
-    if (ubicaciones.length > 0) {
-        console.log('🔍 Estructura completa de la primera ubicación:');
-        Object.keys(ubicaciones[0]).forEach(key => {
-            console.log(`   ${key}:`, ubicaciones[0][key]);
-        });
-    }
+    const getDescripcion = (ubicacion) =>
+        ubicacion.descripcion || ubicacion.detalles || ubicacion.descripcion_lugar || 'Sin descripción';
 
-    const getCiudadNombre = (ubicacion) => {
-        return ubicacion.ciudad_nombre ||
-            ubicacion.ciudad?.nombre ||
-            ubicacion.nombre_ciudad ||
-            ubicacion.ciudad ||
-            'Sin ciudad';
-    };
-
-    const getDescripcion = (ubicacion) => {
-        return ubicacion.descripcion ||
-            ubicacion.detalles ||
-            ubicacion.descripcion_lugar ||
-            'Sin descripción';
-    };
+    const isActivo = (ubicacion) => ubicacion.activo === undefined || ubicacion.activo === 1 || ubicacion.activo === true;
 
     return (
-        <div className={styles.tableContainer}>
-            <table className={styles.ubicacionesTable}>
+        <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-card">
+            <table className="w-full text-sm">
                 <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Dirección</th>
-                        <th>Descripción</th>
-                        <th>Ciudad</th>
-                        <th>Acciones</th>
+                    <tr className="border-b border-slate-200 bg-slate-50">
+                        {['Nombre', 'Dirección', 'Descripción', 'Ciudad', 'Estado', 'Acciones'].map((h) => (
+                            <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">{h}</th>
+                        ))}
                     </tr>
                 </thead>
-                <tbody>
-                    {ubicaciones.map((ubicacion, index) => (
-                        <tr key={ubicacion.id || index}>
-                            <td>{ubicacion.lugar || ubicacion.nombre || ubicacion.lugar_nombre}</td>
-                            <td>{ubicacion.direccion || 'Sin dirección'}</td>
-                            <td>{getDescripcion(ubicacion)}</td>
-                            <td>{getCiudadNombre(ubicacion)}</td>
-                            <td className={styles.actionsCell}>
-                                <button
-                                    className={styles.btnIcon}
-                                    title="Editar"
-                                    onClick={() => onEdit(ubicacion)}
-                                >
-                                    <Pencil size={18} />
-                                </button>
-                                <button
-                                    className={`${styles.btnIcon} ${styles.btnDelete}`}
-                                    title="Eliminar"
-                                    onClick={() => onDelete(ubicacion)}
-                                >
-                                    <Trash2 size={18} />
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
+                <tbody className="divide-y divide-slate-100">
+                    {ubicaciones.map((ubicacion, index) => {
+                        const activo = isActivo(ubicacion);
+                        return (
+                            <tr key={ubicacion.id || index} className={`hover:bg-slate-50 transition-colors ${!activo ? 'opacity-60' : ''}`}>
+                                <td className="px-4 py-3 font-medium text-slate-800">
+                                    {ubicacion.lugar || ubicacion.nombre || ubicacion.lugar_nombre}
+                                </td>
+                                <td className="px-4 py-3 text-slate-600">{ubicacion.direccion || 'Sin dirección'}</td>
+                                <td className="px-4 py-3 text-slate-500 max-w-[200px] truncate">{getDescripcion(ubicacion)}</td>
+                                <td className="px-4 py-3 text-slate-600">{getCiudadNombre(ubicacion)}</td>
+                                <td className="px-4 py-3">
+                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${activo ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+                                        {activo ? 'Habilitada' : 'Deshabilitada'}
+                                    </span>
+                                </td>
+                                <td className="px-4 py-3">
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => onEdit(ubicacion)}
+                                            title="Editar"
+                                            className="p-1.5 rounded-lg text-slate-500 hover:text-brand-600 hover:bg-brand-50 transition-colors"
+                                        >
+                                            <Pencil size={15} />
+                                        </button>
+                                        <button
+                                            onClick={() => onToggle(ubicacion)}
+                                            title={activo ? 'Deshabilitar' : 'Habilitar'}
+                                            className={`p-1.5 rounded-lg transition-colors ${activo ? 'text-slate-500 hover:text-amber-600 hover:bg-amber-50' : 'text-slate-500 hover:text-green-600 hover:bg-green-50'}`}
+                                        >
+                                            {activo ? <PowerOff size={15} /> : <Power size={15} />}
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        );
+                    })}
                 </tbody>
             </table>
         </div>

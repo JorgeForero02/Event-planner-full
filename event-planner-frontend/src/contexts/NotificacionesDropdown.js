@@ -13,7 +13,6 @@ const NotificacionesDropdown = ({ notificationsIcon }) => {
         noLeidasCount,
         loading,
         error,
-        filtros,
         cargarNotificaciones,
         marcarComoLeida,
         eliminarNotificacion,

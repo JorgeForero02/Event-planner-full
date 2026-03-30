@@ -1,193 +1,126 @@
 import React from 'react';
-import { X, MapPin, Building, Info, Users, Plus } from 'lucide-react';
-import styles from '../../styles/lugares.module.css';
+import { X, MapPin, Users, AlertTriangle } from 'lucide-react';
+
+const inputCls = 'h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 transition';
+const labelCls = 'block text-xs font-medium text-slate-600 mb-1';
 
 const PlaceForm = ({
-    title,
     formData,
     ubicaciones,
     empresa,
     onSubmit,
     onClose,
     onInputChange,
-    loading = false,
-    showCreateButton = false
+    showCreateButton,
+    onShowCreateForm
 }) => {
+    const handleLocalInputChange = (e) => {
+        const { name, value } = e.target;
+        onInputChange(name, value);
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
         onSubmit(e);
     };
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        onInputChange(name, value);
-    };
-
     return (
-        <div className={styles.modalOverlay} onClick={onClose}>
-            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-                <div className={styles.modalHeader}>
-                    <div className={styles.modalTitle}>
-                        <Building size={24} className={styles.titleIcon} />
-                        <h2>{title}</h2>
+        <div
+            className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+            onClick={onClose}
+        >
+            <div
+                className="bg-white rounded-2xl shadow-modal w-full max-w-lg max-h-[90vh] overflow-y-auto animate-slide-up"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+                    <div className="flex items-center gap-2">
+                        <MapPin size={18} className="text-brand-500" />
+                        <h2 className="text-base font-semibold text-slate-800">Crear Lugar</h2>
                     </div>
-                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                    <div className="flex items-center gap-2">
                         {showCreateButton && (
-                            <button
-                                className={styles.btnCreate}
-                                disabled={loading}
+                            <button type="button" onClick={onShowCreateForm}
+                                className="px-3 py-1.5 rounded-lg bg-brand-600 text-white text-xs font-medium hover:bg-brand-700 transition-colors flex items-center gap-1"
                             >
-                                <Plus size={20} />
-                                Crear Nuevo
+                                + Crear Nuevo
                             </button>
                         )}
-                        <button
-                            className={styles.btnClose}
-                            onClick={onClose}
-                            disabled={loading}
-                            aria-label="Cerrar formulario"
-                        >
-                            <X size={24} />
+                        <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+                            <X size={18} />
                         </button>
                     </div>
                 </div>
 
-                <form onSubmit={handleSubmit} className={styles.lugarForm}>
-                    {/* Información de la empresa */}
-                    <div className={styles.formSection}>
-                        <div className={styles.sectionHeader}>
-                            <Info size={18} />
-                            <h3>Información de la Empresa</h3>
-                        </div>
-                        <div className={styles.formGroup}>
-                            <label>Empresa</label>
-                            <div className={styles.empresaDisplay}>
-                                <strong>{empresa?.nombre || 'No seleccionada'}</strong>
-                                {empresa?.descripcion && (
-                                    <p className={styles.empresaDescription}>{empresa.descripcion}</p>
-                                )}
-                            </div>
+                <form onSubmit={handleSubmit} className="px-6 py-5 space-y-5">
+                    {/* Empresa info */}
+                    <div>
+                        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Información de la Empresa</p>
+                        <div className="h-9 flex items-center px-3 rounded-lg bg-slate-50 border border-slate-200 text-sm font-medium text-slate-700">
+                            {empresa?.nombre || 'Cargando...'}
                         </div>
                     </div>
 
-                    {/* Información del lugar */}
-                    <div className={styles.formSection}>
-                        <div className={styles.sectionHeader}>
-                            <MapPin size={18} />
-                            <h3>Información del Lugar</h3>
+                    {/* Place details */}
+                    <div className="space-y-4">
+                        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Información del Lugar</p>
+
+                        <div>
+                            <label htmlFor="nombre" className={labelCls}>Nombre *</label>
+                            <input type="text" id="nombre" name="nombre"
+                                value={formData.nombre} onChange={handleLocalInputChange}
+                                placeholder="Nombre del lugar" required className={inputCls} />
                         </div>
 
-                        {/* Nombre del lugar */}
-                        <div className={styles.formGroup}>
-                            <label htmlFor="nombre">Nombre del Lugar *</label>
-                            <input
-                                type="text"
-                                id="nombre"
-                                name="nombre"
-                                value={formData.nombre || ''}
-                                onChange={handleInputChange}
-                                placeholder="Ej: Sala de conferencias principal"
-                                required
-                                disabled={loading}
-                                className={styles.formInput}
-                            />
-                            <small className={styles.helpText}>
-                                Proporcione un nombre descriptivo para identificar fácilmente este lugar
-                            </small>
-                        </div>
-
-                        {/* Ubicación */}
-                        <div className={styles.formGroup}>
-                            <label htmlFor="id_ubicacion">Ubicación *</label>
-                            <select
-                                id="id_ubicacion"
-                                name="id_ubicacion"
-                                value={formData.id_ubicacion || ''}
-                                onChange={handleInputChange}
-                                required
-                                disabled={loading || !ubicaciones || ubicaciones.length === 0}
-                                className={styles.formSelect}
-                            >
-                                <option value="">Seleccione una ubicación</option>
-                                {ubicaciones && ubicaciones.map((ubicacion) => (
-                                    <option key={ubicacion.id} value={ubicacion.id}>
-                                        {ubicacion.lugar} - {ubicacion.direccion}
-                                    </option>
-                                ))}
-                            </select>
-                            {ubicaciones && ubicaciones.length === 0 && (
-                                <div className={styles.warningBox}>
-                                    <Info size={16} />
-                                    <span>No hay ubicaciones disponibles para esta empresa. Cree una ubicación primero.</span>
+                        <div>
+                            <label htmlFor="id_ubicacion" className={labelCls}>Ubicación *</label>
+                            {ubicaciones && ubicaciones.length > 0 ? (
+                                <select id="id_ubicacion" name="id_ubicacion"
+                                    value={formData.id_ubicacion} onChange={handleLocalInputChange}
+                                    required
+                                    className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500 transition"
+                                >
+                                    <option value="">Seleccione una ubicación</option>
+                                    {ubicaciones.map((ubicacion) => (
+                                        <option key={ubicacion.id} value={ubicacion.id}>{ubicacion.lugar}</option>
+                                    ))}
+                                </select>
+                            ) : (
+                                <div className="rounded-lg bg-amber-50 border border-amber-200 p-3 flex items-start gap-2">
+                                    <AlertTriangle size={16} className="text-amber-500 mt-0.5 shrink-0" />
+                                    <p className="text-xs text-amber-700">No hay ubicaciones disponibles. Cree una ubicación primero.</p>
                                 </div>
                             )}
                         </div>
 
-                        <div className={styles.formGroup}>
-                            <label htmlFor="capacidad">
-                                <Users size={16} style={{ display: 'inline', marginRight: '8px' }} />
-                                Capacidad
+                        <div>
+                            <label htmlFor="capacidad" className={labelCls}>
+                                <span className="flex items-center gap-1">
+                                    <Users size={12} className="text-slate-400" />Capacidad *
+                                </span>
                             </label>
-                            <input
-                                type="number"
-                                id="capacidad"
-                                name="capacidad"
-                                value={formData.capacidad || ''}
-                                onChange={handleInputChange}
-                                placeholder="Ej: 50"
-                                min="1"
-                                disabled={loading}
-                                className={styles.formInput}
-                            />
-                            <small className={styles.helpText}>
-                                Número máximo de personas que puede albergar el lugar (opcional)
-                            </small>
+                            <input type="number" id="capacidad" name="capacidad"
+                                value={formData.capacidad} onChange={handleLocalInputChange}
+                                placeholder="0" min="1" required className={inputCls} />
                         </div>
 
-                        {/* Descripción */}
-                        <div className={styles.formGroup}>
-                            <label htmlFor="descripcion">Descripción *</label>
-                            <textarea
-                                id="descripcion"
-                                name="descripcion"
-                                value={formData.descripcion || ''}
-                                onChange={handleInputChange}
-                                placeholder="Describa las características, equipamiento y capacidad del lugar..."
-                                rows="4"
-                                required
-                                disabled={loading}
-                                className={styles.formTextarea}
+                        <div>
+                            <label htmlFor="descripcion" className={labelCls}>Descripción *</label>
+                            <textarea id="descripcion" name="descripcion"
+                                value={formData.descripcion} onChange={handleLocalInputChange}
+                                placeholder="Descripción del lugar" rows="4" required
+                                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 transition resize-none"
                             />
-                            <small className={styles.helpText}>
-                                Incluya detalles como capacidad, equipos disponibles, características especiales, etc.
-                            </small>
                         </div>
                     </div>
 
-                    {/* Actions */}
-                    <div className={styles.formActions}>
-                        <button
-                            type="button"
-                            className={styles.btnCancel}
-                            onClick={onClose}
-                            disabled={loading}
-                        >
-                            Cancelar
-                        </button>
-                        <button
-                            type="submit"
-                            className={styles.btnSubmit}
-                            disabled={loading || !ubicaciones || ubicaciones.length === 0}
-                        >
-                            {loading ? (
-                                <>
-                                    <div className={styles.spinner}></div>
-                                    Guardando...
-                                </>
-                            ) : (
-                                'Guardar Lugar'
-                            )}
-                        </button>
+                    <div className="flex items-center justify-end gap-3 pt-2">
+                        <button type="button" onClick={onClose}
+                            className="px-4 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                        >Cancelar</button>
+                        <button type="submit" disabled={!ubicaciones || ubicaciones.length === 0}
+                            className="px-4 py-2 rounded-lg bg-brand-600 text-white text-sm font-medium hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >Crear Lugar</button>
                     </div>
                 </form>
             </div>

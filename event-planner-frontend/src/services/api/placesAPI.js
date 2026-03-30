@@ -121,6 +121,23 @@ class PlacesAPI extends BaseService {
       }
     }
   }
+
+  toggleLugar = async (lugarId) => {
+    try {
+      const result = await this.fetch(`/lugares/${lugarId}/toggle-estado`, {
+        method: 'PATCH'
+      });
+
+      if (!result.success) {
+        throw new Error(result.message || 'Error al cambiar estado del lugar');
+      }
+
+      return result;
+    } catch (error) {
+      console.error('Error al cambiar estado del lugar:', error);
+      throw new Error(error.message || 'Error al cambiar estado del lugar');
+    }
+  }
 }
 
 export const placesAPI = new PlacesAPI();

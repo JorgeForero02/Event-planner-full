@@ -31,8 +31,8 @@ const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
 
     useEffect(() => {
         cargarEstadisticas();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [encuestaId]);
-
     const cargarEstadisticas = async () => {
         try {
             setLoading(true);

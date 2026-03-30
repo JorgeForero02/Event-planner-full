@@ -37,7 +37,7 @@ const EncuestaCard = ({
             return null;
         }
         return encuesta.respuestas.find(respuesta =>
-            respuesta.id_asistente == idAsistente
+            respuesta.id_asistente === idAsistente
         );
     };
 

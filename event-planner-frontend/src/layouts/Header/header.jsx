@@ -1,9 +1,8 @@
 import { useNavigate } from 'react-router-dom';
-import { isAdmin, isAsistente, getRoleName, isGerente, isOrganizador, isPonente } from '../../utils/roleUtils';
-import headerStyles from './header.module.css';
+import { isAdmin, isAsistente, isGerente, isOrganizador, isPonente } from '../../utils/roleUtils';
+import { CalendarDays } from 'lucide-react';
 import notificationsIcon from '../../assets/notifications.png';
-import logoIcon from '../../assets/evento-remove.png';
-import NotificacionesDropdown from '../../contexts/NotificacionesDropdown'; 
+import NotificacionesDropdown from '../../contexts/NotificacionesDropdown';
 
 const Header = ({ isMenuCollapsed }) => {
   const navigate = useNavigate();
@@ -36,27 +35,33 @@ const Header = ({ isMenuCollapsed }) => {
   };
 
   return (
-    <header className={`${headerStyles.header} ${isMenuCollapsed ? headerStyles.menuCollapsed : ''}`}>
-      <div className={headerStyles.left}>
-        <button
-          className={headerStyles.logoButton}
-          onClick={handleLogoClick}
-          type="button"
-          title="Cerrar sesión"
-        >
-          <img className={headerStyles.logoImg} src={logoIcon} alt="Evento" />
-        </button>
-      </div>
+    <header className="sticky top-0 z-[100] h-14 bg-white border-b border-slate-200 flex items-center justify-between px-5 shrink-0">
+      {/* Left — brand logo / logout */}
+      <button
+        className="flex items-center gap-2 text-brand-600 hover:text-brand-700 transition-colors"
+        onClick={handleLogoClick}
+        type="button"
+        title="Cerrar sesión"
+      >
+        <CalendarDays size={22} className="shrink-0" />
+        <span className="font-bold text-sm hidden sm:inline tracking-tight">Event Planner</span>
+      </button>
 
-      <div className={headerStyles.right}>
+      {/* Right — notifications + user info + avatar */}
+      <div className="flex items-center gap-3">
         <NotificacionesDropdown notificationsIcon={notificationsIcon} />
 
-        <div className={headerStyles.userInfo}>
-          <div className={headerStyles.role}>{displayRole}</div>
-          <div className={headerStyles.email}>{email || '—'}</div>
+        <div className="hidden sm:flex flex-col items-end leading-tight">
+          <span className="text-xs font-semibold text-slate-700">{displayRole}</span>
+          <span className="text-xs text-slate-500 max-w-[180px] truncate">{email || '—'}</span>
         </div>
 
-        <div className={headerStyles.avatar} title={email || 'Usuario'}>{initials}</div>
+        <div
+          className="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center text-xs font-bold select-none shrink-0"
+          title={email || 'Usuario'}
+        >
+          {initials}
+        </div>
       </div>
     </header>
   );

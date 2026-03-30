@@ -1,7 +1,7 @@
 import { useAdminDashboard } from '../../hooks/useAdminDashboard';
 import AffiliationMetrics from './AffiliationMetrics';
 import AuditMetrics from './AuditMetrics';
-import styles from '../../admin.module.css';
+import SystemStatsMetrics from './SystemStatsMetrics';
 
 const AdminDashboard = () => {
     const {
@@ -14,13 +14,20 @@ const AdminDashboard = () => {
     } = useAdminDashboard();
 
     return (
-        <div className={styles.dashboardContainer}>
-            <h1 className={styles.dashboardTitle}>Panel de Administración</h1>
-            <p className={styles.dashboardSubtitle}>
-                Gestión integral del sistema y supervisión de actividades
-            </p>
+        <div className="flex-1 space-y-6">
+            <div>
+                <h1 className="text-2xl font-bold tracking-tight text-slate-800">Panel de Administración</h1>
+                <p className="text-slate-500">
+                    Gestión integral del sistema y supervisión de actividades
+                </p>
+            </div>
 
-            <div className={styles.dashboardGrid}>
+            <div className="grid grid-cols-1 gap-6">
+                <SystemStatsMetrics
+                    data={dashboardData.stats}
+                    loading={loading}
+                />
+
                 <AffiliationMetrics
                     data={dashboardData.afiliaciones}
                     loading={loading}

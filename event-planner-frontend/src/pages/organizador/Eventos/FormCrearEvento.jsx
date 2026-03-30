@@ -101,7 +101,7 @@ const CrearEvento = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-brand-100 py-12 px-4">
             <div className="max-w-3xl mx-auto">
                 <div className="bg-white rounded-2xl shadow-xl p-8">
                     <div className="text-center mb-8">
@@ -235,7 +235,7 @@ const CrearEvento = () => {
                         <button
                             onClick={handleSubmit}
                             disabled={enviando}
-                            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold py-4 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                            className="w-full bg-gradient-to-r from-blue-600 to-brand-600 text-white font-semibold py-4 rounded-lg hover:from-blue-700 hover:to-brand-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                         >
                             {enviando ? 'Creando Evento...' : 'Crear Evento'}
                         </button>

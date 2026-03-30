@@ -3,17 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { getRedirectPath } from '../utils/roleUtils';
 import { useAuth } from '../contexts/AuthContext';
 
-// Configuración de la API
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
-
-// Mapeo de roles de la UI a roles del backend
-const ROLE_MAPPING = {
-  'asistente': ['asistente'],
-  'gerente': ['gerente'],
-  'ponente': ['ponente'],
-  'organizador': ['organizador']
-};
-
 export const useLogin = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');

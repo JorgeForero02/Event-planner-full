@@ -70,16 +70,12 @@ class LocationsAPI extends BaseService {
             if (result.success && result.data && Array.isArray(result.data) && result.data.length > 0) {
                 return result.data[0];
             } else {
-                return {
-                    id: 1,
-                    nombre: 'Mi Empresa'
-                };
+                // [FRONTEND-FIX] F6: Retornar null en lugar de empresa falsa
+                return null;
             }
         } catch (error) {
-            return {
-                id: 1,
-                nombre: 'Mi Empresa'
-            };
+            console.error('Error en getPrimeraEmpresa:', error);
+            return null;
         }
     }
 
@@ -189,6 +185,22 @@ class LocationsAPI extends BaseService {
             return result;
         } catch (error) {
             throw new Error(error.message || 'Error al eliminar ubicación');
+        }
+    }
+
+    toggleUbicacion = async (ubicacionId) => {
+        try {
+            const result = await this.fetch(`/ubicaciones/${ubicacionId}/toggle-estado`, {
+                method: 'PATCH'
+            });
+
+            if (!result.success) {
+                throw new Error(result.message || 'Error al cambiar estado de ubicación');
+            }
+
+            return result;
+        } catch (error) {
+            throw new Error(error.message || 'Error al cambiar estado de ubicación');
         }
     }
 }

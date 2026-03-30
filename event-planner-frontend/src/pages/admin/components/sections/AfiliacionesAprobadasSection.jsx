@@ -1,102 +1,67 @@
-import React, {useEffect, useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import { useEmpresas } from '../../../../hooks/useEmpresas';
-import { useNotifications } from '../../../../hooks/useNotifications';
 import EmpresaCard from '../sections/EmpresaCard';
-import styles from './afiliaciones.module.css';
+import { Search, Building } from 'lucide-react';
+import { Input } from '../../../../components/ui/input';
+import { Button } from '../../../../components/ui/button';
 
 const AfiliacionesAprobadasSection = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const { empresas, loading, error, fetchEmpresas } = useEmpresas();
-  const { notification, showNotification } = useNotifications();
 
   useEffect(() => {
-    fetchEmpresas();
+    fetchEmpresas('empresas/aprobadas');
   }, [fetchEmpresas]);
 
-  const empresasAprobadas = empresas.filter(e => e.estado === 1);
-
-  const filteredEmpresas = empresasAprobadas.filter(empresa =>
+  const filteredEmpresas = empresas.filter(empresa =>
     empresa.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     empresa.nit?.includes(searchTerm)
   );
 
-  const handleRetry = () => {
-    fetchEmpresas();
-  };
-
   return (
-    <div className={styles.container}>
-      {notification && (
-        <div className={`${styles.notification} ${styles[notification.type]}`}>
-          <div className={styles.notificationContent}>
-            <div className={styles.notificationIcon}>
-              {notification.type === 'success' ? '✓' : '✗'}
-            </div>
-            <p className={styles.notificationMessage}>{notification.message}</p>
-            <button
-              className={styles.notificationClose}
-              onClick={() => showNotification(null)}
-            >
-              ×
-            </button>
-          </div>
-        </div>
-      )}
-
-      <div className={styles.header}>
-        <h1 className={styles.title}>Afiliaciones Aprobadas</h1>
-        <div className={styles.stats}>
-          <span className={styles.statsLabel}>Total aprobadas:</span>
-          <span className={styles.statsValue}>{empresasAprobadas.length}</span>
-        </div>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Empresas Aprobadas</h1>
+        <p className="text-slate-500">Listado de empresas con afiliación activa</p>
       </div>
 
-      <div className={styles.controls}>
-        <div className={styles.searchContainer}>
-          <input
-            type="text"
-            placeholder="Buscar por nombre o NIT"
-            className={styles.searchInput}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className={styles.searchIcon}>
-            <circle cx="8" cy="8" r="6" stroke="#757575" strokeWidth="2"/>
-            <path d="M13 13l5 5" stroke="#757575" strokeWidth="2" strokeLinecap="round"/>
-          </svg>
-        </div>
+      <div className="relative w-full sm:w-80">
+        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
+        <Input
+          type="text"
+          placeholder="Buscar por nombre o NIT"
+          className="pl-9 bg-white"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
 
       {error && (
-        <div className={styles.errorMessage}>
+        <div className="p-4 bg-rose-50 border-rose-200 text-rose-800 rounded-lg flex items-center justify-between">
           <p>{error}</p>
-          <button onClick={handleRetry} className={styles.btnRetry}>
-            Reintentar
-          </button>
+          <Button variant="outline" size="sm" onClick={() => fetchEmpresas('empresas/aprobadas')} className="bg-white">Reintentar</Button>
         </div>
       )}
 
       {loading && (
-        <div className={styles.loading}>Cargando empresas...</div>
+        <div className="h-32 flex items-center justify-center text-slate-500">Cargando empresas...</div>
       )}
 
       {!loading && filteredEmpresas.length === 0 && (
-        <div className={styles.noResults}>
-          <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-            <circle cx="32" cy="32" r="30" stroke="#4caf50" strokeWidth="2" fill="none"/>
-            <path d="M20 32l8 8 16-16" stroke="#4caf50" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
+        <div className="h-48 bg-white border border-dashed rounded-lg flex flex-col items-center justify-center text-slate-500 space-y-3">
+          <Building className="w-8 h-8 text-slate-400" />
           <p>{searchTerm ? 'No se encontraron empresas con ese criterio' : 'No hay empresas aprobadas'}</p>
         </div>
       )}
 
       {!loading && filteredEmpresas.length > 0 && (
-        <div className={styles.empresasList}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredEmpresas.map((empresa) => (
             <EmpresaCard
               key={empresa.id}
               empresa={empresa}
               status="aprobada"
+              showActions={false}
             />
           ))}
         </div>

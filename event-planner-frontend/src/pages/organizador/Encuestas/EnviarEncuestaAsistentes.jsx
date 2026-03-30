@@ -15,8 +15,8 @@ const EnviarEncuestaAsistentes = ({ encuesta, eventoId, onCerrar, onEnvioExitoso
     // Cargar asistentes al montar el componente
     useEffect(() => {
         cargarAsistentes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [eventoId]);
-
     const cargarAsistentes = async () => {
         try {
             setLoadingAsistentes(true);

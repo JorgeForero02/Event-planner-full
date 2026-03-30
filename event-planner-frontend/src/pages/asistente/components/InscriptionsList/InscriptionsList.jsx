@@ -12,6 +12,8 @@ const InscriptionsList = ({
     inscripcionRegistrando,
     handleRegistrarAsistencia,
     puedeRegistrarAsistencia,
+    handleCancelarInscripcion,
+    puedeCancelar,
     formatFecha,
     formatHora,
     onViewEvents
@@ -269,6 +271,15 @@ const InscriptionsList = ({
                                     <span className={`${styles.mensajeEstado} ${accionAsistencia.clase || ''}`}>
                                         {accionAsistencia.contenido}
                                     </span>
+                                )}
+
+                                {puedeCancelar && puedeCancelar(inscripcion) && (
+                                    <button
+                                        className={styles.btnCancelar}
+                                        onClick={() => handleCancelarInscripcion(inscripcion)}
+                                    >
+                                        Cancelar inscripción
+                                    </button>
                                 )}
                             </div>
                         </div>

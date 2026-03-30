@@ -42,6 +42,19 @@ class ActividadController {
                 });
             }
 
+            // RF33 — Validar capacidad de sala vs inscritos confirmados del evento
+            const errorCapacidad = await ActividadValidator.validarCapacidadSala(
+                datosActividad.lugares || [],
+                eventoId
+            );
+            if (errorCapacidad) {
+                await transaction.rollback();
+                return res.status(CODIGOS_HTTP.BAD_REQUEST).json({
+                    success: false,
+                    message: errorCapacidad
+                });
+            }
+
             const actividad = await ActividadService.crear(
                 eventoId,
                 datosActividad,
@@ -168,6 +181,19 @@ class ActividadController {
                 return res.status(CODIGOS_HTTP.CONFLICT).json({
                     success: false,
                     message: errorSolapamiento
+                });
+            }
+
+            // RF33 — Validar capacidad de sala vs inscritos confirmados del evento
+            const errorCapacidad = await ActividadValidator.validarCapacidadSala(
+                datosActualizacion.lugares || [],
+                actividadAnt.id_evento
+            );
+            if (errorCapacidad) {
+                await transaction.rollback();
+                return res.status(CODIGOS_HTTP.BAD_REQUEST).json({
+                    success: false,
+                    message: errorCapacidad
                 });
             }
 

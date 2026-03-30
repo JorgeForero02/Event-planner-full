@@ -136,13 +136,25 @@ class EventoController {
         try {
             const eventoActualizado = req.evento;
 
-            const errorValidacion = EventoValidator.validarActualizacion(req.body);
+            // [BACKEND-FIX] B13: Pasar evento actual para validación cruzada de fechas
+            const errorValidacion = EventoValidator.validarActualizacion(req.body, eventoActualizado);
 
             if (errorValidacion) {
                 await transaction.rollback();
                 return res.status(400).json({
                     success: false,
                     message: errorValidacion
+                });
+            }
+
+            // [BACKEND-FIX] B5: Validar estado antes de permitir actualización
+            const nuevoEstado = req.body.estado !== undefined ? Number(req.body.estado) : undefined;
+            const errorEstado = EventoValidator.validarEstado(eventoActualizado.estado, nuevoEstado);
+            if (errorEstado) {
+                await transaction.rollback();
+                return res.status(400).json({
+                    success: false,
+                    message: errorEstado
                 });
             }
 
@@ -182,6 +194,36 @@ class EventoController {
                 message: MENSAJES.ERROR_ACTUALIZAR,
                 error: error.message
             });
+        }
+    }
+
+    // RF80 — Reporte de evento
+    async obtenerReporte(req, res) {
+        try {
+            const { eventoId } = req.params;
+            const reporte = await EventoService.obtenerReporte(eventoId);
+            if (!reporte) {
+                return res.status(404).json({ success: false, message: MENSAJES.NO_ENCONTRADO_O_SIN_PERMISO });
+            }
+            return res.json({ success: true, data: reporte });
+        } catch (error) {
+            console.error('Error al obtener reporte:', error);
+            return res.status(500).json({ success: false, message: MENSAJES.ERROR_OBTENER });
+        }
+    }
+
+    // RF81 — Presupuesto total del evento
+    async obtenerPresupuesto(req, res) {
+        try {
+            const { eventoId } = req.params;
+            const presupuesto = await EventoService.obtenerPresupuestoTotal(eventoId);
+            if (!presupuesto) {
+                return res.status(404).json({ success: false, message: MENSAJES.NO_ENCONTRADO_O_SIN_PERMISO });
+            }
+            return res.json({ success: true, data: presupuesto });
+        } catch (error) {
+            console.error('Error al obtener presupuesto:', error);
+            return res.status(500).json({ success: false, message: MENSAJES.ERROR_OBTENER });
         }
     }
 

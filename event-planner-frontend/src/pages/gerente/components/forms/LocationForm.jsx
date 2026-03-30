@@ -1,6 +1,8 @@
 import React from 'react';
 import { X } from 'lucide-react';
-import styles from '../../styles/ubicaciones.module.css';
+
+const inputCls = 'h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 transition';
+const labelCls = 'block text-xs font-medium text-slate-600 mb-1';
 
 const LocationForm = ({
     title,
@@ -22,87 +24,73 @@ const LocationForm = ({
     };
 
     return (
-        <div className={styles.modalOverlay} onClick={onClose}>
-            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-                <div className={styles.modalHeader}>
-                    <h2>{title}</h2>
-                    <button className={styles.btnClose} onClick={onClose}>
-                        <X size={24} />
+        <div
+            className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+            onClick={onClose}
+        >
+            <div
+                className="bg-white rounded-2xl shadow-modal w-full max-w-lg max-h-[90vh] overflow-y-auto animate-slide-up"
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+                    <h2 className="text-base font-semibold text-slate-800">{title}</h2>
+                    <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+                        <X size={18} />
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className={styles.ubicacionForm}>
-                    <div className={styles.formGroup}>
-                        <label>Empresa</label>
-                        <div className={styles.empresaDisplay}>
-                            <strong>{empresa?.nombre || 'Cargando...'}</strong>
+                <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
+                    <div>
+                        <label className={labelCls}>Empresa</label>
+                        <div className="h-9 flex items-center px-3 rounded-lg bg-slate-50 border border-slate-200 text-sm font-medium text-slate-700">
+                            {empresa?.nombre || 'Cargando...'}
                         </div>
                     </div>
 
-                    <div className={styles.formGroup}>
-                        <label htmlFor="lugar">Nombre *</label>
-                        <input
-                            type="text"
-                            id="lugar"
-                            name="lugar"
-                            value={formData.lugar}
-                            onChange={handleLocalInputChange}
-                            placeholder="Nombre de la ubicación"
-                            required
-                        />
+                    <div>
+                        <label htmlFor="lugar" className={labelCls}>Nombre *</label>
+                        <input type="text" id="lugar" name="lugar"
+                            value={formData.lugar} onChange={handleLocalInputChange}
+                            placeholder="Nombre de la ubicación" required className={inputCls} />
                     </div>
 
-                    <div className={styles.formGroup}>
-                        <label htmlFor="direccion">Dirección *</label>
-                        <input
-                            type="text"
-                            id="direccion"
-                            name="direccion"
-                            value={formData.direccion}
-                            onChange={handleLocalInputChange}
-                            placeholder="Dirección completa"
-                            required
-                        />
+                    <div>
+                        <label htmlFor="direccion" className={labelCls}>Dirección *</label>
+                        <input type="text" id="direccion" name="direccion"
+                            value={formData.direccion} onChange={handleLocalInputChange}
+                            placeholder="Dirección completa" required className={inputCls} />
                     </div>
 
-                    <div className={styles.formGroup}>
-                        <label htmlFor="id_ciudad">Ciudad *</label>
-                        <select
-                            id="id_ciudad"
-                            name="id_ciudad"
-                            value={formData.id_ciudad}
-                            onChange={handleLocalInputChange}
+                    <div>
+                        <label htmlFor="id_ciudad" className={labelCls}>Ciudad *</label>
+                        <select id="id_ciudad" name="id_ciudad"
+                            value={formData.id_ciudad} onChange={handleLocalInputChange}
                             required
+                            className="h-9 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500 transition"
                         >
                             <option value="">Seleccione una ciudad</option>
                             {ciudades.map((ciudad) => (
-                                <option key={ciudad.id} value={ciudad.id}>
-                                    {ciudad.nombre}
-                                </option>
+                                <option key={ciudad.id} value={ciudad.id}>{ciudad.nombre}</option>
                             ))}
                         </select>
                     </div>
 
-                    <div className={`${styles.formGroup} ${styles.fullWidth}`}>
-                        <label htmlFor="descripcion">Descripción *</label>
-                        <textarea
-                            id="descripcion"
-                            name="descripcion"
-                            value={formData.descripcion}
-                            onChange={handleLocalInputChange}
-                            placeholder="Descripción de la ubicación"
-                            rows="4"
-                            required
+                    <div>
+                        <label htmlFor="descripcion" className={labelCls}>Descripción *</label>
+                        <textarea id="descripcion" name="descripcion"
+                            value={formData.descripcion} onChange={handleLocalInputChange}
+                            placeholder="Descripción de la ubicación" rows="4" required
+                            className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500 transition resize-none"
                         />
                     </div>
 
-                    <div className={styles.formActions}>
-                        <button type="button" className={styles.btnCancel} onClick={onClose}>
-                            Cancelar
-                        </button>
-                        <button type="submit" className={styles.btnSubmit}>
-                            Crear Ubicación
-                        </button>
+                    <div className="flex items-center justify-end gap-3 pt-2">
+                        <button type="button" onClick={onClose}
+                            className="px-4 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                        >Cancelar</button>
+                        <button type="submit"
+                            className="px-4 py-2 rounded-lg bg-brand-600 text-white text-sm font-medium hover:bg-brand-700 transition-colors"
+                        >Crear Ubicación</button>
                     </div>
                 </form>
             </div>

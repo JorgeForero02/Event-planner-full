@@ -6,7 +6,6 @@ import {
     MainContent,
     PasswordModal
 } from './OrganizerComponents';
-import './OrganizerDashboard.css';
 import Sidebar from './Sidebar';
 
 export default function OrganizerDashboard() {
@@ -29,10 +28,10 @@ export default function OrganizerDashboard() {
     } = useOrganizerDashboard();
 
     return (
-        <div className="dashboard-container">
+        <div className="flex min-h-screen bg-slate-50">
             <Sidebar />
 
-            <div className="dashboard-main">
+            <div className="flex-1 flex flex-col min-w-0 ml-[280px]">
                 <Header
                     isSidebarOpen={isSidebarOpen}
                     onToggleSidebar={toggleSidebar}

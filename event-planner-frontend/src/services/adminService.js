@@ -24,7 +24,7 @@ export class AdminService extends BaseService {
   }
 
   async getUsuarios() {
-    return this.request('/gestion-usuarios/users');
+    return this.request('/gestion-usuarios');
   }
 
   async promoverAGerente(idUsuario, idEmpresa) {

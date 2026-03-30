@@ -18,7 +18,9 @@ const OrganizadorNotificaciones = () => {
     const [detalle, setDetalle] = useState(null);
     const [asignacion, setAsignacion] = useState(null);
     const [comentarios, setComentarios] = useState('');
+    // eslint-disable-next-line no-unused-vars
     const [horaInicio, setHoraInicio] = useState('');
+    // eslint-disable-next-line no-unused-vars
     const [horaFin, setHoraFin] = useState('');
     const [cargando, setCargando] = useState(false);
     const [actualizandoActividad, setActualizandoActividad] = useState(false);
@@ -26,8 +28,8 @@ const OrganizadorNotificaciones = () => {
 
     useEffect(() => {
         cargarNotificaciones();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [vistaActual]);
-
     const cargarNotificaciones = async () => {
         setCargando(true);
         try {

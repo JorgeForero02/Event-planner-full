@@ -5,7 +5,7 @@ export const usePonenteAgenda = () => {
     const [agenda, setAgenda] = useState({ actividades: [], eventos: [] });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [estadisticas, setEstadisticas] = useState(null);
+    const [estadisticas] = useState(null);
 
     const getToken = () => {
         const token = localStorage.getItem('access_token');

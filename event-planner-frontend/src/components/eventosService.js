@@ -78,7 +78,7 @@ export const obtenerPerfil = async () => {
  */
 export const obtenerUbicaciones = async (empresaId) => {
   const res = await api.get(`/empresas/${empresaId}/ubicaciones`);
-  return res. data;
+  return res.data;
 };
 /**
  * Obtener lugares. Si se pasa ubicacionId se usa ruta por ubicación; si no, devuelve todos los lugares.
@@ -87,11 +87,11 @@ export const obtenerUbicaciones = async (empresaId) => {
 export const obtenerLugares = async (empresaId, ubicacionId) => {
   const res = await api.get(`/empresas/${empresaId}/lugares`);
   // Si se pasa ubicacionId, filtramos los resultados en el frontend
-  if (ubicacionId && res.data?. data) {
+  if (ubicacionId && res.data?.data) {
     const filtrados = Array.isArray(res.data.data)
-      ? res. data.data.filter(l => String(l.id_ubicacion) === String(ubicacionId))
+      ? res.data.data.filter(l => String(l.id_ubicacion) === String(ubicacionId))
       : [];
-    return { ... res.data, data: filtrados };
+    return {...res.data, data: filtrados};
   }
   return res.data;
 };
@@ -175,16 +175,16 @@ export const eliminarEvento = async (eventoId) => {
   return res.data;
 };
 
-export default {
+const eventosService = {
   getHeaders,
   obtenerEventos,
   obtenerEventoPorId,
-  obtenerActividadesEvento, 
-  crearEvento,             
-  actualizarEvento,    
+  obtenerActividadesEvento,
+  crearEvento,
+  actualizarEvento,
   eliminarEvento,
   crearActividad,
-  actualizarActividad,   
+  actualizarActividad,
   eliminarActividad,
   obtenerPerfil,
   obtenerUbicaciones,
@@ -193,3 +193,4 @@ export default {
   obtenerPonenteAsignado,
   obtenerAsistenciasEvento
 };
+export default eventosService;
