@@ -1,6 +1,7 @@
 // components/OrganizerComponents.jsx
 import React from 'react';
-import { Lock, X, Eye, EyeOff, Menu, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Lock, X, Eye, EyeOff, Menu, AlertCircle, CheckCircle2, CalendarDays, TrendingUp } from 'lucide-react';
+import KpiCard from '../../components/ui/KpiCard';
 import EventosPage from './Eventos/EventosPageOrganizador';
 import ActividadesPage from './Actividades/ActividadesPage';
 import EncuestasManager from './Encuestas/EncuestasManager';
@@ -126,16 +127,37 @@ export const PasswordModal = ({
         </div>
     );
 };
+const colorVariantMap = {
+    'bg-brand-600':   'brand',
+    'bg-blue':        'brand',
+    'bg-emerald-600': 'success',
+    'bg-green-600':   'success',
+    'bg-amber-500':   'warning',
+    'bg-yellow-500':  'warning',
+    'bg-rose-500':    'danger',
+    'bg-red-500':     'danger',
+    'bg-purple':      'default',
+};
+
+const colorIconMap = {
+    'bg-brand-600':   CalendarDays,
+    'bg-blue':        CalendarDays,
+    'bg-emerald-600': TrendingUp,
+    'bg-green-600':   TrendingUp,
+    'bg-amber-500':   AlertCircle,
+    'bg-yellow-500':  AlertCircle,
+    'bg-rose-500':    AlertCircle,
+    'bg-red-500':     AlertCircle,
+    'bg-purple':      TrendingUp,
+};
+
 export const StatCard = ({ label, value, color }) => (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-card p-5">
-        <div className="flex items-center justify-between">
-            <div>
-                <p className="text-sm font-medium text-slate-500">{label}</p>
-                <p className="text-2xl font-bold text-slate-800 mt-0.5">{value}</p>
-            </div>
-            <div className={cn('h-10 w-10 rounded-full flex items-center justify-center', color)} />
-        </div>
-    </div>
+    <KpiCard
+        title={label}
+        value={value}
+        icon={colorIconMap[color] ?? TrendingUp}
+        variant={colorVariantMap[color] ?? 'default'}
+    />
 );
 
 // Fila de evento

@@ -3,6 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '../../../../components
 import { Button } from '../../../../components/ui/button';
 import { RefreshCw, AlertCircle, Building2, Clock, CheckCircle2, XCircle } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
+import KpiCard from '../../../../components/ui/KpiCard';
 
 const AffiliationMetrics = ({
   data,
@@ -79,28 +80,26 @@ const AffiliationMetrics = ({
 
       <CardContent className="pt-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <StatCard
-            type="pending"
-            count={pendientes}
-            label="Pendientes"
-            percentage={calculatePercentage(pendientes)}
-            icon={<Clock className="w-5 h-5" />}
+          <KpiCard
+            icon={Clock}
+            title="Pendientes"
+            value={pendientes}
+            variant="warning"
+            progress={calculatePercentage(pendientes)}
           />
-
-          <StatCard
-            type="approved"
-            count={aprobadas}
-            label="Aprobadas"
-            percentage={calculatePercentage(aprobadas)}
-            icon={<CheckCircle2 className="w-5 h-5" />}
+          <KpiCard
+            icon={CheckCircle2}
+            title="Aprobadas"
+            value={aprobadas}
+            variant="success"
+            progress={calculatePercentage(aprobadas)}
           />
-
-          <StatCard
-            type="rejected"
-            count={rechazadas}
-            label="Rechazadas"
-            percentage={calculatePercentage(rechazadas)}
-            icon={<XCircle className="w-5 h-5" />}
+          <KpiCard
+            icon={XCircle}
+            title="Rechazadas"
+            value={rechazadas}
+            variant="danger"
+            progress={calculatePercentage(rechazadas)}
           />
         </div>
 
@@ -117,52 +116,6 @@ const AffiliationMetrics = ({
         </div>
       </CardContent>
     </Card>
-  );
-};
-
-const StatCard = ({ type, count, label, percentage, icon }) => {
-  const styles = {
-    pending: {
-      bg: 'bg-amber-50 border-amber-100',
-      text: 'text-amber-700',
-      iconBg: 'bg-amber-100',
-      bar: 'bg-amber-500'
-    },
-    approved: {
-      bg: 'bg-emerald-50 border-emerald-100',
-      text: 'text-emerald-700',
-      iconBg: 'bg-emerald-100',
-      bar: 'bg-emerald-500'
-    },
-    rejected: {
-      bg: 'bg-rose-50 border-rose-100',
-      text: 'text-rose-700',
-      iconBg: 'bg-rose-100',
-      bar: 'bg-rose-500'
-    }
-  };
-
-  const currentStyle = styles[type];
-
-  return (
-    <div className={cn("rounded-xl border p-5 flex flex-col gap-4 transition-transform hover:-translate-y-1", currentStyle.bg)}>
-      <div className="flex justify-between items-start">
-        <div>
-          <p className="text-4xl font-bold text-slate-800 mb-1">{count}</p>
-          <p className={cn("text-sm font-semibold uppercase tracking-wider", currentStyle.text)}>{label}</p>
-        </div>
-        <div className={cn("p-2 rounded-lg", currentStyle.iconBg, currentStyle.text)}>
-          {icon}
-        </div>
-      </div>
-      
-      <div className="w-full bg-white/60 rounded-full h-2.5 overflow-hidden">
-        <div
-          className={cn("h-full rounded-full [width:var(--bar-w)]", currentStyle.bar)}
-          style={{ '--bar-w': `${percentage}%` }}
-        />
-      </div>
-    </div>
   );
 };
 

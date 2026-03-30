@@ -249,3 +249,30 @@ FRONTEND_URL=http://localhost:3001
 PORT=3001
 REACT_APP_API_URL=http://localhost:3000/api
 ```
+
+---
+
+## Estado Fase 3 — Unificación Visual (en progreso)
+
+### Componentes completados
+| # | Componente | Archivos tocados |
+|---|-----------|-----------------|
+| 1 | SharedSidebar.jsx | Reemplaza 5 sidebars legacy (Asistente, Ponente, Organizador, Gerente, Admin) |
+| 2 | KpiCard.jsx | Reemplaza todas las StatCard/MetricCard con inline styles |
+| 3 | DataTable.jsx + EmptyState.jsx | asistencia.jsx, EstadisticasEncuesta.jsx, AgendaSection.jsx migradas |
+
+### Componente actual
+**4 — Modales** → Migrar modales legacy a shadcn/ui `<Dialog>`.
+Prioridad: EventModal.jsx, CrearEncuestaModal.jsx, EstadisticasModal.jsx,
+OrganizadorNotificaciones.jsx y resto de modales con CSS Module.
+Regla crítica: NO tocar lógica, handlers ni formularios internos.
+
+### Pendiente
+- Componente 5: Formularios — inputs con shadcn/ui Input/Label/Alert
+- Componente 6: StatusBadge.jsx — badges con tokens event-*
+
+### Invariantes globales (recordatorio)
+- useEffect, handlers, lógica de API y estado: nunca modificar
+- Tablas Admin/Gerente en shadcn/ui: no tocar
+- style dinámico (ej: backgroundColor: row.color): preservar siempre
+- Si ya usa shadcn/ui: no tocar

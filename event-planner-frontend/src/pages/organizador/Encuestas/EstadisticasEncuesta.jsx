@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './EstadisticasEncuesta.css';
+import DataTable from '../../../components/ui/DataTable';
 import * as pdfMake from "pdfmake/build/pdfmake";
 import * as pdfFonts from "pdfmake/build/vfs_fonts";
 pdfMake.vfs = pdfFonts.vfs;
@@ -67,13 +68,24 @@ const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
     };
 
     const obtenerBadgeEstado = (estado) => {
-        const badges = {
-            'activa': { color: '#22c55e', texto: 'Activa' },
-            'borrador': { color: '#f59e0b', texto: 'Borrador' },
-            'cerrada': { color: '#3b82f6', texto: 'Cerrada' }
+        const clsMap = {
+            'activa':     'bg-emerald-100 text-emerald-700',
+            'completada': 'bg-emerald-100 text-emerald-700',
+            'borrador':   'bg-amber-100 text-amber-700',
+            'pendiente':  'bg-amber-100 text-amber-700',
+            'cerrada':    'bg-brand-100 text-brand-700',
+            'expirada':   'bg-rose-100 text-rose-700',
         };
-        const badge = badges[estado] || { color: '#6b7280', texto: estado };
-        return <span className="badge-estado" style={{ backgroundColor: badge.color }}>{badge.texto}</span>;
+        const labelMap = {
+            'activa': 'Activa', 'borrador': 'Borrador', 'cerrada': 'Cerrada',
+            'completada': 'Completada', 'pendiente': 'Pendiente', 'expirada': 'Expirada',
+        };
+        const cls = clsMap[estado] ?? 'bg-slate-100 text-slate-600';
+        return (
+            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${cls}`}>
+                {labelMap[estado] ?? estado}
+            </span>
+        );
     };
 
     // ==================== FUNCIONES DE EXPORTACIÓN ====================
@@ -446,36 +458,21 @@ const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
                     {/* Tabla de respuestas */}
                     <div className="card-estadisticas tabla-respuestas">
                         <h3>Detalle de Respuestas ({respuestas.length})</h3>
-                        {respuestas.length === 0 ? (
-                            <p className="sin-datos">No hay respuestas registradas</p>
-                        ) : (
-                            <div className="tabla-container-estadisticas">
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Asistente</th>
-                                            <th>Correo</th>
-                                            <th>Estado</th>
-                                            <th>Fecha Envío</th>
-                                            <th>Fecha Completado</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {respuestas.map((respuesta) => (
-                                            <tr key={respuesta.id}>
-                                                <td>{respuesta.id}</td>
-                                                <td>{respuesta.asistente.nombre}</td>
-                                                <td>{respuesta.asistente.correo}</td>
-                                                <td>{obtenerBadgeEstado(respuesta.estado)}</td>
-                                                <td>{formatearFecha(respuesta.fecha_envio)}</td>
-                                                <td>{formatearFecha(respuesta.fecha_completado)}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        )}
+                        <DataTable
+                            columns={[
+                                { key: 'id', label: 'ID' },
+                                { key: 'asistente', label: 'Asistente', render: (val) => val?.nombre },
+                                { key: 'asistente_correo', label: 'Correo', render: (_, row) => row.asistente?.correo },
+                                { key: 'estado', label: 'Estado', render: (val) => obtenerBadgeEstado(val) },
+                                { key: 'fecha_envio', label: 'Fecha Envío', render: (val) => formatearFecha(val) },
+                                { key: 'fecha_completado', label: 'Fecha Completado', render: (val) => formatearFecha(val) },
+                            ]}
+                            data={respuestas}
+                            emptyState={{
+                                title: 'Sin respuestas',
+                                description: 'No hay respuestas registradas para esta encuesta.',
+                            }}
+                        />
                     </div>
 
                     {/* Enlaces a Google Forms */}

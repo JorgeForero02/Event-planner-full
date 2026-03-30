@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import styles from './Dashboard.module.css';
 import Calendar from '../../../../assets/calendar.png';
-import Users from '../../../../assets/person.png';
-import EventIcon from '../../../../assets/cupos.png';
-import Clock from '../../../../assets/clock.png';
 import Location from '../../../../assets/lugar.png';
+import ClockImg from '../../../../assets/clock.png';
+import { CalendarDays, ClipboardCheck } from 'lucide-react';
 import { formatFecha, formatHora } from '../../utils/dateUtils';
 import agendaService from '../../../../services/agendaService';
 import eventService from '../../../../services/eventService';
 import { inscriptionService } from '../../../../services/inscriptionService';
+import KpiCard from '../../../../components/ui/KpiCard';
 
 const Dashboard = () => {
     const [metricas, setMetricas] = useState({
@@ -164,26 +164,19 @@ const Dashboard = () => {
             </div>
 
             {/* Métricas */}
-            <div className={styles.metricsGrid}>
-                <div className={styles.metricCard}>
-                    <div className={styles.metricIcon}>
-                        <img src={EventIcon} alt="Eventos" className={styles.iconImage} />
-                    </div>
-                    <div className={styles.metricContent}>
-                        <h3 className={styles.metricValue}>{metricas.totalEventos}</h3>
-                        <p className={styles.metricLabel}>Eventos Disponibles</p>
-                    </div>
-                </div>
-
-                <div className={styles.metricCard}>
-                    <div className={styles.metricIcon}>
-                        <img src={Users} alt="Inscripciones" className={styles.iconImage} />
-                    </div>
-                    <div className={styles.metricContent}>
-                        <h3 className={styles.metricValue}>{metricas.totalInscripciones}</h3>
-                        <p className={styles.metricLabel}>Mis Inscripciones</p>
-                    </div>
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <KpiCard
+                    icon={CalendarDays}
+                    title="Eventos Disponibles"
+                    value={metricas.totalEventos}
+                    variant="brand"
+                />
+                <KpiCard
+                    icon={ClipboardCheck}
+                    title="Mis Inscripciones"
+                    value={metricas.totalInscripciones}
+                    variant="success"
+                />
             </div>
 
             {/* Contenido Principal */}
@@ -231,7 +224,7 @@ const Dashboard = () => {
 
                                                 <div className={styles.detailRow}>
                                                     <span className={styles.detailIcon}>
-                                                        <img src={Clock} alt="Hora" className={styles.iconSmall} />
+                                                        <img src={ClockImg} alt="Hora" className={styles.iconSmall} />
                                                     </span>
                                                     <span>{formatRangoHoras(actividad.hora_inicio, actividad.hora_fin)}</span>
                                                 </div>

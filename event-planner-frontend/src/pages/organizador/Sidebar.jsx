@@ -1,6 +1,7 @@
-import { React } from 'react';
-import { Lock, LogOut, Menu, X, Eye, EyeOff } from 'lucide-react';
+import React from 'react';
+import { Lock, Menu, X, Eye, EyeOff } from 'lucide-react';
 import { useSidebar } from '../../components/SideBarOrganizador';
+import SharedSidebar from '../../layouts/Sidebar/SharedSidebar';
 import { cn } from '../../lib/utils';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -35,18 +36,25 @@ const Sidebar = ({ onSectionChange }) => {
         if (onSectionChange) onSectionChange(sectionId);
     };
 
-    /* ── Shared nav-item style ────────────────────────────────────────── */
-    const navItemCls = (active) => cn(
-        'w-full flex items-center gap-3 px-6 py-3.5 text-[15px] text-white cursor-pointer',
-        'bg-transparent border-none transition-colors duration-200 text-left',
-        active
-            ? 'bg-white/20 border-l-4 border-white font-semibold'
-            : 'hover:bg-white/10'
+    /* ── Footer slot: cambiar contraseña ─────────────────────────────── */
+    const footerSlot = (isCollapsed) => (
+        <button
+            onClick={openPasswordModal}
+            title={isCollapsed ? 'Cambiar Contraseña' : undefined}
+            className={cn(
+                'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium cursor-pointer',
+                'text-white/70 hover:text-white hover:bg-sidebar-hover transition-colors duration-200',
+                isCollapsed && 'justify-center'
+            )}
+        >
+            <Lock size={18} className="shrink-0" />
+            {!isCollapsed && <span>Cambiar Contraseña</span>}
+        </button>
     );
 
     return (
         <>
-            {/* ── Mobile toggle button ─────────────────────────────────── */}
+            {/* ── Mobile toggle button ─────────────────────────────── */}
             <button
                 onClick={toggleSidebar}
                 aria-label="Toggle sidebar"
@@ -55,61 +63,21 @@ const Sidebar = ({ onSectionChange }) => {
                 {isOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
 
-            {/* ── Sidebar panel ────────────────────────────────────────── */}
-            <aside className={cn(
-                'fixed left-0 top-0 z-[1000] h-screen w-[280px] flex flex-col',
-                'bg-[#1A2332] text-white shadow-sidebar transition-transform duration-300 overflow-y-auto',
-                isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
-            )}>
+            {/* ── SharedSidebar ─────────────────────────────────────── */}
+            <SharedSidebar
+                title="Panel de Organizador"
+                items={menuItems}
+                mode="view"
+                currentView={activeSection}
+                onNavigate={onMenuClickHandler}
+                onLogout={handleLogout}
+                userInfo={{ name: user?.nombre, email: user?.correo }}
+                footerSlot={footerSlot}
+                mobileOpen={isOpen}
+                expandedWidth="w-[280px]"
+            />
 
-                {/* Header — avatar + info */}
-                <div
-                    className="flex items-center gap-4 px-6 py-8 border-b border-white/10 cursor-pointer"
-                    onClick={() => { handleMenuClick('inicio'); navigate('/organizador'); }}
-                >
-                    <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-xl font-bold shrink-0">
-                        {user?.nombre?.[0]?.toUpperCase() || 'O'}
-                    </div>
-                    <div className="min-w-0">
-                        <p className="text-base font-semibold truncate">{user?.nombre || 'Organizador'}</p>
-                        <p className="text-sm opacity-75 truncate">{user?.correo}</p>
-                    </div>
-                </div>
-
-                {/* Navigation */}
-                <nav className="flex-1 py-4 overflow-y-auto scrollbar-thin">
-                    {menuItems.map((item) => {
-                        const Icon = item.icon;
-                        return (
-                            <button
-                                key={item.id}
-                                onClick={() => onMenuClickHandler(item.id)}
-                                className={navItemCls(activeSection === item.id)}
-                            >
-                                <Icon size={20} />
-                                <span>{item.label}</span>
-                            </button>
-                        );
-                    })}
-                </nav>
-
-                {/* Footer */}
-                <div className="border-t border-white/10 py-3">
-                    <button onClick={openPasswordModal} className={navItemCls(false)}>
-                        <Lock size={20} />
-                        <span>Cambiar Contraseña</span>
-                    </button>
-                    <button
-                        onClick={handleLogout}
-                        className={cn(navItemCls(false), 'text-rose-300 hover:bg-rose-600/20')}
-                    >
-                        <LogOut size={20} />
-                        <span>Cerrar Sesión</span>
-                    </button>
-                </div>
-            </aside>
-
-            {/* ── Cambiar Contraseña modal ──────────────────────────────── */}
+            {/* ── Modal: cambiar contraseña ─────────────────────────── */}
             {showPasswordModal && (
                 <div
                     className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
@@ -214,8 +182,7 @@ const Sidebar = ({ onSectionChange }) => {
                         </div>
                     </div>
                 </div>
-            )
-            }
+            )}
         </>
     );
 };

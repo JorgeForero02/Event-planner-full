@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Eye, Users, AlertCircle } from 'lucide-react';
 import Sidebar from './Sidebar';
 import asistenciaService from '../../components/asistenciaService';
-import './asistencia.css';
+import DataTable from '../../components/ui/DataTable';
 
 export default function GestionAsistentes() {
     const [eventos, setEventos] = useState([]);
@@ -44,6 +44,7 @@ export default function GestionAsistentes() {
         cargarAsistentes(selectedEventoId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedEventoId]);
+
     const cargarAsistentes = async (idEvento) => {
         setLoading(true);
         setError(null);
@@ -54,7 +55,6 @@ export default function GestionAsistentes() {
             const lista = info.inscripciones || [];
 
             const normalizados = lista.map((inscripcion, idx) => {
-                // Extraer datos del usuario anidado
                 const usuario = inscripcion.asistente?.usuario || {};
                 const nombre = usuario.nombre ||
                     inscripcion.nombre ||
@@ -67,7 +67,6 @@ export default function GestionAsistentes() {
                     inscripcion.correo ||
                     '—';
 
-                // Generar iniciales desde el nombre
                 const iniciales = nombre.split(' ')
                     .filter(n => n.length > 0)
                     .map(n => n[0])
@@ -133,22 +132,67 @@ export default function GestionAsistentes() {
     const pendientes = asistentes.filter(a => a.estado.toLowerCase() === 'pendiente').length;
     const ausentes = asistentes.filter(a => a.estado.toLowerCase() === 'ausente').length;
 
-    const getEstadoBadgeClass = (estado) => {
+    const getEstadoBadgeClasses = (estado) => {
         const estadoNorm = estado.toLowerCase();
-        if (estadoNorm === 'confirmado' || estadoNorm === 'confirmada') return 'badge-confirmado';
-        if (estadoNorm === 'pendiente') return 'badge-pendiente';
-        if (estadoNorm === 'ausente') return 'badge-ausente';
-        return 'badge-default';
+        if (estadoNorm === 'confirmado' || estadoNorm === 'confirmada') return 'bg-emerald-100 text-emerald-700';
+        if (estadoNorm === 'pendiente') return 'bg-amber-100 text-amber-700';
+        if (estadoNorm === 'ausente') return 'bg-rose-100 text-rose-700';
+        return 'bg-slate-100 text-slate-600';
     };
 
-    if (loading) {
+    const columns = [
+        {
+            key: 'id',
+            label: 'ID',
+            render: (val) => <span className="text-slate-500 font-mono text-xs">#{val}</span>,
+        },
+        {
+            key: 'nombre',
+            label: 'Participante',
+            render: (_, row) => (
+                <div className="flex items-center gap-3">
+                    <div
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-semibold shrink-0"
+                        style={{ backgroundColor: row.color }}
+                    >
+                        {row.iniciales}
+                    </div>
+                    <div>
+                        <p className="text-sm font-medium text-slate-800">{row.nombre}</p>
+                        <p className="text-xs text-slate-500">{row.email}</p>
+                    </div>
+                </div>
+            ),
+        },
+        { key: 'fechaRegistro', label: 'Fecha Registro' },
+        {
+            key: 'estado',
+            label: 'Estado',
+            render: (val) => (
+                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getEstadoBadgeClasses(val)}`}>
+                    {val}
+                </span>
+            ),
+        },
+        {
+            key: 'acciones',
+            label: 'Acciones',
+            render: () => (
+                <button className="rounded-lg p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition-colors cursor-pointer">
+                    <Eye size={16} />
+                </button>
+            ),
+        },
+    ];
+
+    if (loading && eventos.length === 0) {
         return (
-            <div className="layout-container">
+            <div className="flex h-screen bg-slate-50">
                 <Sidebar />
-                <div className="main-content">
-                    <div className="loading-container">
-                        <div className="spinner"></div>
-                        <p>Cargando...</p>
+                <div className="flex-1 flex items-center justify-center">
+                    <div className="flex flex-col items-center gap-3 text-slate-500">
+                        <div className="w-8 h-8 rounded-full border-2 border-brand-600 border-t-transparent animate-spin" />
+                        <p className="text-sm">Cargando...</p>
                     </div>
                 </div>
             </div>
@@ -156,20 +200,19 @@ export default function GestionAsistentes() {
     }
 
     return (
-        <div className="layout-container">
+        <div className="flex h-screen bg-slate-50">
             <Sidebar />
-            <div className="main-content">
-                <div className="page-header">
-                    <h1 className="page-title">Gestión de Inscritos</h1>
+            <div className="flex-1 overflow-auto p-6 space-y-6">
+                <div>
+                    <h1 className="text-2xl font-bold tracking-tight text-slate-900">Gestión de Inscritos</h1>
                 </div>
 
-                <div className="evento-selector-card">
-                    <div className="selector-header">
-                        <h3 className="selector-title">Seleccionar evento</h3>
-                        <p className="selector-subtitle">Elige el evento para ver los inscritos</p>
-                    </div>
+                {/* Selector de evento */}
+                <div className="bg-white rounded-xl border border-slate-200 shadow-card p-5">
+                    <h3 className="text-sm font-semibold text-slate-700 mb-0.5">Seleccionar evento</h3>
+                    <p className="text-xs text-slate-500 mb-3">Elige el evento para ver los inscritos</p>
                     <select
-                        className="evento-select"
+                        className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-brand-600/30 focus:border-brand-600 transition-colors"
                         value={selectedEventoId || ''}
                         onChange={(e) => setSelectedEventoId(e.target.value)}
                     >
@@ -186,59 +229,59 @@ export default function GestionAsistentes() {
                 </div>
 
                 {error && (
-                    <div className="error-container-inline">
-                        <AlertCircle size={20} />
+                    <div className="flex items-center gap-2 rounded-lg bg-rose-50 border border-rose-200 px-4 py-3 text-sm text-rose-700">
+                        <AlertCircle size={16} className="shrink-0" />
                         <span>{error}</span>
                     </div>
                 )}
 
                 {selectedEventoId && (
-                    <div className="evento-info">
-                        <h2>
-                            {(() => {
-                                const ev = eventos.find(e =>
-                                    String(e.id || e._id || e.codigo) === String(selectedEventoId)
-                                );
-                                return ev ? (ev.titulo || ev.nombre || ev.title) : 'Evento seleccionado';
-                            })()}
-                        </h2>
-                    </div>
+                    <h2 className="text-lg font-semibold text-slate-800">
+                        {(() => {
+                            const ev = eventos.find(e =>
+                                String(e.id || e._id || e.codigo) === String(selectedEventoId)
+                            );
+                            return ev ? (ev.titulo || ev.nombre || ev.title) : 'Evento seleccionado';
+                        })()}
+                    </h2>
                 )}
 
-                <div className="stats-grid">
-                    <div className="stat-card stat-blue">
-                        <p className="stat-label">Total Inscritos</p>
-                        <p className="stat-value">{totalInscritos}</p>
+                {/* Stats */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="bg-white rounded-xl border border-slate-200 shadow-card p-5">
+                        <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">Total Inscritos</p>
+                        <p className="text-2xl font-bold text-brand-600">{totalInscritos}</p>
                     </div>
-                    <div className="stat-card stat-green">
-                        <p className="stat-label">Confirmados</p>
-                        <p className="stat-value">{confirmados}</p>
+                    <div className="bg-white rounded-xl border border-slate-200 shadow-card p-5">
+                        <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">Confirmados</p>
+                        <p className="text-2xl font-bold text-success">{confirmados}</p>
                     </div>
-                    <div className="stat-card stat-yellow">
-                        <p className="stat-label">Pendientes</p>
-                        <p className="stat-value">{pendientes}</p>
+                    <div className="bg-white rounded-xl border border-slate-200 shadow-card p-5">
+                        <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">Pendientes</p>
+                        <p className="text-2xl font-bold text-warning">{pendientes}</p>
                     </div>
-                    <div className="stat-card stat-red">
-                        <p className="stat-label">Ausentes</p>
-                        <p className="stat-value">{ausentes}</p>
+                    <div className="bg-white rounded-xl border border-slate-200 shadow-card p-5">
+                        <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">Ausentes</p>
+                        <p className="text-2xl font-bold text-danger">{ausentes}</p>
                     </div>
                 </div>
 
-                <div className="filters-container">
-                    <div className="search-box">
-                        <Search size={20} />
+                {/* Filtros */}
+                <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="relative flex-1">
+                        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                         <input
                             type="text"
                             placeholder="Buscar por nombre, email, cédula o ID..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full rounded-lg border border-slate-200 pl-9 pr-3 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-600/30 focus:border-brand-600 transition-colors"
                         />
                     </div>
-
                     <select
                         value={filtroEstado}
                         onChange={(e) => setFiltroEstado(e.target.value)}
-                        className="filter-select"
+                        className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-brand-600/30 focus:border-brand-600 transition-colors"
                     >
                         <option value="todos">Todos los estados</option>
                         <option value="confirmado">Confirmado</option>
@@ -246,58 +289,19 @@ export default function GestionAsistentes() {
                         <option value="pendiente">Pendiente</option>
                         <option value="ausente">Ausente</option>
                     </select>
-
                 </div>
 
-                <div className="table-container">
-                    <table className="asistentes-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Participante</th>
-                                <th>Fecha Registro</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredAsistentes.map((asistente) => (
-                                <tr key={asistente.id}>
-                                    <td>#{asistente.id}</td>
-                                    <td>
-                                        <div className="participante-cell">
-                                            <div className="avatar" style={{ backgroundColor: asistente.color }}>
-                                                {asistente.iniciales}
-                                            </div>
-                                            <div className="participante-info">
-                                                <p className="participante-nombre">{asistente.nombre}</p>
-                                                <p className="participante-email">{asistente.email}</p>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>{asistente.fechaRegistro}</td>
-                                    <td>
-                                        <span className={`badge ${getEstadoBadgeClass(asistente.estado)}`}>
-                                            {asistente.estado}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <button className="btn-icon">
-                                            <Eye size={16} />
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-
-                {filteredAsistentes.length === 0 && (
-                    <div className="empty-state">
-                        <Users size={48} />
-                        <p>No se encontraron asistentes con los filtros aplicados</p>
-                    </div>
-                )}
+                {/* Tabla */}
+                <DataTable
+                    columns={columns}
+                    data={filteredAsistentes}
+                    loading={loading}
+                    emptyState={{
+                        icon: Users,
+                        title: 'Sin asistentes',
+                        description: 'No se encontraron asistentes con los filtros aplicados.',
+                    }}
+                />
             </div>
         </div>
     );

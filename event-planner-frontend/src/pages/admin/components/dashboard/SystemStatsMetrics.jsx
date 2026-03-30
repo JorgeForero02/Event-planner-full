@@ -1,17 +1,6 @@
 import React from 'react';
 import { Users, CalendarDays, ClipboardList, BarChart2 } from 'lucide-react';
-
-const StatCard = ({ icon: Icon, label, value, color }) => (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-card p-4 flex items-center gap-4">
-        <div className={`p-3 rounded-lg ${color}`}>
-            <Icon size={20} className="text-white" />
-        </div>
-        <div>
-            <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">{label}</p>
-            <p className="text-2xl font-bold text-slate-800">{value ?? '—'}</p>
-        </div>
-    </div>
-);
+import KpiCard from '../../../../components/ui/KpiCard';
 
 const RolRow = ({ rol, count }) => (
     <div className="flex items-center justify-between py-1.5 border-b border-slate-100 last:border-0">
@@ -43,10 +32,10 @@ const SystemStatsMetrics = ({ data, loading }) => {
             <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">Estadísticas del Sistema</h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                <StatCard icon={Users} label="Total usuarios" value={roles.total} color="bg-brand-600" />
-                <StatCard icon={CalendarDays} label="Eventos activos" value={data.eventos_activos} color="bg-emerald-600" />
-                <StatCard icon={ClipboardList} label="Inscripciones confirmadas" value={data.total_inscripciones_confirmadas} color="bg-amber-500" />
-                <StatCard icon={BarChart2} label="Tasa asistencia global" value={`${data.tasa_global_asistencia ?? 0}%`} color="bg-violet-600" />
+                <KpiCard icon={Users}        title="Total usuarios"              value={roles.total}                                    variant="brand"   />
+                <KpiCard icon={CalendarDays} title="Eventos activos"             value={data.eventos_activos}                           variant="success" />
+                <KpiCard icon={ClipboardList} title="Inscripciones confirmadas"  value={data.total_inscripciones_confirmadas}            variant="warning" />
+                <KpiCard icon={BarChart2}    title="Tasa asistencia global"      value={`${data.tasa_global_asistencia ?? 0}%`}         variant="default" />
             </div>
 
             <div className="bg-slate-50 rounded-xl p-4">

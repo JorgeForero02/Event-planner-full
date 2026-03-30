@@ -1,7 +1,8 @@
 import { useState } from 'react';
 // eslint-disable-next-line no-unused-vars
 import ActividadCard from '../ui/ActividadCard';
-import styles from '../styles/DashboardSection.module.css';
+import { ClipboardList, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
+import KpiCard from '../../../../components/ui/KpiCard';
 
 const DashboardSection = ({ actividades, loading }) => {
     // eslint-disable-next-line no-unused-vars
@@ -9,7 +10,7 @@ const DashboardSection = ({ actividades, loading }) => {
 
     // Asegurar que actividades siempre sea un array
     const actividadesSeguras = actividades || [];
-    
+
     // eslint-disable-next-line no-unused-vars
     const actividadesFiltradas = actividadesSeguras.filter(actividad => {
         if (filter === 'pendientes') return actividad.estado === 'pendiente';
@@ -27,35 +28,44 @@ const DashboardSection = ({ actividades, loading }) => {
 
     if (loading) {
         return (
-            <div className={styles.dashboard}>
-                <div className={styles.loading}>Cargando actividades...</div>
+            <div className="p-6">
+                <div className="text-sm text-slate-500">Cargando actividades...</div>
             </div>
         );
     }
 
     return (
-        <div className={styles.dashboard}>
-            <h1>Mi Dashboard</h1>
-            <p className={styles.subtitle}>Resumen de tus actividades y eventos</p>
+        <div className="space-y-6 p-6">
+            <div>
+                <h1 className="text-2xl font-bold tracking-tight text-slate-900">Mi Dashboard</h1>
+                <p className="text-sm text-slate-500 mt-1">Resumen de tus actividades y eventos</p>
+            </div>
 
-            {/* Estadísticas */}
-            <div className={styles.statsGrid}>
-                <div className={styles.statCard}>
-                    <h3>Total Actividades</h3>
-                    <span className={styles.statNumber}>{estadisticas.total}</span>
-                </div>
-                <div className={styles.statCard}>
-                    <h3>Pendientes</h3>
-                    <span className={styles.statNumber}>{estadisticas.pendientes}</span>
-                </div>
-                <div className={styles.statCard}>
-                    <h3>Aceptadas</h3>
-                    <span className={styles.statNumber}>{estadisticas.aceptadas}</span>
-                </div>
-                <div className={styles.statCard}>
-                    <h3>Con Solicitud</h3>
-                    <span className={styles.statNumber}>{estadisticas.conSolicitud}</span>
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <KpiCard
+                    icon={ClipboardList}
+                    title="Total Actividades"
+                    value={estadisticas.total}
+                    variant="brand"
+                />
+                <KpiCard
+                    icon={Clock}
+                    title="Pendientes"
+                    value={estadisticas.pendientes}
+                    variant="warning"
+                />
+                <KpiCard
+                    icon={CheckCircle2}
+                    title="Aceptadas"
+                    value={estadisticas.aceptadas}
+                    variant="success"
+                />
+                <KpiCard
+                    icon={AlertCircle}
+                    title="Con Solicitud"
+                    value={estadisticas.conSolicitud}
+                    variant="default"
+                />
             </div>
         </div>
     );
