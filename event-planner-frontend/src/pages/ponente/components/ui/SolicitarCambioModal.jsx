@@ -1,6 +1,10 @@
-import { useState, useEffect } from 'react';  // ← Agrega useEffect
-import styles from '../styles/SolicitudCambioModal.module.css';
+import { useState, useEffect } from 'react';
 import { API_PREFIX } from '../../../../config/apiConfig';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../../../components/ui/dialog';
+import { Input } from '../../../../components/ui/input';
+import { Label } from '../../../../components/ui/label';
+import { Textarea } from '../../../../components/ui/textarea';
+import { Button } from '../../../../components/ui/button';
 const API_BASE = API_PREFIX;
 
 const SolicitudCambioModal = ({ actividad, onClose, onSubmit }) => {
@@ -324,17 +328,16 @@ const SolicitudCambioModal = ({ actividad, onClose, onSubmit }) => {
     // Mostrar loading mientras se cargan datos
     if (loading) {
         return (
-            <div className={styles.modalOverlay}>
-                <div className={styles.modal}>
-                    <div className={styles.modalHeader}>
-                        <h2>Solicitar Cambio de Actividad</h2>
-                        <button className={styles.closeButton} onClick={onClose}>×</button>
-                    </div>
-                    <div className={styles.loading}>
+            <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Solicitar Cambio de Actividad</DialogTitle>
+                    </DialogHeader>
+                    <div className="py-8 text-center text-sm text-slate-500">
                         Cargando información de la actividad...
                     </div>
-                </div>
-            </div>
+                </DialogContent>
+            </Dialog>
         );
     }
 
@@ -345,238 +348,217 @@ const SolicitudCambioModal = ({ actividad, onClose, onSubmit }) => {
     }
 
     return (
-        <div className={styles.modalOverlay}>
-            {/* ... (el resto del JSX se mantiene igual) ... */}
-            <div className={styles.modal}>
-                <div className={styles.modalHeader}>
-                    <h2>Solicitar Cambio de Actividad</h2>
-                    <button className={styles.closeButton} onClick={onClose}>×</button>
-                </div>
+        <Dialog open={true} onOpenChange={(open) => !open && !isSubmitting && onClose()}>
+            <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                    <DialogTitle>Solicitar Cambio de Actividad</DialogTitle>
+                </DialogHeader>
 
-                <form onSubmit={handleSubmit} className={styles.form}>
+                <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Información de la actividad actual */}
-                    <div className={styles.formSection}>
-                        <h3>Actividad Actual</h3>
-                        <div className={styles.currentInfo}>
+                    <div className="space-y-2">
+                        <h3 className="text-sm font-semibold text-slate-700">Actividad Actual</h3>
+                        <div className="rounded-md bg-slate-50 border border-slate-200 p-3 text-sm space-y-1">
                             <p><strong>Título:</strong> {getValorActual('titulo')}</p>
                             <p><strong>Fecha:</strong> {getValorActual('fecha_actividad')}</p>
                             <p><strong>Horario:</strong> {getValorActual('hora_inicio')} - {getValorActual('hora_fin')}</p>
                             <p><strong>Ubicación:</strong> {getValorActual('ubicacion')}</p>
                             {error && (
-                                <p className={styles.warning}>
-                                    <small>Nota: No se pudieron cargar todos los detalles de la actividad</small>
+                                <p className="text-xs text-amber-600">
+                                    Nota: No se pudieron cargar todos los detalles de la actividad
                                 </p>
                             )}
                         </div>
                     </div>
 
-                    <div className={styles.formSection}>
-                        <h3>Cambios Solicitados</h3>
-                        <p className={styles.helpText}>
-                            Completa solo los campos que deseas modificar. No es necesario completar todos.
-                        </p>
+                    <div className="space-y-4">
+                        <div>
+                            <h3 className="text-sm font-semibold text-slate-700">Cambios Solicitados</h3>
+                            <p className="text-xs text-slate-500 mt-1">
+                                Completa solo los campos que deseas modificar. No es necesario completar todos.
+                            </p>
+                        </div>
 
                         {errors.cambios && (
-                            <div className={styles.errorMessage}>
-                                {errors.cambios}
-                            </div>
+                            <p className="text-sm text-danger">{errors.cambios}</p>
                         )}
 
-                        <div className={styles.formGroup}>
-                            <div className={styles.fieldHeader}>
-                                <label>Nueva Fecha:</label>
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                                <Label>Nueva Fecha:</Label>
                                 {formData.cambios_solicitados.fecha_actividad && (
                                     <button
                                         type="button"
-                                        className={styles.clearButton}
+                                        className="text-slate-400 hover:text-slate-600 text-lg leading-none"
                                         onClick={() => clearField('fecha_actividad')}
                                     >
                                         ×
                                     </button>
                                 )}
                             </div>
-                            <input
+                            <Input
                                 type="date"
                                 value={formData.cambios_solicitados.fecha_actividad}
                                 onChange={(e) => handleInputChange('cambios_solicitados.fecha_actividad', e.target.value)}
                                 min={new Date().toISOString().split('T')[0]}
                             />
-                            <small className={styles.helpText}>
-                                Actual: {getValorActual('fecha_actividad')}
-                            </small>
+                            <p className="text-xs text-slate-500">Actual: {getValorActual('fecha_actividad')}</p>
                             {errors.fecha && (
-                                <div className={styles.errorMessage}>
-                                    {errors.fecha}
-                                </div>
+                                <p className="text-sm text-danger">{errors.fecha}</p>
                             )}
                         </div>
 
-                        <div className={styles.formRow}>
-                            <div className={styles.formGroup}>
-                                <div className={styles.fieldHeader}>
-                                    <label>Nueva Hora de Inicio:</label>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <Label>Nueva Hora de Inicio:</Label>
                                     {formData.cambios_solicitados.hora_inicio && (
                                         <button
                                             type="button"
-                                            className={styles.clearButton}
+                                            className="text-slate-400 hover:text-slate-600 text-lg leading-none"
                                             onClick={() => clearField('hora_inicio')}
                                         >
                                             ×
                                         </button>
                                     )}
                                 </div>
-                                <input
+                                <Input
                                     type="time"
                                     value={formData.cambios_solicitados.hora_inicio}
                                     onChange={(e) => handleInputChange('cambios_solicitados.hora_inicio', e.target.value)}
                                 />
-                                <small className={styles.helpText}>
-                                    Actual: {getValorActual('hora_inicio')}
-                                </small>
+                                <p className="text-xs text-slate-500">Actual: {getValorActual('hora_inicio')}</p>
                             </div>
 
-                            <div className={styles.formGroup}>
-                                <div className={styles.fieldHeader}>
-                                    <label>Nueva Hora de Fin:</label>
+                            <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <Label>Nueva Hora de Fin:</Label>
                                     {formData.cambios_solicitados.hora_fin && (
                                         <button
                                             type="button"
-                                            className={styles.clearButton}
+                                            className="text-slate-400 hover:text-slate-600 text-lg leading-none"
                                             onClick={() => clearField('hora_fin')}
                                         >
                                             ×
                                         </button>
                                     )}
                                 </div>
-                                <input
+                                <Input
                                     type="time"
                                     value={formData.cambios_solicitados.hora_fin}
                                     onChange={(e) => handleInputChange('cambios_solicitados.hora_fin', e.target.value)}
                                 />
-                                <small className={styles.helpText}>
-                                    Actual: {getValorActual('hora_fin')}
-                                </small>
+                                <p className="text-xs text-slate-500">Actual: {getValorActual('hora_fin')}</p>
                             </div>
                         </div>
 
                         {errors.horario && (
-                            <div className={styles.errorMessage}>
-                                {errors.horario}
-                            </div>
+                            <p className="text-sm text-danger">{errors.horario}</p>
                         )}
 
-                        <div className={styles.formGroup}>
-                            <div className={styles.fieldHeader}>
-                                <label>Nuevo Título:</label>
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                                <Label>Nuevo Título:</Label>
                                 {formData.cambios_solicitados.titulo && (
                                     <button
                                         type="button"
-                                        className={styles.clearButton}
+                                        className="text-slate-400 hover:text-slate-600 text-lg leading-none"
                                         onClick={() => clearField('titulo')}
                                     >
                                         ×
                                     </button>
                                 )}
                             </div>
-                            <input
+                            <Input
                                 type="text"
                                 value={formData.cambios_solicitados.titulo}
                                 onChange={(e) => handleInputChange('cambios_solicitados.titulo', e.target.value)}
                                 placeholder="Nuevo título para la actividad"
                             />
-                            <small className={styles.helpText}>
-                                Actual: {getValorActual('titulo')}
-                            </small>
+                            <p className="text-xs text-slate-500">Actual: {getValorActual('titulo')}</p>
                         </div>
 
-                        <div className={styles.formGroup}>
-                            <div className={styles.fieldHeader}>
-                                <label>Nueva Descripción:</label>
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                                <Label>Nueva Descripción:</Label>
                                 {formData.cambios_solicitados.descripcion && (
                                     <button
                                         type="button"
-                                        className={styles.clearButton}
+                                        className="text-slate-400 hover:text-slate-600 text-lg leading-none"
                                         onClick={() => clearField('descripcion')}
                                     >
                                         ×
                                     </button>
                                 )}
                             </div>
-                            <textarea
+                            <Textarea
                                 value={formData.cambios_solicitados.descripcion}
                                 onChange={(e) => handleInputChange('cambios_solicitados.descripcion', e.target.value)}
                                 placeholder="Nueva descripción para la actividad"
                                 rows="3"
                             />
-                            <small className={styles.helpText}>
-                                Actual: {getValorActual('descripcion')}
-                            </small>
+                            <p className="text-xs text-slate-500">Actual: {getValorActual('descripcion')}</p>
                         </div>
 
-                        <div className={styles.formGroup}>
-                            <div className={styles.fieldHeader}>
-                                <label>Nueva Ubicación:</label>
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                                <Label>Nueva Ubicación:</Label>
                                 {formData.cambios_solicitados.ubicacion && (
                                     <button
                                         type="button"
-                                        className={styles.clearButton}
+                                        className="text-slate-400 hover:text-slate-600 text-lg leading-none"
                                         onClick={() => clearField('ubicacion')}
                                     >
                                         ×
                                     </button>
                                 )}
                             </div>
-                            <input
+                            <Input
                                 type="text"
                                 value={formData.cambios_solicitados.ubicacion}
                                 onChange={(e) => handleInputChange('cambios_solicitados.ubicacion', e.target.value)}
                                 placeholder="Nueva ubicación para la actividad"
                             />
-                            <small className={styles.helpText}>
-                                Actual: {getValorActual('ubicacion')}
-                            </small>
+                            <p className="text-xs text-slate-500">Actual: {getValorActual('ubicacion')}</p>
                         </div>
                     </div>
 
-                    <div className={styles.formSection}>
-                        <h3>Justificación *</h3>
-                        <div className={styles.formGroup}>
-                            <label>Explica por qué necesitas este cambio:</label>
-                            <textarea
+                    <div className="space-y-2">
+                        <h3 className="text-sm font-semibold text-slate-700">Justificación *</h3>
+                        <div className="space-y-2">
+                            <Label>Explica por qué necesitas este cambio:</Label>
+                            <Textarea
                                 value={formData.justificacion}
                                 onChange={(e) => handleInputChange('justificacion', e.target.value)}
                                 placeholder="Describe los motivos para solicitar el cambio (conflicto de horario, disponibilidad, recursos, etc.)"
                                 rows="4"
-                                className={errors.justificacion ? styles.error : ''}
+                                className={errors.justificacion ? 'border-danger' : ''}
                             />
                             {errors.justificacion && (
-                                <div className={styles.errorMessage}>
-                                    {errors.justificacion}
-                                </div>
+                                <p className="text-sm text-danger">{errors.justificacion}</p>
                             )}
                         </div>
                     </div>
 
-                    <div className={styles.modalActions}>
-                        <button
+                    <DialogFooter>
+                        <Button
                             type="button"
-                            className={styles.cancelButton}
+                            variant="outline"
                             onClick={onClose}
                             disabled={isSubmitting}
                         >
                             Cancelar
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             type="submit"
-                            className={styles.submitButton}
                             disabled={isSubmitting}
                         >
                             {isSubmitting ? 'Enviando...' : 'Enviar Solicitud'}
-                        </button>
-                    </div>
+                        </Button>
+                    </DialogFooter>
                 </form>
-            </div>
-        </div>
+            </DialogContent>
+        </Dialog>
     );
 };
 

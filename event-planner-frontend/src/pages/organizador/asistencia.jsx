@@ -1,6 +1,7 @@
 // File: GestionAsistentes.jsx
 import React, { useState, useEffect } from 'react';
 import { Search, Eye, Users, AlertCircle } from 'lucide-react';
+import StatusBadge from '../../components/ui/StatusBadge';
 import Sidebar from './Sidebar';
 import asistenciaService from '../../components/asistenciaService';
 import DataTable from '../../components/ui/DataTable';
@@ -132,13 +133,6 @@ export default function GestionAsistentes() {
     const pendientes = asistentes.filter(a => a.estado.toLowerCase() === 'pendiente').length;
     const ausentes = asistentes.filter(a => a.estado.toLowerCase() === 'ausente').length;
 
-    const getEstadoBadgeClasses = (estado) => {
-        const estadoNorm = estado.toLowerCase();
-        if (estadoNorm === 'confirmado' || estadoNorm === 'confirmada') return 'bg-emerald-100 text-emerald-700';
-        if (estadoNorm === 'pendiente') return 'bg-amber-100 text-amber-700';
-        if (estadoNorm === 'ausente') return 'bg-rose-100 text-rose-700';
-        return 'bg-slate-100 text-slate-600';
-    };
 
     const columns = [
         {
@@ -168,11 +162,7 @@ export default function GestionAsistentes() {
         {
             key: 'estado',
             label: 'Estado',
-            render: (val) => (
-                <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getEstadoBadgeClasses(val)}`}>
-                    {val}
-                </span>
-            ),
+            render: (val) => <StatusBadge status={val} />,
         },
         {
             key: 'acciones',

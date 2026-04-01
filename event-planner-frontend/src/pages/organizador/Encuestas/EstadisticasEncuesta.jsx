@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './EstadisticasEncuesta.css';
+import StatusBadge from '../../../components/ui/StatusBadge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../../components/ui/dialog';
 import DataTable from '../../../components/ui/DataTable';
 import * as pdfMake from "pdfmake/build/pdfmake";
 import * as pdfFonts from "pdfmake/build/vfs_fonts";
@@ -67,26 +69,6 @@ const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
         });
     };
 
-    const obtenerBadgeEstado = (estado) => {
-        const clsMap = {
-            'activa':     'bg-emerald-100 text-emerald-700',
-            'completada': 'bg-emerald-100 text-emerald-700',
-            'borrador':   'bg-amber-100 text-amber-700',
-            'pendiente':  'bg-amber-100 text-amber-700',
-            'cerrada':    'bg-brand-100 text-brand-700',
-            'expirada':   'bg-rose-100 text-rose-700',
-        };
-        const labelMap = {
-            'activa': 'Activa', 'borrador': 'Borrador', 'cerrada': 'Cerrada',
-            'completada': 'Completada', 'pendiente': 'Pendiente', 'expirada': 'Expirada',
-        };
-        const cls = clsMap[estado] ?? 'bg-slate-100 text-slate-600';
-        return (
-            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${cls}`}>
-                {labelMap[estado] ?? estado}
-            </span>
-        );
-    };
 
     // ==================== FUNCIONES DE EXPORTACIÓN ====================
 
@@ -297,53 +279,45 @@ const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
 
     if (loading) {
         return (
-            <div className="estadisticas-modal-overlay">
-                <div className="estadisticas-modal">
+            <Dialog open={true} onOpenChange={(open) => !open && onCerrar()}>
+                <DialogContent>
                     <div className="loading">
                         <div className="spinner"></div>
                         <p>Cargando estadísticas...</p>
                     </div>
-                </div>
-            </div>
+                </DialogContent>
+            </Dialog>
         );
     }
 
     if (error) {
         return (
-            <div className="estadisticas-modal-overlay">
-                <div className="estadisticas-modal">
-                    <div className="modal-header">
-                        <h2>⚠️ Error</h2>
-                        <button onClick={onCerrar} className="btn-cerrar-modal">✕</button>
-                    </div>
+            <Dialog open={true} onOpenChange={(open) => !open && onCerrar()}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>⚠️ Error</DialogTitle>
+                    </DialogHeader>
                     <div className="error-message">
                         <p>{error}</p>
-                        <button onClick={onCerrar} className="btn-volver-estadisticas">
-                            Volver
-                        </button>
+                        <DialogFooter>
+                            <button onClick={onCerrar} className="btn-volver-estadisticas">
+                                Volver
+                            </button>
+                        </DialogFooter>
                     </div>
-                </div>
-            </div>
+                </DialogContent>
+            </Dialog>
         );
     }
 
     const { encuesta, estadisticas, respuestas } = data;
 
     return (
-        <div className="estadisticas-modal-overlay">
-            <div className="estadisticas-modal">
-                <div className="modal-headerr">
-                    <h2>📊 Estadísticas Detalladas</h2>
-                    <div className="modal-header-actions">
-                        <button
-                            onClick={onCerrar}
-                            className="btn-cerrar-modal"
-                            type="button"
-                        >
-                            ✕
-                        </button>
-                    </div>
-                </div>
+        <Dialog open={true} onOpenChange={(open) => !open && !exportando && onCerrar()}>
+            <DialogContent className="max-w-3xl">
+                <DialogHeader>
+                    <DialogTitle>📊 Estadísticas Detalladas</DialogTitle>
+                </DialogHeader>
                 <div className="modal-content">
                     <div className="exportar-dropdown">
                         <button
@@ -395,7 +369,7 @@ const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
                             </div>
                             <div className="info-item">
                                 <strong>Estado:</strong>
-                                {obtenerBadgeEstado(encuesta.estado)}
+                                <StatusBadge status={encuesta.estado} />
                             </div>
                             <div className="info-item">
                                 <strong>Obligatoria:</strong>
@@ -463,7 +437,7 @@ const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
                                 { key: 'id', label: 'ID' },
                                 { key: 'asistente', label: 'Asistente', render: (val) => val?.nombre },
                                 { key: 'asistente_correo', label: 'Correo', render: (_, row) => row.asistente?.correo },
-                                { key: 'estado', label: 'Estado', render: (val) => obtenerBadgeEstado(val) },
+                                { key: 'estado', label: 'Estado', render: (val) => <StatusBadge status={val} /> },
                                 { key: 'fecha_envio', label: 'Fecha Envío', render: (val) => formatearFecha(val) },
                                 { key: 'fecha_completado', label: 'Fecha Completado', render: (val) => formatearFecha(val) },
                             ]}
@@ -498,8 +472,8 @@ const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
+            </DialogContent>
+        </Dialog>
     );
 };
 

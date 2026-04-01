@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styles from './empresa.module.css';
 import HeaderAfiliar from '../../layouts/Header/headerAfiliar/headerAfiliar';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog';
+import { Input } from '../../components/ui/input';
+import { Label } from '../../components/ui/label';
+import { Select } from '../../components/ui/select';
+import { Button } from '../../components/ui/button';
+import { Alert, AlertDescription } from '../../components/ui/alert';
 
 const Empresa = () => {
   console.log('🔵 Componente Empresa cargado - Versión con cambios');
@@ -68,7 +73,7 @@ const Empresa = () => {
           // Asegurarse de que result.data es un array
           const paisesData = Array.isArray(result.data) ? result.data : [];
           setPaises(paisesData);
-          
+
           // Mostrar advertencia si no hay países
           if (paisesData.length === 0) {
             console.warn('⚠️ No hay países disponibles en la base de datos');
@@ -139,20 +144,20 @@ const Empresa = () => {
           if (response.ok) {
             const result = await response.json();
             console.log(`✅ Ciudades obtenidas desde ${url}:`, result);
-            
+
             if (result.success && result.data) {
               // Si result.data es un array, usarlo directamente
               // Si es un objeto con ciudades, extraer el array
-              ciudadesData = Array.isArray(result.data) 
-                ? result.data 
+              ciudadesData = Array.isArray(result.data)
+                ? result.data
                 : (result.data.ciudades || result.data.data || []);
-              
+
               // Si las ciudades tienen id_pais, filtrar por país
               if (ciudadesData.length > 0 && ciudadesData[0].id_pais !== undefined) {
                 // eslint-disable-next-line eqeqeq
                 ciudadesData = ciudadesData.filter(ciudad => ciudad.id_pais == idPais);
               }
-              
+
               setCiudades(ciudadesData);
               return; // Éxito, salir de la función
             }
@@ -180,7 +185,7 @@ const Empresa = () => {
           if (result.success && result.data) {
             const todasLasCiudades = Array.isArray(result.data) ? result.data : [];
             // Filtrar ciudades por país en el frontend
-            ciudadesData = todasLasCiudades.filter(ciudad => 
+            ciudadesData = todasLasCiudades.filter(ciudad =>
               // eslint-disable-next-line eqeqeq
               ciudad.id_pais == idPais || ciudad.pais_id == idPais || ciudad.idPais == idPais
             );
@@ -196,7 +201,7 @@ const Empresa = () => {
       // Si llegamos aquí, no se pudieron obtener ciudades
       console.error('❌ No se pudieron obtener ciudades para el país:', idPais, lastError);
       setCiudades([]);
-      
+
     } catch (err) {
       console.error('❌ Error al cargar ciudades:', err);
       setError('Error al cargar ciudades');
@@ -277,219 +282,222 @@ const Empresa = () => {
   };
 
   return (
-    <div className={styles.empresaContainer}>
+    <div className="min-h-screen bg-slate-50">
       <HeaderAfiliar />
-      <div className={styles.empresaCard}>
-        <h2 className={styles.empresaTitle}>Solicitud de Afiliación de Empresa</h2>
+      <div className="max-w-2xl mx-auto mt-8 mb-8 bg-white rounded-xl shadow-sm border border-slate-200 p-8">
+        <h2 className="text-xl font-semibold text-slate-800 mb-6">Solicitud de Afiliación de Empresa</h2>
 
-        <form onSubmit={handleSubmit}>
-          <div className={styles.sectionHeader}>
-            <span className={styles.sectionIcon}>📋</span>
-            <span>Información Básica de la Empresa</span>
-          </div>
-
-          <div className={styles.formRow}>
-            <div className={styles.formGroup}>
-              <label htmlFor="nombre">
-                Nombre de la Empresa<span className={styles.required}>*</span>
-              </label>
-              <input
-                type="text"
-                id="nombre"
-                name="nombre"
-                value={formData.nombre}
-                onChange={handleChange}
-                required
-                placeholder="Ingrese el nombre de la empresa"
-              />
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <div className="flex items-center gap-2 text-sm font-medium text-slate-600 mb-4 pb-2 border-b border-slate-200">
+              <span>📋</span>
+              <span>Información Básica de la Empresa</span>
             </div>
 
-            <div className={styles.formGroup}>
-              <label htmlFor="nit">
-                NIT<span className={styles.required}>*</span>
-              </label>
-              <input
-                type="text"
-                id="nit"
-                name="nit"
-                value={formData.nit}
-                onChange={handleChange}
-                required
-                placeholder="Ingrese el NIT"
-              />
-            </div>
-          </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="nombre">
+                  Nombre de la Empresa<span className="text-danger ml-0.5">*</span>
+                </Label>
+                <Input
+                  type="text"
+                  id="nombre"
+                  name="nombre"
+                  value={formData.nombre}
+                  onChange={handleChange}
+                  required
+                  placeholder="Ingrese el nombre de la empresa"
+                />
+              </div>
 
-          <div className={styles.sectionHeader}>
-            <span className={styles.sectionIcon}>📍</span>
-            <span>Información de Contacto</span>
-          </div>
-
-          <div className={`${styles.formGroup} ${styles.fullWidth}`}>
-            <label htmlFor="direccion">
-              Dirección<span className={styles.required}>*</span>
-            </label>
-            <input
-              type="text"
-              id="direccion"
-              name="direccion"
-              value={formData.direccion}
-              onChange={handleChange}
-              required
-              placeholder="Ingrese la dirección"
-            />
-          </div>
-
-          <div className={styles.formRow}>
-            <div className={styles.formGroup}>
-              <label htmlFor="id_pais">
-                País<span className={styles.required}>*</span>
-              </label>
-              <select
-                id="id_pais"
-                name="id_pais"
-                value={formData.id_pais}
-                onChange={handleChange}
-                required
-                className={styles.selectInput}
-                disabled={paises.length === 0}
-              >
-                <option value="">
-                  {paises.length === 0 
-                    ? 'No hay países disponibles' 
-                    : 'Seleccione un país'}
-                </option>
-                {paises.map(pais => (
-                  <option key={pais.id} value={pais.id}>
-                    {pais.nombre}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className={styles.formGroup}>
-              <label htmlFor="id_ciudad">
-                Ciudad<span className={styles.required}>*</span>
-              </label>
-              <select
-                id="id_ciudad"
-                name="id_ciudad"
-                value={formData.id_ciudad}
-                onChange={handleChange}
-                required
-                disabled={!formData.id_pais}
-                className={styles.selectInput}
-              >
-                <option value="">
-                  {!formData.id_pais
-                    ? 'Primero seleccione un país'
-                    : ciudades.length === 0
-                      ? 'No hay ciudades disponibles'
-                      : 'Seleccione una ciudad'}
-                </option>
-                {ciudades.map(ciudad => (
-                  <option key={ciudad.id} value={ciudad.id}>
-                    {ciudad.nombre}
-                  </option>
-                ))}
-              </select>
+              <div className="space-y-2">
+                <Label htmlFor="nit">
+                  NIT<span className="text-danger ml-0.5">*</span>
+                </Label>
+                <Input
+                  type="text"
+                  id="nit"
+                  name="nit"
+                  value={formData.nit}
+                  onChange={handleChange}
+                  required
+                  placeholder="Ingrese el NIT"
+                />
+              </div>
             </div>
           </div>
 
-          <div className={styles.formRow}>
-            <div className={styles.formGroup}>
-              <label htmlFor="telefono">
-                Teléfono<span className={styles.required}>*</span>
-              </label>
-              <input
-                type="tel"
-                id="telefono"
-                name="telefono"
-                value={formData.telefono}
-                onChange={handleChange}
-                required
-                placeholder="Ingrese el teléfono"
-              />
+          <div>
+            <div className="flex items-center gap-2 text-sm font-medium text-slate-600 mb-4 pb-2 border-b border-slate-200">
+              <span>📍</span>
+              <span>Información de Contacto</span>
             </div>
-            <div className={styles.formGroup}>
-              <label htmlFor="correo">
-                Correo Electrónico<span className={styles.required}>*</span>
-              </label>
-              <input
-                type="email"
-                id="correo"
-                name="correo"
-                value={formData.correo}
-                onChange={handleChange}
-                required
-                placeholder="Ingrese el correo electrónico"
-              />
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="direccion">
+                  Dirección<span className="text-danger ml-0.5">*</span>
+                </Label>
+                <Input
+                  type="text"
+                  id="direccion"
+                  name="direccion"
+                  value={formData.direccion}
+                  onChange={handleChange}
+                  required
+                  placeholder="Ingrese la dirección"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="id_pais">
+                    País<span className="text-danger ml-0.5">*</span>
+                  </Label>
+                  <Select
+                    id="id_pais"
+                    name="id_pais"
+                    value={formData.id_pais}
+                    onChange={handleChange}
+                    required
+                    disabled={paises.length === 0}
+                  >
+                    <option value="">
+                      {paises.length === 0
+                        ? 'No hay países disponibles'
+                        : 'Seleccione un país'}
+                    </option>
+                    {paises.map(pais => (
+                      <option key={pais.id} value={pais.id}>
+                        {pais.nombre}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="id_ciudad">
+                    Ciudad<span className="text-danger ml-0.5">*</span>
+                  </Label>
+                  <Select
+                    id="id_ciudad"
+                    name="id_ciudad"
+                    value={formData.id_ciudad}
+                    onChange={handleChange}
+                    required
+                    disabled={!formData.id_pais}
+                  >
+                    <option value="">
+                      {!formData.id_pais
+                        ? 'Primero seleccione un país'
+                        : ciudades.length === 0
+                          ? 'No hay ciudades disponibles'
+                          : 'Seleccione una ciudad'}
+                    </option>
+                    {ciudades.map(ciudad => (
+                      <option key={ciudad.id} value={ciudad.id}>
+                        {ciudad.nombre}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="telefono">
+                    Teléfono<span className="text-danger ml-0.5">*</span>
+                  </Label>
+                  <Input
+                    type="tel"
+                    id="telefono"
+                    name="telefono"
+                    value={formData.telefono}
+                    onChange={handleChange}
+                    required
+                    placeholder="Ingrese el teléfono"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="correo">
+                    Correo Electrónico<span className="text-danger ml-0.5">*</span>
+                  </Label>
+                  <Input
+                    type="email"
+                    id="correo"
+                    name="correo"
+                    value={formData.correo}
+                    onChange={handleChange}
+                    required
+                    placeholder="Ingrese el correo electrónico"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
-          {error && <div className={styles.errorMessage}>{error}</div>}
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
-          <div className={styles.formActions}>
-            <button
+          <div className="flex justify-end gap-3">
+            <Button
               type="button"
-              className={styles.btnCancel}
+              variant="outline"
               onClick={handleCancel}
               disabled={loading}
             >
               Cancelar
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              className={styles.btnSubmit}
               disabled={loading}
             >
               {loading ? 'Enviando...' : 'Enviar Solicitud'}
-            </button>
+            </Button>
           </div>
         </form>
       </div>
 
-      {showSuccessModal && (
-        <div className={styles.modalOverlay} onClick={handleCloseModal}>
-          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.modalHeader}>
-              <div className={styles.successIcon}>✓</div>
-              <h3>¡Empresa Creada Exitosamente!</h3>
-            </div>
+      <Dialog open={showSuccessModal} onOpenChange={(open) => !open && handleCloseModal()}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <div className="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 text-xl mx-auto mb-2">✓</div>
+            <DialogTitle>¡Empresa Creada Exitosamente!</DialogTitle>
+          </DialogHeader>
 
-            <div className={styles.modalBody}>
-              <div className={styles.successMessage}>
-                <span className={styles.messageIcon}>📧</span>
-                <div className={styles.messageText}>
-                  <strong>Confirmación Enviada</strong>
-                  <p>Se ha enviado un correo electrónico con los detalles completos del registro.</p>
-                </div>
-              </div>
-
-              <div className={styles.successMessage}>
-                <span className={styles.messageIcon}>⏳</span>
-                <div className={styles.messageText}>
-                  <strong>Solicitud Pendiente</strong>
-                  <p>Tu afiliación está en proceso de revisión por parte del administrador.</p>
-                </div>
-              </div>
-
-              <div className={styles.infoBox}>
-                <p>
-                  <strong>📬 ¿Qué sigue ahora?</strong>
-                  Recibirás una notificación por correo electrónico cuando tu solicitud sea procesada y aprobada.
-                </p>
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <span className="text-lg">📧</span>
+              <div className="text-sm">
+                <p className="font-medium">Confirmación Enviada</p>
+                <p className="text-slate-500">Se ha enviado un correo electrónico con los detalles completos del registro.</p>
               </div>
             </div>
 
-            <div className={styles.modalFooter}>
-              <button className={styles.btnClose} onClick={handleCloseModal}>
-                Entendido
-              </button>
+            <div className="flex items-start gap-3">
+              <span className="text-lg">⏳</span>
+              <div className="text-sm">
+                <p className="font-medium">Solicitud Pendiente</p>
+                <p className="text-slate-500">Tu afiliación está en proceso de revisión por parte del administrador.</p>
+              </div>
+            </div>
+
+            <div className="rounded-md bg-slate-50 border border-slate-200 p-3 text-sm">
+              <p>
+                <strong>📬 ¿Qué sigue ahora?</strong>{' '}
+                Recibirás una notificación por correo electrónico cuando tu solicitud sea procesada y aprobada.
+              </p>
             </div>
           </div>
-        </div>
-      )}
+
+          <DialogFooter>
+            <Button onClick={handleCloseModal}>Entendido</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

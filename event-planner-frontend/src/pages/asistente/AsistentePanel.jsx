@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from './asistentePanel.module.css';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../components/ui/dialog';
 import Sidebar from '../../layouts/Sidebar/sidebarAsistente/sidebar';
 import Header from '../../layouts/Header/header';
 import EventCard from './components/EventCard/EventCard';
@@ -501,45 +502,39 @@ const AsistentePanel = () => {
                 {renderVista()}
             </div>
 
-            {dialogOpen && selectedEvento && (
-                <div className={styles.modalOverlay}>
-                    <div className={styles.modalContent}>
-                        <div className={styles.modalHeader}>
-                            <h2>
-                                {modalType === 'details'
-                                    ? 'Detalles Completos del Evento'
-                                    : 'Confirmar Inscripción'
-                                }
-                            </h2>
-                            <button
-                                className={styles.closeButton}
-                                onClick={() => setDialogOpen(false)}
-                                disabled={inscribiendo}
-                            >
-                                ×
-                            </button>
-                        </div>
+            <Dialog
+                open={dialogOpen && !!selectedEvento}
+                onOpenChange={(open) => !open && !inscribiendo && setDialogOpen(false)}
+            >
+                <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle>
+                            {modalType === 'details'
+                                ? 'Detalles Completos del Evento'
+                                : 'Confirmar Inscripción'
+                            }
+                        </DialogTitle>
+                    </DialogHeader>
 
-                        {modalType === 'details' ? (
-                            <EventModal
-                                evento={selectedEvento}
-                                onClose={() => setDialogOpen(false)}
-                                formatFecha={formatFecha}
-                                formatFechaCompleta={formatFechaCompleta}
-                            />
-                        ) : (
-                            <InscriptionModal
-                                evento={selectedEvento}
-                                onClose={() => setDialogOpen(false)}
-                                onConfirm={handleConfirmInscription}
-                                formatFecha={formatFecha}
-                                loading={inscribiendo}
-                                userData={userData}
-                            />
-                        )}
-                    </div>
-                </div>
-            )}
+                    {selectedEvento && (modalType === 'details' ? (
+                        <EventModal
+                            evento={selectedEvento}
+                            onClose={() => setDialogOpen(false)}
+                            formatFecha={formatFecha}
+                            formatFechaCompleta={formatFechaCompleta}
+                        />
+                    ) : (
+                        <InscriptionModal
+                            evento={selectedEvento}
+                            onClose={() => setDialogOpen(false)}
+                            onConfirm={handleConfirmInscription}
+                            formatFecha={formatFecha}
+                            loading={inscribiendo}
+                            userData={userData}
+                        />
+                    ))}
+                </DialogContent>
+            </Dialog>
 
             {attendanceModalOpen && selectedInscripcion && (
                 <AttendanceModal

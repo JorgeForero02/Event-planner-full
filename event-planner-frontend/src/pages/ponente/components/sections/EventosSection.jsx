@@ -5,6 +5,7 @@ import { useEventos } from '../../hooks/useEventos';
 import { ponenteEventosService } from '../../../../services/ponenteEventosService';
 import { formatFecha, formatHora, formatFechaCompleta } from '../../../asistente/utils/dateUtils';
 import styles from '../../components/styles/EventosSection.module.css';
+import { Dialog, DialogContent } from '../../../../components/ui/dialog';
 
 const EventosSection = ({ onEventoSelect }) => {
   const { eventos, loading, error } = useEventos();
@@ -133,25 +134,23 @@ const EventosSection = ({ onEventoSelect }) => {
         </>
       )}
 
-      {showModal && modalEvento && (
-        <div className={styles.modalOverlay}>
-          <div className={styles.modal}>
-            {modalLoading ? (
-              <div className={styles.modalLoading}>
-                <p>Cargando detalles del evento...</p>
-              </div>
-            ) : (
-              <EventModal
-                evento={modalEvento}
-                onClose={closeModal}
-                formatFecha={formatFecha}
-                formatFechaCompleta={formatFechaCompleta}
-                error={modalError}
-              />
-            )}
-          </div>
-        </div>
-      )}
+      <Dialog open={showModal && !!modalEvento} onOpenChange={(open) => !open && !modalLoading && closeModal()}>
+        <DialogContent className="max-w-2xl">
+          {modalLoading ? (
+            <div className={styles.modalLoading}>
+              <p>Cargando detalles del evento...</p>
+            </div>
+          ) : (
+            <EventModal
+              evento={modalEvento}
+              onClose={closeModal}
+              formatFecha={formatFecha}
+              formatFechaCompleta={formatFechaCompleta}
+              error={modalError}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import React from 'react';
 import styles from './Encuestas.module.css';
+import StatusBadge from '../../../../components/ui/StatusBadge';
 
 const EncuestaCard = ({
     encuesta,
@@ -20,17 +21,6 @@ const EncuestaCard = ({
     const esEncuestaActividad = encuesta.id_actividad !== null;
     const esEncuestaSatisfaccion = encuesta.tipo_encuesta === 'satisfaccion_evento';
 
-    const getEstadoStyles = () => {
-        if (esCompletada) return styles.estadoCompletada;
-        if (esPendiente) return styles.estadoPendiente;
-        return styles.estadoNoEnviada;
-    };
-
-    const getEstadoTexto = () => {
-        if (esCompletada) return 'Completada';
-        if (esPendiente) return ' Pendiente';
-        return 'No enviada';
-    };
 
     const getRespuestaAsistente = () => {
         if (!idAsistente || !encuesta.respuestas || encuesta.respuestas.length === 0) {
@@ -64,9 +54,7 @@ const EncuestaCard = ({
                             )}
                         </div>
                     </div>
-                    <div className={`${styles.estadoBadge} ${getEstadoStyles()}`}>
-                        {getEstadoTexto()}
-                    </div>
+                    <StatusBadge status={estado.estado} />
                 </div>
             </div>
 

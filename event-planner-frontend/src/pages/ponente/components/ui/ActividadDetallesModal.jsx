@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import styles from '../styles/EventModal.module.css';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../../../components/ui/dialog';
 
 const ActividadDetallesModal = ({ actividadId, eventoId, onClose }) => {
     const [loading, setLoading] = useState(true);
@@ -157,16 +158,11 @@ const ActividadDetallesModal = ({ actividadId, eventoId, onClose }) => {
     };
 
     return (
-        <div className={styles.modalOverlay}>
-            <div className={styles.modal}>
-                <div className={styles.modalHeader}>
-                    <div>
-                        <h2>Detalles de la Actividad</h2>
-                    </div>
-                    <button className={styles.closeButton} onClick={onClose}>
-                        ×
-                    </button>
-                </div>
+        <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
+            <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                    <DialogTitle>Detalles de la Actividad</DialogTitle>
+                </DialogHeader>
 
                 <div className={styles.modalBody}>
                     {loading && (
@@ -285,8 +281,8 @@ const ActividadDetallesModal = ({ actividadId, eventoId, onClose }) => {
                         </div>
                     )}
                 </div>
-            </div>
-        </div>
+            </DialogContent>
+        </Dialog>
     );
 };
 

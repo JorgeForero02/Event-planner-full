@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, Eye, Pencil, X, Trash2, CheckCircle, XCircle, AlertCircle, Info } from 'lucide-react';
 import styles from './ubicaciones.module.css';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog';
+import { Input } from '../../components/ui/input';
+import { Label } from '../../components/ui/label';
+import { Select } from '../../components/ui/select';
+import { Textarea } from '../../components/ui/textarea';
+import { Button } from '../../components/ui/button';
 import Header from '../../layouts/Header/header';
 import GerenteSidebar from '../gerente/GerenteSidebar';
 
@@ -639,7 +645,7 @@ const Ubicaciones = () => {
                             <div className={styles.filtersRow}>
                                 <div className={styles.searchBox}>
                                     <Search size={20} className={styles.searchIcon} />
-                                    <input
+                                    <Input
                                         type="text"
                                         placeholder="Buscar por nombre o dirección..."
                                         value={searchTerm}
@@ -700,27 +706,23 @@ const Ubicaciones = () => {
             </div>
 
             {/* Modal para crear ubicación */}
-            {showModal && (
-                <div className={styles.modalOverlay} onClick={closeAllModals}>
-                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-                        <div className={styles.modalHeader}>
-                            <h2>Crear Nueva Ubicación</h2>
-                            <button className={styles.btnClose} onClick={closeAllModals}>
-                                <X size={24} />
-                            </button>
-                        </div>
+            <Dialog open={showModal} onOpenChange={(open) => !open && closeAllModals()}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Crear Nueva Ubicación</DialogTitle>
+                    </DialogHeader>
 
-                        <form onSubmit={handleSubmit} className={styles.ubicacionForm}>
-                            <div className={styles.formGroup}>
-                                <label>Empresa</label>
-                                <div className={styles.empresaDisplay}>
-                                    <strong>{empresa?.nombre || 'Cargando...'}</strong>
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div className="space-y-2">
+                                <Label>Empresa</Label>
+                                <div className="text-sm font-medium text-slate-700 py-1">
+                                    {empresa?.nombre || 'Cargando...'}
                                 </div>
                             </div>
 
-                            <div className={styles.formGroup}>
-                                <label htmlFor="lugar">Nombre *</label>
-                                <input
+                            <div className="space-y-2">
+                                <Label htmlFor="lugar">Nombre *</Label>
+                                <Input
                                     type="text"
                                     id="lugar"
                                     name="lugar"
@@ -731,9 +733,9 @@ const Ubicaciones = () => {
                                 />
                             </div>
 
-                            <div className={styles.formGroup}>
-                                <label htmlFor="direccion">Dirección *</label>
-                                <input
+                            <div className="space-y-2">
+                                <Label htmlFor="direccion">Dirección *</Label>
+                                <Input
                                     type="text"
                                     id="direccion"
                                     name="direccion"
@@ -744,9 +746,9 @@ const Ubicaciones = () => {
                                 />
                             </div>
 
-                            <div className={styles.formGroup}>
-                                <label htmlFor="capacidad">Capacidad *</label>
-                                <input
+                            <div className="space-y-2">
+                                <Label htmlFor="capacidad">Capacidad *</Label>
+                                <Input
                                     type="number"
                                     id="capacidad"
                                     name="capacidad"
@@ -758,9 +760,9 @@ const Ubicaciones = () => {
                                 />
                             </div>
 
-                            <div className={styles.formGroup}>
-                                <label htmlFor="id_ciudad">Ciudad *</label>
-                                <select
+                            <div className="space-y-2">
+                                <Label htmlFor="id_ciudad">Ciudad *</Label>
+                                <Select
                                     id="id_ciudad"
                                     name="id_ciudad"
                                     value={formData.id_ciudad}
@@ -773,12 +775,12 @@ const Ubicaciones = () => {
                                             {ciudad.nombre}
                                         </option>
                                     ))}
-                                </select>
+                                </Select>
                             </div>
 
-                            <div className={`${styles.formGroup} ${styles.fullWidth}`}>
-                                <label htmlFor="descripcion">Descripción *</label>
-                                <textarea
+                            <div className="space-y-2">
+                                <Label htmlFor="descripcion">Descripción *</Label>
+                                <Textarea
                                     id="descripcion"
                                     name="descripcion"
                                     value={formData.descripcion}
@@ -789,41 +791,36 @@ const Ubicaciones = () => {
                                 />
                             </div>
 
-                            <div className={styles.formActions}>
-                                <button type="button" className={styles.btnCancel} onClick={closeAllModals}>
+                            <DialogFooter>
+                                <Button type="button" variant="outline" onClick={closeAllModals}>
                                     Cancelar
-                                </button>
-                                <button type="submit" className={styles.btnSubmit}>
+                                </Button>
+                                <Button type="submit">
                                     Crear Ubicación
-                                </button>
-                            </div>
+                                </Button>
+                            </DialogFooter>
                         </form>
-                    </div>
-                </div>
-            )}
+                </DialogContent>
+            </Dialog>
 
             {/* Modal para editar ubicación */}
-            {showEditModal && editingUbicacion && (
-                <div className={styles.modalOverlay} onClick={closeAllModals}>
-                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-                        <div className={styles.modalHeader}>
-                            <h2>Editar Ubicación</h2>
-                            <button className={styles.btnClose} onClick={closeAllModals}>
-                                <X size={24} />
-                            </button>
-                        </div>
+            <Dialog open={showEditModal && !!editingUbicacion} onOpenChange={(open) => !open && closeAllModals()}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Editar Ubicación</DialogTitle>
+                    </DialogHeader>
 
-                        <form onSubmit={handleUpdate} className={styles.ubicacionForm}>
-                            <div className={styles.formGroup}>
-                                <label>Empresa</label>
-                                <div className={styles.empresaDisplay}>
-                                    <strong>{empresa?.nombre || 'Cargando...'}</strong>
+                        <form onSubmit={handleUpdate} className="space-y-4">
+                            <div className="space-y-2">
+                                <Label>Empresa</Label>
+                                <div className="text-sm font-medium text-slate-700 py-1">
+                                    {empresa?.nombre || 'Cargando...'}
                                 </div>
                             </div>
 
-                            <div className={styles.formGroup}>
-                                <label htmlFor="edit_lugar">Lugar *</label>
-                                <input
+                            <div className="space-y-2">
+                                <Label htmlFor="edit_lugar">Lugar *</Label>
+                                <Input
                                     type="text"
                                     id="edit_lugar"
                                     name="lugar"
@@ -834,9 +831,9 @@ const Ubicaciones = () => {
                                 />
                             </div>
 
-                            <div className={styles.formGroup}>
-                                <label htmlFor="edit_direccion">Dirección *</label>
-                                <input
+                            <div className="space-y-2">
+                                <Label htmlFor="edit_direccion">Dirección *</Label>
+                                <Input
                                     type="text"
                                     id="edit_direccion"
                                     name="direccion"
@@ -847,9 +844,9 @@ const Ubicaciones = () => {
                                 />
                             </div>
 
-                            <div className={styles.formGroup}>
-                                <label htmlFor="edit_capacidad">Capacidad *</label>
-                                <input
+                            <div className="space-y-2">
+                                <Label htmlFor="edit_capacidad">Capacidad *</Label>
+                                <Input
                                     type="number"
                                     id="edit_capacidad"
                                     name="capacidad"
@@ -861,9 +858,9 @@ const Ubicaciones = () => {
                                 />
                             </div>
 
-                            <div className={styles.formGroup}>
-                                <label htmlFor="edit_id_ciudad">Ciudad *</label>
-                                <select
+                            <div className="space-y-2">
+                                <Label htmlFor="edit_id_ciudad">Ciudad *</Label>
+                                <Select
                                     id="edit_id_ciudad"
                                     name="id_ciudad"
                                     value={formData.id_ciudad}
@@ -876,12 +873,12 @@ const Ubicaciones = () => {
                                             {ciudad.nombre}
                                         </option>
                                     ))}
-                                </select>
+                                </Select>
                             </div>
 
-                            <div className={`${styles.formGroup} ${styles.fullWidth}`}>
-                                <label htmlFor="edit_descripcion">Descripción *</label>
-                                <textarea
+                            <div className="space-y-2">
+                                <Label htmlFor="edit_descripcion">Descripción *</Label>
+                                <Textarea
                                     id="edit_descripcion"
                                     name="descripcion"
                                     value={formData.descripcion}
@@ -892,28 +889,23 @@ const Ubicaciones = () => {
                                 />
                             </div>
 
-                            <div className={styles.formActions}>
-                                <button type="button" className={styles.btnCancel} onClick={closeAllModals}>
+                            <DialogFooter>
+                                <Button type="button" variant="outline" onClick={closeAllModals}>
                                     Cancelar
-                                </button>
-                                <button type="submit" className={styles.btnSubmit}>
+                                </Button>
+                                <Button type="submit">
                                     Actualizar Ubicación
-                                </button>
-                            </div>
+                                </Button>
+                            </DialogFooter>
                         </form>
-                    </div>
-                </div>
-            )}
+                </DialogContent>
+            </Dialog>
 
-            {showDeleteModal && deletingUbicacion && (
-                <div className={styles.modalOverlay} onClick={closeAllModals}>
-                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-                        <div className={styles.modalHeader}>
-                            <h2>Confirmar Eliminación</h2>
-                            <button className={styles.btnClose} onClick={closeAllModals}>
-                                <X size={24} />
-                            </button>
-                        </div>
+            <Dialog open={showDeleteModal && !!deletingUbicacion} onOpenChange={(open) => !open && closeAllModals()}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Confirmar Eliminación</DialogTitle>
+                    </DialogHeader>
 
                         <div className={styles.confirmDeleteContent}>
                             <p>
@@ -923,7 +915,7 @@ const Ubicaciones = () => {
                                 Esta acción no se puede deshacer.
                             </p>
 
-                            <div className={styles.formActions}>
+                            <DialogFooter>
                                 <button
                                     type="button"
                                     className={styles.btnCancel}
@@ -938,11 +930,10 @@ const Ubicaciones = () => {
                                 >
                                     Eliminar Ubicación
                                 </button>
-                            </div>
+                            </DialogFooter>
                         </div>
-                    </div>
-                </div>
-            )}
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

@@ -20,6 +20,7 @@ import {
 } from '../../../components/eventosService';
 import './GestionarAgendaPage.css';
 import Sidebar from '../Sidebar';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../../components/ui/dialog';
 
 const GestionarAgendaPage = () => {
     const navigate = useNavigate();
@@ -294,22 +295,14 @@ const GestionarAgendaPage = () => {
             </div>
 
             {/* Modal de Detalles de Actividad */}
-            {modalAbierto && actividadSeleccionada && (
-                <div className="modal-overlay" onClick={cerrarModal}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <div className="modal-header-content">
-                                <div className="modal-icon-wrapper">
-                                    <Calendar size={28} />
-                                </div>
-                                <div>
-                                    <h2>Detalles de la Actividad</h2>
-                                </div>
-                            </div>
-                            <button onClick={cerrarModal} className="modal-close-btn">
-                                <X size={20} />
-                            </button>
-                        </div>
+            <Dialog
+                open={modalAbierto && !!actividadSeleccionada}
+                onOpenChange={(open) => !open && cerrarModal()}
+            >
+                <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle>Detalles de la Actividad</DialogTitle>
+                    </DialogHeader>
 
                         <div className="modal-body">
                             <div className="modal-card">
@@ -408,7 +401,7 @@ const GestionarAgendaPage = () => {
                             </div>
                         </div>
 
-                        <div className="modal-footer">
+                        <DialogFooter>
                             <button
                                 onClick={cerrarModal}
                                 className="btn-modal btn-secondary"
@@ -425,10 +418,9 @@ const GestionarAgendaPage = () => {
                                 <Edit size={18} />
                                 Editar Actividad
                             </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+                        </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

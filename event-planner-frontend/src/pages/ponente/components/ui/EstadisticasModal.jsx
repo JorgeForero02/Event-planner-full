@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import styles from '../styles/EstadisticasModal.module.css';
 import encuestaService from '../../../../services/encuestaService';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../../../components/ui/dialog';
 
 const EstadisticasModal = ({ encuestaId, onClose }) => {
     const [estadisticas, setEstadisticas] = useState(null);
@@ -502,21 +503,21 @@ const EstadisticasModal = ({ encuestaId, onClose }) => {
 
     if (loading) {
         return (
-            <div className={styles.modalOverlay} onClick={onClose}>
-                <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
+                <DialogContent>
                     <div className={styles.loadingContainer}>
                         <div className={styles.spinner}></div>
                         <p>Cargando estadísticas...</p>
                     </div>
-                </div>
-            </div>
+                </DialogContent>
+            </Dialog>
         );
     }
 
     if (error || !estadisticas) {
         return (
-            <div className={styles.modalOverlay} onClick={onClose}>
-                <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
+                <DialogContent>
                     <div className={styles.errorContainer}>
                         <div className={styles.errorIcon}>⚠️</div>
                         <h3>Error</h3>
@@ -525,24 +526,21 @@ const EstadisticasModal = ({ encuestaId, onClose }) => {
                             Cerrar
                         </button>
                     </div>
-                </div>
-            </div>
+                </DialogContent>
+            </Dialog>
         );
     }
 
     const { encuesta, estadisticas: stats } = estadisticas;
 
     return (
-        <div className={styles.modalOverlay} onClick={onClose}>
-            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-                <div className={styles.modalHeader}>
-                    <h2 className={styles.modalTitle}>
+        <Dialog open={true} onOpenChange={(open) => !open && !descargando && onClose()}>
+            <DialogContent className="max-w-3xl">
+                <DialogHeader>
+                    <DialogTitle>
                         Estadísticas: {encuesta.titulo}
-                    </h2>
-                    <button className={styles.closeButton} onClick={onClose}>
-                        ×
-                    </button>
-                </div>
+                    </DialogTitle>
+                </DialogHeader>
 
                 <div className={styles.modalBody}>
                     <div className={styles.tabs}>
@@ -825,7 +823,7 @@ const EstadisticasModal = ({ encuestaId, onClose }) => {
                     </div>
                 </div>
 
-                <div className={styles.modalFooter}>
+                <DialogFooter>
                     <div className={styles.descargarContainer}>
                         <button
                             className={styles.btnDescargar}
@@ -875,9 +873,9 @@ const EstadisticasModal = ({ encuestaId, onClose }) => {
                     <button className={styles.btnCerrar} onClick={onClose} disabled={descargando}>
                         Cerrar
                     </button>
-                </div>
-            </div>
-        </div>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     );
 };
 

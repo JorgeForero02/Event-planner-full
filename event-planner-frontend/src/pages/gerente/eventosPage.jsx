@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from '../gerente/eventosPage.module.css';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog';
+import { Input } from '../../components/ui/input';
+import { Select } from '../../components/ui/select';
 import Header from '../../layouts/Header/header';
 import Calendar from '../../assets/calendar.png';
 import Cupos from '../../assets/cupos.png';
@@ -284,12 +287,11 @@ const EventosPage = () => {
                     <div className={styles.filtersSection}>
                         <div className={styles.searchContainer}>
                             <div className={styles.searchWrapper}>
-                                <input
+                                <Input
                                     type="text"
                                     placeholder="Buscar eventos por nombre..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className={styles.searchInput}
                                 />
                             </div>
                         </div>
@@ -298,10 +300,9 @@ const EventosPage = () => {
                             <label className={styles.filterLabel}>
                                 Filtrar por Organizador:
                             </label>
-                            <select
+                            <Select
                                 value={filtroOrganizador}
                                 onChange={(e) => setFiltroOrganizador(e.target.value)}
-                                className={styles.filterSelect}
                             >
                                 <option value="">Todos los organizadores</option>
                                 {organizadores.map((org) => (
@@ -309,7 +310,7 @@ const EventosPage = () => {
                                         {org.nombre}
                                     </option>
                                 ))}
-                            </select>
+                            </Select>
                         </div>
 
                         <div className={styles.filterInfo}>
@@ -364,19 +365,14 @@ const EventosPage = () => {
 };
 
 const EventoModal = ({ show, evento, onClose, formatFecha, formatHora, getLugarTexto, getEstadoEvento }) => {
-    if (!show || !evento) return null;
-
-    const estado = getEstadoEvento(evento);
+    const estado = show && evento ? getEstadoEvento(evento) : null;
 
     return (
-        <div className={styles.modalOverlay} onClick={onClose}>
-            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-                <div className={styles.modalHeader}>
-                    <h2>Detalles del Evento</h2>
-                    <button className={styles.closeButton} onClick={onClose}>
-                        ×
-                    </button>
-                </div>
+        <Dialog open={show && !!evento} onOpenChange={(open) => !open && onClose()}>
+            <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                    <DialogTitle>Detalles del Evento</DialogTitle>
+                </DialogHeader>
 
                 <div className={styles.modalBody}>
                     <div className={styles.eventHeaderModal}>
@@ -414,14 +410,14 @@ const EventoModal = ({ show, evento, onClose, formatFecha, formatHora, getLugarT
                         </InfoSection>
                     </div>
 
-                    <div className={styles.modalActions}>
+                    <DialogFooter>
                         <button className={styles.btnCancel} onClick={onClose}>
                             Cerrar
                         </button>
-                    </div>
+                    </DialogFooter>
                 </div>
-            </div>
-        </div>
+            </DialogContent>
+        </Dialog>
     );
 };
 

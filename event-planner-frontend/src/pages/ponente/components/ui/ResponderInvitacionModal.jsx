@@ -1,5 +1,8 @@
 import { useState } from 'react';
-import styles from '../styles/ResponderInvitacionModal.module.css';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../../../components/ui/dialog';
+import { Textarea } from '../../../../components/ui/textarea';
+import { Label } from '../../../../components/ui/label';
+import { Button } from '../../../../components/ui/button';
 
 const ResponderInvitacionModal = ({ actividad, onClose, onSubmit }) => {
     const [respuesta, setRespuesta] = useState('');
@@ -84,18 +87,17 @@ const ResponderInvitacionModal = ({ actividad, onClose, onSubmit }) => {
     };
 
     return (
-        <div className={styles.modalOverlay}>
-            <div className={styles.modal}>
-                <div className={styles.modalHeader}>
-                    <h2>Responder Invitación</h2>
-                    <button className={styles.closeButton} onClick={onClose}>×</button>
-                </div>
+        <Dialog open={true} onOpenChange={(open) => !open && !isSubmitting && onClose()}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Responder Invitación</DialogTitle>
+                </DialogHeader>
 
-                <form onSubmit={handleSubmit} className={styles.form}>
+                <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Información de la actividad */}
-                    <div className={styles.formSection}>
-                        <h3>Actividad</h3>
-                        <div className={styles.currentInfo}>
+                    <div className="space-y-2">
+                        <h3 className="text-sm font-semibold text-slate-700">Actividad</h3>
+                        <div className="rounded-md bg-slate-50 border border-slate-200 p-3 text-sm space-y-1">
                             <p><strong>Título:</strong> {getValorActual('titulo')}</p>
                             <p><strong>Fecha:</strong> {getValorActual('fecha_actividad')}</p>
                             <p><strong>Horario:</strong> {getValorActual('hora_inicio')} - {getValorActual('hora_fin')}</p>
@@ -104,90 +106,86 @@ const ResponderInvitacionModal = ({ actividad, onClose, onSubmit }) => {
                     </div>
 
                     {/* Selección de respuesta */}
-                    <div className={styles.formSection}>
-                        <h3>Tu Respuesta</h3>
+                    <div className="space-y-2">
+                        <h3 className="text-sm font-semibold text-slate-700">Tu Respuesta</h3>
 
-                        <div className={styles.radioGroup}>
-                            <label className={styles.radioOption}>
+                        <div className="space-y-2">
+                            <label className="flex items-start gap-3 p-3 rounded-md border border-slate-200 cursor-pointer hover:bg-slate-50">
                                 <input
                                     type="radio"
                                     name="respuesta"
                                     value="aceptar"
                                     checked={respuesta === 'aceptar'}
                                     onChange={(e) => setRespuesta(e.target.value)}
+                                    className="mt-0.5"
                                 />
-                                <span className={styles.radioLabel}>
-                                    <span className={styles.radioTitle}>Aceptar Invitación</span>
-                                    <span className={styles.radioDescription}>
-                                        Confirmas tu participación en esta actividad
-                                    </span>
-                                </span>
+                                <div>
+                                    <p className="text-sm font-medium">Aceptar Invitación</p>
+                                    <p className="text-xs text-slate-500">Confirmas tu participación en esta actividad</p>
+                                </div>
                             </label>
 
-                            <label className={styles.radioOption}>
+                            <label className="flex items-start gap-3 p-3 rounded-md border border-slate-200 cursor-pointer hover:bg-slate-50">
                                 <input
                                     type="radio"
                                     name="respuesta"
                                     value="rechazar"
                                     checked={respuesta === 'rechazar'}
                                     onChange={(e) => setRespuesta(e.target.value)}
+                                    className="mt-0.5"
                                 />
-                                <span className={styles.radioLabel}>
-                                    <span className={styles.radioTitle}>Rechazar Invitación</span>
-                                    <span className={styles.radioDescription}>
-                                        No podrás participar en esta actividad
-                                    </span>
-                                </span>
+                                <div>
+                                    <p className="text-sm font-medium">Rechazar Invitación</p>
+                                    <p className="text-xs text-slate-500">No podrás participar en esta actividad</p>
+                                </div>
                             </label>
                         </div>
 
                         {errors.respuesta && (
-                            <div className={styles.errorMessage}>{errors.respuesta}</div>
+                            <p className="text-sm text-danger">{errors.respuesta}</p>
                         )}
                     </div>
 
                     {/* Motivo de rechazo (solo si se selecciona rechazar) */}
                     {respuesta === 'rechazar' && (
-                        <div className={styles.formSection}>
-                            <h3>Motivo del Rechazo</h3>
-                            <div className={styles.formGroup}>
-                                <label>Explica por qué no puedes participar:</label>
-                                <textarea
+                        <div className="space-y-4">
+                            <h3 className="text-sm font-semibold text-slate-700">Motivo del Rechazo</h3>
+                            <div className="space-y-2">
+                                <Label>Explica por qué no puedes participar:</Label>
+                                <Textarea
                                     value={motivoRechazo}
                                     onChange={(e) => setMotivoRechazo(e.target.value)}
                                     placeholder="Describe los motivos por los cuales no puedes participar (conflicto de horario, indisponibilidad, etc.)"
                                     rows="4"
-                                    className={errors.motivoRechazo ? styles.error : ''}
+                                    className={errors.motivoRechazo ? 'border-danger' : ''}
                                 />
                                 {errors.motivoRechazo && (
-                                    <div className={styles.errorMessage}>
-                                        {errors.motivoRechazo}
-                                    </div>
+                                    <p className="text-sm text-danger">{errors.motivoRechazo}</p>
                                 )}
                             </div>
                         </div>
                     )}
 
-                    <div className={styles.modalActions}>
-                        <button
+                    <DialogFooter>
+                        <Button
                             type="button"
-                            className={styles.cancelButton}
+                            variant="outline"
                             onClick={onClose}
                             disabled={isSubmitting}
                         >
                             Cancelar
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             type="submit"
-                            className={respuesta === 'aceptar' ? styles.acceptButton : styles.rejectButton}
+                            variant={respuesta === 'aceptar' ? 'success' : 'destructive'}
                             disabled={isSubmitting}
                         >
                             {isSubmitting ? 'Enviando...' : respuesta === 'aceptar' ? 'Aceptar Invitación' : 'Rechazar Invitación'}
-                        </button>
-                    </div>
+                        </Button>
+                    </DialogFooter>
                 </form>
-            </div>
-        </div>
+            </DialogContent>
+        </Dialog>
     );
 };
 

@@ -1,5 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import styles from '../styles/CrearEncuestaModal.module.css';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../../../components/ui/dialog';
+import { Input } from '../../../../components/ui/input';
+import { Label } from '../../../../components/ui/label';
+import { Select } from '../../../../components/ui/select';
+import { Textarea } from '../../../../components/ui/textarea';
+import { Button } from '../../../../components/ui/button';
 
 const CrearEncuestaModal = ({
     eventoId,
@@ -252,337 +257,293 @@ const CrearEncuestaModal = ({
     });
 
     return (
-        <div className={styles.modalOverlay} onClick={onClose}>
-            <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-                <div className={styles.modalHeader}>
-                    <h2 className={styles.modalTitle}>
+        <Dialog open={true} onOpenChange={(open) => !open && !validando && onClose()}>
+            <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                    <DialogTitle>
                         {encuestaEdit ? 'Editar Encuesta' : 'Crear Nueva Encuesta'}
-                    </h2>
-                    <button className={styles.closeButton} onClick={onClose}>
-                        ×
-                    </button>
-                </div>
+                    </DialogTitle>
+                </DialogHeader>
 
-                <form onSubmit={handleSubmit} className={styles.modalForm}>
-                    <div className={styles.formBody}>
-                        {/* Información de la encuesta */}
-                        <div className={styles.formSection}>
-                            <h3 className={styles.sectionTitle}>
-                                {encuestaEdit ? 'Información de la Encuesta' : 'Nueva Encuesta'}
-                            </h3>
+                <form onSubmit={handleSubmit}>
+                    <div className="space-y-4">
+                        <h3 className="text-sm font-semibold text-slate-700">
+                            {encuestaEdit ? 'Información de la Encuesta' : 'Nueva Encuesta'}
+                        </h3>
 
-                            {/* Filtros de Evento y Actividad */}
-                            <div className={styles.filtrosModal}>
-                                <div className={styles.formGroup}>
-                                    <label className={styles.formLabel}>
-                                        Evento *
-                                    </label>
-                                    <select
-                                        name="id_evento"
-                                        value={formData.id_evento}
-                                        onChange={handleChange}
-                                        className={`${styles.formSelect} ${errores.id_evento ? styles.inputError : ''}`}
-                                    >
-                                        <option value="">Selecciona un evento</option>
-                                        {eventos.map(evento => (
-                                            <option key={evento.id} value={evento.id}>
-                                                {evento.titulo} - {new Date(evento.fecha_inicio).toLocaleDateString()}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    {errores.id_evento && (
-                                        <span className={styles.errorText}>{errores.id_evento}</span>
-                                    )}
-                                </div>
-
-                                <div className={styles.formGroup}>
-                                    <label className={styles.formLabel}>
-                                        Actividad *
-                                    </label>
-                                    <select
-                                        name="id_actividad"
-                                        value={formData.id_actividad || ''}
-                                        onChange={handleChange}
-                                        className={`${styles.formSelect} ${errores.id_actividad ? styles.inputError : ''}`}
-                                        disabled={!formData.id_evento}
-                                    >
-                                        <option value="">Selecciona una actividad</option>
-                                        {actividadesFiltradas.map(actividad => (
-                                            <option key={actividad.id_actividad} value={actividad.id_actividad}>
-                                                {actividad.titulo} - {new Date(actividad.fecha_actividad).toLocaleDateString()}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    {errores.id_actividad && (
-                                        <span className={styles.errorText}>{errores.id_actividad}</span>
-                                    )}
-                                    {!errores.id_actividad && (
-                                        <span className={styles.helpText}>
-                                            {!formData.id_evento
-                                                ? 'Selecciona un evento primero'
-                                                : actividadesFiltradas.length === 0
-                                                    ? 'Este evento no tiene actividades'
-                                                    : 'Selecciona una actividad para la encuesta'
-                                            }
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Información de la selección */}
-                            {(formData.id_evento || formData.id_actividad) && (
-                                <div className={styles.infoAsociada}>
-                                    {getEventoSeleccionado() && (
-                                        <div className={styles.asociacionInfo}>
-                                            <span className={styles.infoLabel}>Evento seleccionado:</span>
-                                            <span className={styles.infoValue}>
-                                                {getEventoSeleccionado().titulo}
-                                            </span>
-                                        </div>
-                                    )}
-                                    {formData.id_actividad && getActividadSeleccionada() && (
-                                        <div className={styles.asociacionInfo}>
-                                            <span className={styles.infoLabel}>Actividad seleccionada:</span>
-                                            <span className={styles.infoValue}>
-                                                {getActividadSeleccionada().titulo}
-                                            </span>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-                            {/* Título */}
-                            <div className={styles.formGroup}>
-                                <label className={styles.formLabel}>
-                                    Título de la encuesta *
-                                </label>
-                                <input
-                                    type="text"
-                                    name="titulo"
-                                    value={formData.titulo}
+                        {/* Filtros de Evento y Actividad */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label>Evento *</Label>
+                                <Select
+                                    name="id_evento"
+                                    value={formData.id_evento}
                                     onChange={handleChange}
-                                    className={`${styles.formInput} ${errores.titulo ? styles.inputError : ''}`}
-                                    maxLength="200"
-                                />
-                                {errores.titulo && (
-                                    <span className={styles.errorText}>{errores.titulo}</span>
+                                    className={errores.id_evento ? 'border-danger' : ''}
+                                >
+                                    <option value="">Selecciona un evento</option>
+                                    {eventos.map(evento => (
+                                        <option key={evento.id} value={evento.id}>
+                                            {evento.titulo} - {new Date(evento.fecha_inicio).toLocaleDateString()}
+                                        </option>
+                                    ))}
+                                </Select>
+                                {errores.id_evento && (
+                                    <p className="text-sm text-danger">{errores.id_evento}</p>
                                 )}
                             </div>
 
-                            {/* Tipo y Momento */}
-                            <div className={styles.formRow}>
-                                <div className={styles.formGroup}>
-                                    <label className={styles.formLabel}>
-                                        Tipo de encuesta *
-                                    </label>
-                                    <select
-                                        name="tipo_encuesta"
-                                        value={formData.tipo_encuesta}
-                                        onChange={handleChange}
-                                        className={`${styles.formSelect} ${errores.tipo_encuesta ? styles.inputError : ''}`}
-                                    >
-                                        <option value="">Selecciona un tipo</option>
-                                        {tiposEncuesta.map(tipo => (
-                                            <option key={tipo.value} value={tipo.value}>
-                                                {tipo.label}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    {errores.tipo_encuesta && (
-                                        <span className={styles.errorText}>{errores.tipo_encuesta}</span>
-                                    )}
-                                </div>
-
-                                <div className={styles.formGroup}>
-                                    <label className={styles.formLabel}>
-                                        Momento *
-                                    </label>
-                                    <select
-                                        name="momento"
-                                        value={formData.momento}
-                                        onChange={handleChange}
-                                        className={styles.formSelect}
-                                    >
-                                        <option value="">Selecciona un momento</option>
-                                        {momentos.map(momento => (
-                                            <option key={momento.value} value={momento.value}>
-                                                {momento.label}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-
-                            {/* URL Google Form */}
-                            <div className={styles.formGroup}>
-                                <label className={styles.formLabel}>
-                                    URL de Google Forms *
-                                </label>
-                                <input
-                                    type="url"
-                                    name="url_google_form"
-                                    value={formData.url_google_form}
+                            <div className="space-y-2">
+                                <Label>Actividad *</Label>
+                                <Select
+                                    name="id_actividad"
+                                    value={formData.id_actividad || ''}
                                     onChange={handleChange}
-                                    className={`${styles.formInput} ${errores.url_google_form ? styles.inputError : ''}`}
-                                    placeholder="https://docs.google.com/forms/d/e/{FORM_ID}/viewform"
-                                />
-                                {errores.url_google_form ? (
-                                    <span className={styles.errorText}>{errores.url_google_form}</span>
+                                    className={errores.id_actividad ? 'border-danger' : ''}
+                                    disabled={!formData.id_evento}
+                                >
+                                    <option value="">Selecciona una actividad</option>
+                                    {actividadesFiltradas.map(actividad => (
+                                        <option key={actividad.id_actividad} value={actividad.id_actividad}>
+                                            {actividad.titulo} - {new Date(actividad.fecha_actividad).toLocaleDateString()}
+                                        </option>
+                                    ))}
+                                </Select>
+                                {errores.id_actividad ? (
+                                    <p className="text-sm text-danger">{errores.id_actividad}</p>
                                 ) : (
-                                    <span className={styles.helpText}>
-                                        Formato requerido: https://docs.google.com/forms/d/e/ID_FORMULARIO/viewform
-                                    </span>
+                                    <p className="text-sm text-slate-500">
+                                        {!formData.id_evento
+                                            ? 'Selecciona un evento primero'
+                                            : actividadesFiltradas.length === 0
+                                                ? 'Este evento no tiene actividades'
+                                                : 'Selecciona una actividad para la encuesta'
+                                        }
+                                    </p>
                                 )}
                             </div>
+                        </div>
 
-                            {/* Descripción */}
-                            <div className={styles.formGroup}>
-                                <label className={styles.formLabel}>
-                                    Descripción
-                                </label>
-                                <textarea
-                                    name="descripcion"
-                                    value={formData.descripcion}
-                                    onChange={handleChange}
-                                    className={styles.formTextarea}
-                                    placeholder="Describe el propósito de esta encuesta..."
-                                    rows="3"
-                                />
+                        {/* Información de la selección */}
+                        {(formData.id_evento || formData.id_actividad) && (
+                            <div className="rounded-md bg-slate-50 border border-slate-200 p-3 text-xs space-y-1">
+                                {getEventoSeleccionado() && (
+                                    <p>
+                                        <span className="text-slate-500">Evento seleccionado:</span>{' '}
+                                        <span className="font-medium">{getEventoSeleccionado().titulo}</span>
+                                    </p>
+                                )}
+                                {formData.id_actividad && getActividadSeleccionada() && (
+                                    <p>
+                                        <span className="text-slate-500">Actividad seleccionada:</span>{' '}
+                                        <span className="font-medium">{getActividadSeleccionada().titulo}</span>
+                                    </p>
+                                )}
                             </div>
+                        )}
 
-                            {/* Campos opcionales */}
-                            <button
-                                type="button"
-                                className={styles.toggleOpcionales}
-                                onClick={() => setMostrarCamposOpcionales(!mostrarCamposOpcionales)}
-                            >
-                                {mostrarCamposOpcionales ? 'Ocultar' : 'Mostrar'} campos opcionales
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                    style={{ transform: mostrarCamposOpcionales ? 'rotate(180deg)' : 'none' }}>
-                                    <path d="M19 9L12 16L5 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
-                            </button>
-
-                            {mostrarCamposOpcionales && (
-                                <div className={styles.camposOpcionales}>
-                                    {/* URL de respuestas */}
-                                    <div className={styles.formGroup}>
-                                        <label className={styles.formLabel}>
-                                            URL de Google Sheets (Respuestas)
-                                        </label>
-                                        <input
-                                            type="url"
-                                            name="url_respuestas"
-                                            value={formData.url_respuestas}
-                                            onChange={handleChange}
-                                            className={styles.formInput}
-                                            placeholder="https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}/edit"
-                                        />
-                                        <span className={styles.helpText}>
-                                            Opcional - URL donde se almacenan las respuestas
-                                        </span>
-                                    </div>
-
-                                    {/* Estado */}
-                                    <div className={styles.formGroup}>
-                                        <label className={styles.formLabel}>
-                                            Estado
-                                        </label>
-                                        <select
-                                            name="estado"
-                                            value={formData.estado}
-                                            onChange={handleChange}
-                                            className={styles.formSelect}
-                                        >
-                                            {estados.map(estado => (
-                                                <option key={estado.value} value={estado.value}>
-                                                    {estado.label}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-
-                                    {/* Fechas */}
-                                    <div className={styles.formRow}>
-                                        <div className={styles.formGroup}>
-                                            <label className={styles.formLabel}>
-                                                Fecha de inicio
-                                            </label>
-                                            <input
-                                                type="date"
-                                                name="fecha_inicio"
-                                                value={formData.fecha_inicio}
-                                                onChange={handleChange}
-                                                className={styles.formInput}
-                                            />
-                                        </div>
-
-                                        <div className={styles.formGroup}>
-                                            <label className={styles.formLabel}>
-                                                Fecha de fin
-                                            </label>
-                                            <input
-                                                type="date"
-                                                name="fecha_fin"
-                                                value={formData.fecha_fin}
-                                                onChange={handleChange}
-                                                className={`${styles.formInput} ${errores.fecha_fin ? styles.inputError : ''}`}
-                                            />
-                                            {errores.fecha_fin && (
-                                                <span className={styles.errorText}>{errores.fecha_fin}</span>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {/* Obligatoria */}
-                                    <div className={styles.formGroup}>
-                                        <label className={styles.checkboxLabel}>
-                                            <input
-                                                type="checkbox"
-                                                name="obligatoria"
-                                                checked={formData.obligatoria}
-                                                onChange={handleChange}
-                                                className={styles.checkboxInput}
-                                            />
-                                            <span className={styles.checkboxCustom}></span>
-                                            Encuesta obligatoria
-                                        </label>
-                                        <span className={styles.helpText}>
-                                            Los asistentes deberán completar esta encuesta
-                                        </span>
-                                    </div>
-                                </div>
+                        {/* Título */}
+                        <div className="space-y-2">
+                            <Label>Título de la encuesta *</Label>
+                            <Input
+                                type="text"
+                                name="titulo"
+                                value={formData.titulo}
+                                onChange={handleChange}
+                                className={errores.titulo ? 'border-danger' : ''}
+                                maxLength="200"
+                            />
+                            {errores.titulo && (
+                                <p className="text-sm text-danger">{errores.titulo}</p>
                             )}
                         </div>
-                    </div>
 
-                    <div className={styles.modalFooter}>
+                        {/* Tipo y Momento */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label>Tipo de encuesta *</Label>
+                                <Select
+                                    name="tipo_encuesta"
+                                    value={formData.tipo_encuesta}
+                                    onChange={handleChange}
+                                    className={errores.tipo_encuesta ? 'border-danger' : ''}
+                                >
+                                    <option value="">Selecciona un tipo</option>
+                                    {tiposEncuesta.map(tipo => (
+                                        <option key={tipo.value} value={tipo.value}>
+                                            {tipo.label}
+                                        </option>
+                                    ))}
+                                </Select>
+                                {errores.tipo_encuesta && (
+                                    <p className="text-sm text-danger">{errores.tipo_encuesta}</p>
+                                )}
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>Momento *</Label>
+                                <Select
+                                    name="momento"
+                                    value={formData.momento}
+                                    onChange={handleChange}
+                                >
+                                    <option value="">Selecciona un momento</option>
+                                    {momentos.map(momento => (
+                                        <option key={momento.value} value={momento.value}>
+                                            {momento.label}
+                                        </option>
+                                    ))}
+                                </Select>
+                            </div>
+                        </div>
+
+                        {/* URL Google Form */}
+                        <div className="space-y-2">
+                            <Label>URL de Google Forms *</Label>
+                            <Input
+                                type="url"
+                                name="url_google_form"
+                                value={formData.url_google_form}
+                                onChange={handleChange}
+                                className={errores.url_google_form ? 'border-danger' : ''}
+                                placeholder="https://docs.google.com/forms/d/e/{FORM_ID}/viewform"
+                            />
+                            {errores.url_google_form ? (
+                                <p className="text-sm text-danger">{errores.url_google_form}</p>
+                            ) : (
+                                <p className="text-sm text-slate-500">
+                                    Formato requerido: https://docs.google.com/forms/d/e/ID_FORMULARIO/viewform
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Descripción */}
+                        <div className="space-y-2">
+                            <Label>Descripción</Label>
+                            <Textarea
+                                name="descripcion"
+                                value={formData.descripcion}
+                                onChange={handleChange}
+                                placeholder="Describe el propósito de esta encuesta..."
+                                rows="3"
+                            />
+                        </div>
+
+                        {/* Campos opcionales */}
                         <button
                             type="button"
-                            className={styles.btnCancelar}
+                            className="flex items-center gap-1 text-sm text-brand-600 hover:text-brand-700"
+                            onClick={() => setMostrarCamposOpcionales(!mostrarCamposOpcionales)}
+                        >
+                            {mostrarCamposOpcionales ? 'Ocultar' : 'Mostrar'} campos opcionales
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                style={{ transform: mostrarCamposOpcionales ? 'rotate(180deg)' : 'none' }}>
+                                <path d="M19 9L12 16L5 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                        </button>
+
+                        {mostrarCamposOpcionales && (
+                            <div className="space-y-4">
+                                {/* URL de respuestas */}
+                                <div className="space-y-2">
+                                    <Label>URL de Google Sheets (Respuestas)</Label>
+                                    <Input
+                                        type="url"
+                                        name="url_respuestas"
+                                        value={formData.url_respuestas}
+                                        onChange={handleChange}
+                                        placeholder="https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}/edit"
+                                    />
+                                    <p className="text-sm text-slate-500">
+                                        Opcional - URL donde se almacenan las respuestas
+                                    </p>
+                                </div>
+
+                                {/* Estado */}
+                                <div className="space-y-2">
+                                    <Label>Estado</Label>
+                                    <Select
+                                        name="estado"
+                                        value={formData.estado}
+                                        onChange={handleChange}
+                                    >
+                                        {estados.map(estado => (
+                                            <option key={estado.value} value={estado.value}>
+                                                {estado.label}
+                                            </option>
+                                        ))}
+                                    </Select>
+                                </div>
+
+                                {/* Fechas */}
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label>Fecha de inicio</Label>
+                                        <Input
+                                            type="date"
+                                            name="fecha_inicio"
+                                            value={formData.fecha_inicio}
+                                            onChange={handleChange}
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label>Fecha de fin</Label>
+                                        <Input
+                                            type="date"
+                                            name="fecha_fin"
+                                            value={formData.fecha_fin}
+                                            onChange={handleChange}
+                                            className={errores.fecha_fin ? 'border-danger' : ''}
+                                        />
+                                        {errores.fecha_fin && (
+                                            <p className="text-sm text-danger">{errores.fecha_fin}</p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Obligatoria */}
+                                <div className="space-y-2">
+                                    <label className="flex items-center gap-2 text-sm cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            name="obligatoria"
+                                            checked={formData.obligatoria}
+                                            onChange={handleChange}
+                                            className="h-4 w-4 rounded border-slate-300 accent-brand-600"
+                                        />
+                                        Encuesta obligatoria
+                                    </label>
+                                    <p className="text-sm text-slate-500">
+                                        Los asistentes deberán completar esta encuesta
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <DialogFooter className="mt-6">
+                        <Button
+                            type="button"
+                            variant="outline"
                             onClick={onClose}
                             disabled={validando}
                         >
                             Cancelar
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                             type="submit"
-                            className={styles.btnConfirmar}
                             disabled={validando}
                         >
-                            {validando ? (
-                                <>
-                                    <span className={styles.spinnerSmall}></span>
-                                    {encuestaEdit ? 'Actualizando...' : 'Creando...'}
-                                </>
-                            ) : (
-                                encuestaEdit ? 'Actualizar Encuesta' : 'Crear Encuesta'
-                            )}
-                        </button>
-                    </div>
+                            {validando
+                                ? (encuestaEdit ? 'Actualizando...' : 'Creando...')
+                                : (encuestaEdit ? 'Actualizar Encuesta' : 'Crear Encuesta')
+                            }
+                        </Button>
+                    </DialogFooter>
                 </form>
-            </div>
-        </div>
+            </DialogContent>
+        </Dialog>
     );
 };
 

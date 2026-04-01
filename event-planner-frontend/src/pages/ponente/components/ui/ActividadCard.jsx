@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import styles from '../styles/ActividadCard.module.css';
+import StatusBadge from '../../../../components/ui/StatusBadge';
 import SolicitudCambioModal from './SolicitarCambioModal';
 import ResponderInvitacionModal from './ResponderInvitacionModal';
 import ActividadDetallesModal from './ActividadDetallesModal';
@@ -54,19 +55,6 @@ const ActividadCard = ({ actividad, showActions = true, onSolicitudEnviada, onAc
         return defaultValue;
     };
 
-    const getEstadoBadge = (estado) => {
-        const labels = {
-            pendiente: 'Pendiente',
-            aceptado: 'Aceptado',
-            rechazado: 'Rechazado',
-            solicitud_cambio: 'Solicitud Cambio',
-            solicitudCambio: 'Solicitud Cambio'
-        };
-        const estadoParaMostrar = estado || estadoLocal;
-        const label = labels[estadoParaMostrar] || estadoParaMostrar || 'Estado';
-        const estadoClass = styles[estadoParaMostrar] || styles[estadoParaMostrar?.replace(/_/g, '')] || '';
-        return <span className={`${styles.estadoBadge} ${estadoClass}`}>{label}</span>;
-    };
 
     const showNotification = (message, type = 'info') => {
         if (onShowNotification) {
@@ -299,7 +287,7 @@ const ActividadCard = ({ actividad, showActions = true, onSolicitudEnviada, onAc
                             {actividad.tipo || 'Actividad'}
                         </span>
                     </div>
-                    {getEstadoBadge(estadoLocal)}
+                    <StatusBadge status={estadoLocal} />
                 </div>
 
                 <div className={styles.cardBody}>

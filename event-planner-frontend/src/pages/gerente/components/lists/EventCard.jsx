@@ -1,13 +1,7 @@
 import React from 'react';
 import { Calendar, Users, Building2, Eye } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
-
-const estadoVariants = {
-  publicado:  'bg-brand-100 text-brand-700 border-brand-200',
-  activo:     'bg-emerald-100 text-emerald-700 border-emerald-200',
-  cancelado:  'bg-rose-100 text-rose-700 border-rose-200',
-  finalizado: 'bg-slate-100 text-slate-600 border-slate-200',
-};
+import StatusBadge from '../../../../components/ui/StatusBadge';
 
 const progressColors = {
   publicado:  'bg-brand-500',
@@ -27,7 +21,6 @@ const EventCard = ({
   const fechaInicio = formatFecha(evento.fecha_inicio || evento.fecha);
   const hora = formatHora(evento.hora);
   const claseKey = (estado.clase || '').toLowerCase();
-  const badgeCls = estadoVariants[claseKey] || 'bg-slate-100 text-slate-600 border-slate-200';
   const progressCls = progressColors[claseKey] || 'bg-brand-500';
 
   return (
@@ -42,9 +35,7 @@ const EventCard = ({
             {evento.modalidad || 'Presencial'}
           </span>
         </div>
-        <span className={cn('inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border shrink-0', badgeCls)}>
-          {estado.texto}
-        </span>
+        <StatusBadge status={claseKey} label={estado.texto} className="shrink-0" />
       </div>
 
       {/* Progress bar */}

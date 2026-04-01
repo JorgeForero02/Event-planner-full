@@ -1,17 +1,21 @@
 // src/pages/ActualizarEmpresa.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Building2, MapPin, Info, RefreshCw, ArrowLeft } from 'lucide-react';
 import GerenteSidebar from '../gerente/GerenteSidebar';
 import empresaService from '../../components/empresaService';
-import './ActualizarEmpresa.css';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog';
+import { Input } from '../../components/ui/input';
+import { Label } from '../../components/ui/label';
+import { Button } from '../../components/ui/button';
 import Header from '../../layouts/Header/header';
 
 const ActualizarEmpresa = () => {
     const navigate = useNavigate();
     const [showModal, setShowModal] = useState(false);
-    const [showCancelModal, setShowCancelModal] = useState(false); // Nuevo estado
+    const [showCancelModal, setShowCancelModal] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
-    const [cancelModalMessage, setCancelModalMessage] = useState(''); // Nuevo estado
+    const [cancelModalMessage, setCancelModalMessage] = useState('');
     const [user, setUser] = useState(null);
     const [empresaOriginal, setEmpresaOriginal] = useState(null);
     const [formData, setFormData] = useState({
@@ -28,6 +32,11 @@ const ActualizarEmpresa = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [loadError, setLoadError] = useState(null);
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+    const handleSidebarToggle = (isCollapsed) => {
+        setSidebarCollapsed(isCollapsed);
+    };
 
     // Cargar datos del usuario y de la empresa
     useEffect(() => {
@@ -186,7 +195,7 @@ const ActualizarEmpresa = () => {
                 correo: formData.correo
             };
 
-            console.log("📦 Datos a enviar al backend:", datosActualizados);
+            console.log("Datos a enviar al backend:", datosActualizados);
 
             const resultado = await empresaService.actualizarEmpresa(empresaOriginal.id, datosActualizados);
 
@@ -198,7 +207,7 @@ const ActualizarEmpresa = () => {
 
         } catch (error) {
             console.error("Error al actualizar empresa:", error);
-            setModalMessage("❌ Ocurrió un error al actualizar la empresa");
+            setModalMessage("Ocurrió un error al actualizar la empresa");
             setShowModal(true);
         } finally {
             setIsSubmitting(false);
@@ -238,29 +247,22 @@ const ActualizarEmpresa = () => {
         setCancelModalMessage('');
     };
 
+    const contentStyle = {
+        marginLeft: sidebarCollapsed ? '80px' : '288px',
+        width: sidebarCollapsed ? 'calc(100% - 80px)' : 'calc(100% - 288px)',
+    };
 
     // Mostrar loading mientras se cargan los datos
     if (isLoading) {
         return (
-            <div className="gerente-layout">
-                <GerenteSidebar />
-                <div className="gerente-content">
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        height: '100vh',
-                        fontSize: '1.2rem',
-                        color: '#555'
-                    }}>
-                        <div style={{ textAlign: 'center' }}>
-                            <div style={{
-                                fontSize: '3rem',
-                                marginBottom: '1rem'
-                            }}>
-                                ⏳
-                            </div>
-                            Cargando información de la empresa...
+            <div className="min-h-screen bg-slate-50">
+                <Header />
+                <div className="flex min-h-[calc(100vh-80px)]">
+                    <GerenteSidebar onToggle={handleSidebarToggle} />
+                    <div className="flex-1 flex items-center justify-center transition-all duration-300" style={contentStyle}>
+                        <div className="flex flex-col items-center gap-3 text-slate-500">
+                            <div className="w-8 h-8 border-4 border-brand-600 border-t-transparent rounded-full animate-spin" />
+                            <p className="text-sm">Cargando información de la empresa...</p>
                         </div>
                     </div>
                 </div>
@@ -271,64 +273,26 @@ const ActualizarEmpresa = () => {
     // Mostrar error si no se pudieron cargar los datos
     if (loadError) {
         return (
-            <div className="gerente-layout">
-                <GerenteSidebar />
-                <div className="gerente-content">
-                    <div style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        height: '100vh',
-                        gap: '1rem',
-                        padding: '2rem'
-                    }}>
-                        <div style={{ fontSize: '4rem' }}>⚠️</div>
-                        <p style={{
-                            color: '#e74c3c',
-                            fontSize: '1.2rem',
-                            textAlign: 'center',
-                            maxWidth: '500px'
-                        }}>
-                            {loadError}
-                        </p>
-                        <div style={{ display: 'flex', gap: '1rem' }}>
-                            <button
-                                onClick={cargarEmpresa}
-                                style={{
-                                    padding: '0.75rem 1.5rem',
-                                    backgroundColor: '#3498db',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '8px',
-                                    cursor: 'pointer',
-                                    fontSize: '1rem',
-                                    fontWeight: '500',
-                                    transition: 'background-color 0.3s'
-                                }}
-                                onMouseOver={(e) => e.target.style.backgroundColor = '#2980b9'}
-                                onMouseOut={(e) => e.target.style.backgroundColor = '#3498db'}
-                            >
-                                🔄 Reintentar
-                            </button>
-                            <button
-                                onClick={() => navigate('/gerente')}
-                                style={{
-                                    padding: '0.75rem 1.5rem',
-                                    backgroundColor: '#95a5a6',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '8px',
-                                    cursor: 'pointer',
-                                    fontSize: '1rem',
-                                    fontWeight: '500',
-                                    transition: 'background-color 0.3s'
-                                }}
-                                onMouseOver={(e) => e.target.style.backgroundColor = '#7f8c8d'}
-                                onMouseOut={(e) => e.target.style.backgroundColor = '#95a5a6'}
-                            >
-                                ← Volver al Inicio
-                            </button>
+            <div className="min-h-screen bg-slate-50">
+                <Header />
+                <div className="flex min-h-[calc(100vh-80px)]">
+                    <GerenteSidebar onToggle={handleSidebarToggle} />
+                    <div className="flex-1 flex items-center justify-center transition-all duration-300" style={contentStyle}>
+                        <div className="flex flex-col items-center gap-4 max-w-md text-center px-6">
+                            <div className="w-12 h-12 rounded-full bg-danger/10 flex items-center justify-center text-danger">
+                                <Info size={24} />
+                            </div>
+                            <p className="text-sm text-slate-600">{loadError}</p>
+                            <div className="flex gap-3">
+                                <Button onClick={cargarEmpresa}>
+                                    <RefreshCw size={16} className="mr-2" />
+                                    Reintentar
+                                </Button>
+                                <Button variant="outline" onClick={() => navigate('/gerente')}>
+                                    <ArrowLeft size={16} className="mr-2" />
+                                    Volver
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -337,265 +301,264 @@ const ActualizarEmpresa = () => {
     }
 
     return (
-        <div className="gerente-layout">
-            <GerenteSidebar />
+        <div className="min-h-screen bg-slate-50">
+            <Header />
+            <div className="flex min-h-[calc(100vh-80px)]">
+                <GerenteSidebar onToggle={handleSidebarToggle} />
 
-            <div className="gerente-content">
-                <Header />
+                <div className="flex-1 p-6 transition-all duration-300 min-w-0" style={contentStyle}>
+                    <div className="max-w-3xl mx-auto space-y-6">
 
-                <main className="gerente-main">
-                    <div className="form-container">
-                        <h2>Gestión de Actualización de Empresa</h2>
-                        <div className="info-banner">
-                            <div className="info-icon">ℹ️</div>
-                            <div className="info-text">
-                                <strong>Instrucciones</strong>
-                                <p>Modifique los campos que desea actualizar. Los cambios se guardarán inmediatamente.</p>
+                        {/* Page header */}
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => navigate('/gerente')}
+                                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors"
+                            >
+                                <ArrowLeft size={18} />
+                            </button>
+                            <h1 className="text-2xl font-bold text-slate-800">Actualizar Empresa</h1>
+                        </div>
+
+                        {/* Info banner */}
+                        <div className="flex items-start gap-3 rounded-xl border border-sky-200 bg-sky-50 p-4 text-sm">
+                            <Info size={18} className="shrink-0 text-sky-600 mt-0.5" />
+                            <div>
+                                <p className="font-semibold text-sky-800">Instrucciones</p>
+                                <p className="text-sky-700 mt-0.5">Modifique los campos que desea actualizar. Los cambios se guardarán inmediatamente.</p>
                             </div>
                         </div>
 
-                        <form onSubmit={handleSubmit}>
-                            <div className="form-section">
-                                <div className="section-header">
-                                    <span className="section-icon">🏢</span>
-                                    <h2>Información Básica de la Empresa</h2>
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            {/* Sección: Información Básica */}
+                            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
+                                <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
+                                    <Building2 size={18} className="text-slate-500" />
+                                    <h2 className="text-sm font-semibold text-slate-700">Información Básica de la Empresa</h2>
                                 </div>
 
-                                <div className="form-row">
-                                    <div className="form-group">
-                                        <label htmlFor="nombreEmpresa">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="nombreEmpresa">
                                             Nombre de la Empresa*
                                             {!hasCambiado('nombreEmpresa') ? (
-                                                <span className="badge-sin-cambios">SIN CAMBIOS</span>
+                                                <span className="ml-2 inline-block text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 tracking-wide">Sin cambios</span>
                                             ) : (
-                                                <span className="badge-modificado">MODIFICADO</span>
+                                                <span className="ml-2 inline-block text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-red-100 text-red-700 tracking-wide">Modificado</span>
                                             )}
-                                        </label>
-                                        <input
+                                        </Label>
+                                        <Input
                                             type="text"
                                             id="nombreEmpresa"
                                             name="nombreEmpresa"
                                             value={formData.nombreEmpresa}
                                             onChange={handleChange}
-                                            className={errors.nombreEmpresa ? 'error' : ''}
+                                            className={errors.nombreEmpresa ? 'border-danger' : ''}
                                         />
                                         {errors.nombreEmpresa && (
-                                            <span className="error-message">{errors.nombreEmpresa}</span>
+                                            <p className="text-sm text-danger mt-1">{errors.nombreEmpresa}</p>
                                         )}
                                     </div>
 
-                                    <div className="form-group">
-                                        <label htmlFor="nit">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="nit">
                                             NIT*
                                             {!hasCambiado('nit') ? (
-                                                <span className="badge-sin-cambios">SIN CAMBIOS</span>
+                                                <span className="ml-2 inline-block text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 tracking-wide">Sin cambios</span>
                                             ) : (
-                                                <span className="badge-modificado">MODIFICADO</span>
+                                                <span className="ml-2 inline-block text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-red-100 text-red-700 tracking-wide">Modificado</span>
                                             )}
-                                        </label>
-                                        <input
+                                        </Label>
+                                        <Input
                                             type="text"
                                             id="nit"
                                             name="nit"
                                             value={formData.nit}
                                             onChange={handleChange}
-                                            className={errors.nit ? 'error' : ''}
+                                            className={errors.nit ? 'border-danger' : ''}
                                         />
                                         {errors.nit && (
-                                            <span className="error-message">{errors.nit}</span>
+                                            <p className="text-sm text-danger mt-1">{errors.nit}</p>
                                         )}
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="form-section">
-                                <div className="section-header">
-                                    <span className="section-icon">📍</span>
-                                    <h2>Información de Contacto</h2>
+                            {/* Sección: Información de Contacto */}
+                            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
+                                <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
+                                    <MapPin size={18} className="text-slate-500" />
+                                    <h2 className="text-sm font-semibold text-slate-700">Información de Contacto</h2>
                                 </div>
 
-                                <div className="form-group full-width">
-                                    <label htmlFor="direccion">
+                                <div className="space-y-2">
+                                    <Label htmlFor="direccion">
                                         Dirección*
                                         {!hasCambiado('direccion') ? (
-                                            <span className="badge-sin-cambios">SIN CAMBIOS</span>
+                                            <span className="ml-2 inline-block text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 tracking-wide">Sin cambios</span>
                                         ) : (
-                                            <span className="badge-modificado">MODIFICADO</span>
+                                            <span className="ml-2 inline-block text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-red-100 text-red-700 tracking-wide">Modificado</span>
                                         )}
-                                    </label>
-                                    <input
+                                    </Label>
+                                    <Input
                                         type="text"
                                         id="direccion"
                                         name="direccion"
                                         value={formData.direccion}
                                         onChange={handleChange}
-                                        className={errors.direccion ? 'error' : ''}
+                                        className={errors.direccion ? 'border-danger' : ''}
                                     />
                                     {errors.direccion && (
-                                        <span className="error-message">{errors.direccion}</span>
+                                        <p className="text-sm text-danger mt-1">{errors.direccion}</p>
                                     )}
                                 </div>
 
-                                <div className="form-row">
-                                    <div className="form-group">
-                                        <label htmlFor="ciudad">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="ciudad">
                                             Ciudad*
                                             {!hasCambiado('ciudad') ? (
-                                                <span className="badge-sin-cambios">SIN CAMBIOS</span>
+                                                <span className="ml-2 inline-block text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 tracking-wide">Sin cambios</span>
                                             ) : (
-                                                <span className="badge-modificado">MODIFICADO</span>
+                                                <span className="ml-2 inline-block text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-red-100 text-red-700 tracking-wide">Modificado</span>
                                             )}
-                                        </label>
-                                        <input
+                                        </Label>
+                                        <Input
                                             type="text"
                                             id="ciudad"
                                             name="ciudad"
                                             value={formData.ciudad}
                                             onChange={handleChange}
-                                            className={errors.ciudad ? 'error' : ''}
+                                            className={errors.ciudad ? 'border-danger' : ''}
                                         />
                                         {errors.ciudad && (
-                                            <span className="error-message">{errors.ciudad}</span>
+                                            <p className="text-sm text-danger mt-1">{errors.ciudad}</p>
                                         )}
                                     </div>
 
-                                    <div className="form-group">
-                                        <label htmlFor="departamento">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="pais">
                                             Pais*
                                             {!hasCambiado('pais') ? (
-                                                <span className="badge-sin-cambios">SIN CAMBIOS</span>
+                                                <span className="ml-2 inline-block text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 tracking-wide">Sin cambios</span>
                                             ) : (
-                                                <span className="badge-modificado">MODIFICADO</span>
+                                                <span className="ml-2 inline-block text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-red-100 text-red-700 tracking-wide">Modificado</span>
                                             )}
-                                        </label>
-                                        <input
+                                        </Label>
+                                        <Input
                                             type="text"
                                             id="pais"
                                             name="pais"
                                             value={formData.pais}
                                             onChange={handleChange}
-                                            className={errors.pais ? 'error' : ''}
+                                            className={errors.pais ? 'border-danger' : ''}
                                         />
                                         {errors.pais && (
-                                            <span className="error-message">{errors.pais}</span>
+                                            <p className="text-sm text-danger mt-1">{errors.pais}</p>
                                         )}
                                     </div>
                                 </div>
 
-                                <div className="form-row">
-                                    <div className="form-group">
-                                        <label htmlFor="telefono">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="telefono">
                                             Teléfono*
                                             {!hasCambiado('telefono') ? (
-                                                <span className="badge-sin-cambios">SIN CAMBIOS</span>
+                                                <span className="ml-2 inline-block text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 tracking-wide">Sin cambios</span>
                                             ) : (
-                                                <span className="badge-modificado">MODIFICADO</span>
+                                                <span className="ml-2 inline-block text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-red-100 text-red-700 tracking-wide">Modificado</span>
                                             )}
-                                        </label>
-                                        <input
+                                        </Label>
+                                        <Input
                                             type="text"
                                             id="telefono"
                                             name="telefono"
                                             value={formData.telefono}
                                             onChange={handleChange}
-                                            className={errors.telefono ? 'error' : ''}
+                                            className={errors.telefono ? 'border-danger' : ''}
                                         />
                                         {errors.telefono && (
-                                            <span className="error-message">{errors.telefono}</span>
+                                            <p className="text-sm text-danger mt-1">{errors.telefono}</p>
                                         )}
                                     </div>
 
-                                    <div className="form-group">
-                                        <label htmlFor="correo">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="correo">
                                             Correo Electrónico*
                                             {!hasCambiado('correo') ? (
-                                                <span className="badge-sin-cambios">SIN CAMBIOS</span>
+                                                <span className="ml-2 inline-block text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 tracking-wide">Sin cambios</span>
                                             ) : (
-                                                <span className="badge-modificado">MODIFICADO</span>
+                                                <span className="ml-2 inline-block text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-red-100 text-red-700 tracking-wide">Modificado</span>
                                             )}
-                                        </label>
-                                        <input
+                                        </Label>
+                                        <Input
                                             type="email"
                                             id="correo"
                                             name="correo"
                                             value={formData.correo}
                                             onChange={handleChange}
-                                            className={errors.correo ? 'error' : ''}
+                                            className={errors.correo ? 'border-danger' : ''}
                                         />
                                         {errors.correo && (
-                                            <span className="error-message">{errors.correo}</span>
+                                            <p className="text-sm text-danger mt-1">{errors.correo}</p>
                                         )}
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="form-actions">
-                                <button
+                            {/* Form actions */}
+                            <div className="flex justify-end gap-3 pt-2">
+                                <Button
                                     type="button"
-                                    className="btn-cancel"
+                                    variant="outline"
                                     onClick={handleCancel}
                                     disabled={isSubmitting}
                                 >
                                     Cancelar
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                     type="submit"
-                                    className="btn-submit"
                                     disabled={isSubmitting}
                                 >
                                     {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
-                                </button>
+                                </Button>
                             </div>
                         </form>
                     </div>
-                </main>
+                </div>
             </div>
-            {/* Modal de confirmación */}
-            {showModal && (
-                <div className="modal-overlay">
-                    <div className="modal-content">
-                        <div className="modal-body">
-                            <p>{modalMessage}</p>
-                        </div>
-                        <div className="modal-actions">
-                            <button
-                                className="modal-btn-accept"
-                                onClick={handleCloseModal}
-                            >
-                                Aceptar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-            {/* Modal de confirmación de cancelación */}
-            {showCancelModal && (
-                <div className="modal-overlay">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <div className="modal-icon warning">⚠️</div>
-                        </div>
-                        <div className="modal-body">
-                            <p>{cancelModalMessage}</p>
-                        </div>
-                        <div className="modal-actions cancel-modal-actions">
-                            <button
-                                className="modal-btn-cancel"
-                                onClick={handleCancelModalClose}
-                            >
-                                No, continuar editando
-                            </button>
-                            <button
-                                className="modal-btn-confirm"
-                                onClick={handleCloseCancelModal}
-                            >
-                                Sí, descartar cambios
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
 
+            {/* Modal de confirmación */}
+            <Dialog open={showModal} onOpenChange={(open) => !open && handleCloseModal()}>
+                <DialogContent>
+                    <div className="py-2">
+                        <p className="text-sm text-slate-700">{modalMessage}</p>
+                    </div>
+                    <DialogFooter>
+                        <Button onClick={handleCloseModal}>Aceptar</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Modal de confirmación de cancelación */}
+            <Dialog open={showCancelModal} onOpenChange={(open) => !open && handleCancelModalClose()}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Descartar cambios</DialogTitle>
+                    </DialogHeader>
+                    <div className="py-2">
+                        <p className="text-sm text-slate-700">{cancelModalMessage}</p>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={handleCancelModalClose}>
+                            No, continuar editando
+                        </Button>
+                        <Button variant="destructive" onClick={handleCloseCancelModal}>
+                            Sí, descartar cambios
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

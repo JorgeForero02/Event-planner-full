@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import styles from './evento.module.css';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../components/ui/dialog';
 
 const Evento = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -216,13 +217,12 @@ const Evento = () => {
             </div>
 
             {/* Modal de Inscripción */}
-            {isModalOpen && selectedEvent && (
-                <div className={styles.modalOverlay} onClick={handleCloseModal}>
-                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-                        <button className={styles.closeButton} onClick={handleCloseModal}>×</button>
-
-                        <h2 className={styles.modalTitle}>{selectedEvent.nombre}</h2>
-                        <p className={styles.modalSubtitle}>Inscríbete ahora para participar en este evento</p>
+            <Dialog open={isModalOpen && !!selectedEvent} onOpenChange={(open) => !open && handleCloseModal()}>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>{selectedEvent?.nombre}</DialogTitle>
+                  <p className={styles.modalSubtitle}>Inscríbete ahora para participar en este evento</p>
+                </DialogHeader>
 
                         <div className={styles.eventImage}>
                             <img
@@ -352,9 +352,8 @@ const Evento = () => {
                                 </button>
                             </div>
                         </form>
-                    </div>
-                </div>
-            )}
+              </DialogContent>
+            </Dialog>
         </>
     );
 };

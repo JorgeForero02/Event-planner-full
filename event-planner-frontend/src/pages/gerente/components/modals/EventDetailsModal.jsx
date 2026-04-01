@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
+import StatusBadge from '../../../../components/ui/StatusBadge';
 
 const API_BASE = (process.env.REACT_APP_API_URL || 'http://localhost:3000/api').replace(/\/$/, '');
 
@@ -17,12 +18,6 @@ const Section = ({ title, children }) => (
   </div>
 );
 
-const estadoClasses = {
-  'Activo':     'bg-emerald-100 text-emerald-700',
-  'Publicado':  'bg-brand-100 text-brand-700',
-  'Cancelado':  'bg-rose-100 text-rose-700',
-  'Finalizado': 'bg-slate-100 text-slate-600',
-};
 
 const EventDetailsModal = ({
   evento,
@@ -61,7 +56,6 @@ const EventDetailsModal = ({
     return 'No especificada';
   };
 
-  const badgeCls = estadoClasses[estado.texto] || 'bg-slate-100 text-slate-600';
 
   return (
     <div
@@ -79,9 +73,7 @@ const EventDetailsModal = ({
               <h2 className="text-base font-semibold text-slate-800 truncate">
                 {evento.titulo || evento.nombre || 'Evento sin título'}
               </h2>
-              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium mt-1 ${badgeCls}`}>
-                {estado.texto}
-              </span>
+              <StatusBadge status={(estado.clase || '').toLowerCase()} label={estado.texto} className="mt-1" />
             </div>
           </div>
           <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors shrink-0 ml-4">

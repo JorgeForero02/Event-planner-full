@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import asistenciaService from '../../../components/asistenciaService';
 import encuestaService from '../../../components/encuestaService';
 import './EnviarEncuestaAsistentes.css';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../../components/ui/dialog';
 
 const EnviarEncuestaAsistentes = ({ encuesta, eventoId, onCerrar, onEnvioExitoso }) => {
     const [asistentes, setAsistentes] = useState([]);
@@ -92,29 +93,28 @@ const EnviarEncuestaAsistentes = ({ encuesta, eventoId, onCerrar, onEnvioExitoso
 
     if (loadingAsistentes) {
         return (
-            <div className="enviar-encuesta-modal">
-                <div className="modal-overlay" onClick={onCerrar}></div>
-                <div className="modal-content">
+            <Dialog open={true} onOpenChange={(open) => !open && onCerrar()}>
+                <DialogContent>
                     <div className="loading-spinner">
                         <div className="spinner"></div>
                         <p>Cargando asistentes...</p>
                     </div>
-                </div>
-            </div>
+                </DialogContent>
+            </Dialog>
         );
     }
 
     return (
-        <div className="enviar-encuesta-modal">
-            <div className="modal-overlay" onClick={onCerrar}></div>
-            <div className="modal-content">
+        <Dialog open={true} onOpenChange={(open) => !open && !loading && onCerrar()}>
+            <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                    <DialogTitle>Enviar Encuesta a Asistentes</DialogTitle>
+                </DialogHeader>
                 <div className="encuesta-card">
                     <div className="card-header">
                         <div>
-                            <h2>Enviar Encuesta a Asistentes</h2>
                             <p className="subtitle">{encuesta.titulo}</p>
                         </div>
-                        <button className="btn-close-modal" onClick={onCerrar}>✕</button>
                     </div>
 
                     <div className="card-body">
@@ -248,8 +248,8 @@ const EnviarEncuestaAsistentes = ({ encuesta, eventoId, onCerrar, onEnvioExitoso
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
+            </DialogContent>
+        </Dialog>
     );
 };
 

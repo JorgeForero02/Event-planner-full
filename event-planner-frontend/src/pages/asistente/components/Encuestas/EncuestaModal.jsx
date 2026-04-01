@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styles from './Encuestas.module.css';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../../../components/ui/dialog';
 
 const EncuestaModal = ({
     encuesta,
@@ -28,16 +29,13 @@ const EncuestaModal = ({
     };
 
     return (
-        <div className={styles.modalOverlay}>
-            <div className={styles.modalContent}>
-                <div className={styles.modalHeader}>
-                    <h2 className={styles.modalTitle}>
+        <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>
                         {esCompletada ? 'Encuesta Completada' : encuesta.titulo}
-                    </h2>
-                    <button className={styles.closeButton} onClick={onClose}>
-                        ×
-                    </button>
-                </div>
+                    </DialogTitle>
+                </DialogHeader>
 
                 <div className={styles.modalBody}>
                     {!mostrarConfirmacion ? (
@@ -172,8 +170,8 @@ const EncuestaModal = ({
                         </div>
                     )}
                 </div>
-            </div>
-        </div>
+            </DialogContent>
+        </Dialog>
     );
 };
 

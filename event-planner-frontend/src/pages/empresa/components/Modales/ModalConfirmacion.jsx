@@ -1,5 +1,5 @@
 import React from 'react';
-import './Modales.css';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../../../components/ui/dialog';
 
 export const ModalConfirmacion = ({
     show,
@@ -8,21 +8,20 @@ export const ModalConfirmacion = ({
     onCancel,
     titulo = "Confirmar Acción"
 }) => {
-    if (!show) return null;
-
     return (
-        <div className="modal-overlay">
-            <div className="modal-content">
-                <div className="modal-header">
-                    <div className="modal-icon warning">⚠️</div>
-                    <h3>{titulo}</h3>
-                </div>
-                
+        <Dialog open={show} onOpenChange={(open) => !open && onCancel()}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>
+                        <span className="modal-icon warning">⚠️</span> {titulo}
+                    </DialogTitle>
+                </DialogHeader>
+
                 <div className="modal-body">
                     <p>{mensaje}</p>
                 </div>
-                
-                <div className="modal-actions cancel-modal-actions">
+
+                <DialogFooter>
                     <button
                         className="modal-btn-cancel"
                         onClick={onCancel}
@@ -35,8 +34,8 @@ export const ModalConfirmacion = ({
                     >
                         Sí, descartar cambios
                     </button>
-                </div>
-            </div>
-        </div>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     );
 };

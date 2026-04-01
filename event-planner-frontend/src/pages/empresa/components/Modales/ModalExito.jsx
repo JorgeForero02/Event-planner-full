@@ -1,5 +1,5 @@
 import React from 'react';
-import './Modales.css';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../../../components/ui/dialog';
 
 export const ModalExito = ({
     show,
@@ -7,25 +7,27 @@ export const ModalExito = ({
     onClose,
     titulo = "Operación Exitosa"
 }) => {
-    if (!show) return null;
-
     return (
-        <div className="modal-overlay">
-            <div className="modal-content">
+        <Dialog open={show} onOpenChange={(open) => !open && onClose()}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>{titulo}</DialogTitle>
+                </DialogHeader>
+
                 <div className="modal-body">
                     <div className="modal-icon success">✅</div>
                     <p>{mensaje}</p>
                 </div>
-                
-                <div className="modal-actions">
+
+                <DialogFooter>
                     <button
                         className="modal-btn-accept"
                         onClick={onClose}
                     >
                         Aceptar
                     </button>
-                </div>
-            </div>
-        </div>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     );
 };

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from './Agenda.module.css';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../../../components/ui/dialog';
 import Calendar from '../../../../assets/calendar.png';
 import Clock from '../../../../assets/clock.png';
 import Location from '../../../../assets/lugar.png';
@@ -463,18 +464,14 @@ const Agenda = ({ misInscripciones, onRegisterAttendance }) => {
                 </div>
             )}
 
-            {modalDetallesAbierto && actividadSeleccionada && (
-                <div className={styles.modalOverlay}>
-                    <div className={`${styles.modalContent} ${styles.large}`}>
-                        <div className={styles.modalHeader}>
-                            <h2>Detalles de la Actividad</h2>
-                            <button
-                                className={styles.closeButton}
-                                onClick={cerrarModalDetalles}
-                            >
-                                ×
-                            </button>
-                        </div>
+            <Dialog
+                open={modalDetallesAbierto && !!actividadSeleccionada}
+                onOpenChange={(open) => !open && cerrarModalDetalles()}
+            >
+                <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle>Detalles de la Actividad</DialogTitle>
+                    </DialogHeader>
 
                         <div className={styles.modalBody}>
                             {cargandoDetalles ? (
@@ -633,17 +630,16 @@ const Agenda = ({ misInscripciones, onRegisterAttendance }) => {
                             )}
                         </div>
 
-                        <div className={styles.modalActions}>
+                        <DialogFooter>
                             <button
                                 className={styles.btnCerrar}
                                 onClick={cerrarModalDetalles}
                             >
                                 Cerrar
                             </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+                        </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

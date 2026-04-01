@@ -196,27 +196,69 @@ CSS variables in `src/index.css`:
 
 ### shadcn/ui components installed (`src/components/ui/`)
 
-`alert` · `badge` · `button` · `card` · `dialog` · `input` · `label` · `select` · `separator` · `skeleton` · `table` · `textarea`
+`alert` · `badge` · `button` · `card` · `dialog` · `input` · `label` · `select` · `separator` · `skeleton` · `StatusBadge` · `table` · `textarea`
 
 All use `cn()` from `src/lib/utils.js` (`clsx` + `tailwind-merge`).
 
 ### CSS migration state
 
-**Already on Tailwind** (no separate CSS file):
-- All `src/pages/admin/` components (CSS module files deleted)
-- All `src/pages/gerente/` components
-- `src/components/ui/*`
-- `src/layouts/MenuAdmin/menu.jsx` (module deleted)
+**Fully on Tailwind** (no CSS import):
+- All `src/pages/admin/` components ✅
+- `src/pages/gerente/ActualizarEmpresa.jsx` ✅ (ActualizarEmpresa.css file exists but is no longer imported)
+- `src/components/ui/*` ✅
+- `src/components/` (all non-ui components) ✅
+- `src/layouts/MenuAdmin/menu.jsx` ✅
 
-**Still using CSS Modules / plain CSS** (pending migration):
-- `src/components/Dashboard.module.css`
-- `src/contexts/NotificacionesDropdown.module.css`
-- `src/pages/asistente/asistentePanel.module.css`
-- `src/pages/organizador/OrganizerDashboard.css`
-- `src/pages/organizador/Sidebar.css`
-- `src/pages/organizador/Eventos/EventosPage.css`
-- `src/pages/auth/Login.css` / `register.css`
-- `src/pages/AdminLogin.css` / `ForgotPassword.css`
+**Gerente — still using CSS (layout/structure only):**
+- `lugares.jsx` → `lugares.module.css`
+- `ubicaciones.jsx` → `ubicaciones.module.css`
+- `eventosPage.jsx` → `eventosPage.module.css`
+- `GerenteSidebar.jsx` → `GerenteSidebar.css`
+- `GerenteDashboard.jsx` → `GerenteDashboard.css`
+- `CrearOrganizadorPage.jsx` → `CrearOrganizadorModal.css`
+
+**Organizador — still using CSS:**
+- `EditarEventoPage.jsx` → `CrearEventoPage.css` (layout only; form elements already on shadcn/ui)
+- `GestionarAgendaPage.jsx` → `GestionarAgendaPage.css`
+- `EstadisticasEncuesta.jsx` → `EstadisticasEncuesta.css`
+- `EnviarEncuestaAsistentes.jsx` → `EnviarEncuestaAsistentes.css`
+- `EncuestasManager.jsx` → `EncuestasManager.css`
+- `EstadisticasAsistencia.jsx` → `estadisticas.css`
+- `OrganizadorNotificaciones.jsx` → `OrganizadorNotificaciones.css`
+- `Actividades/ActividadesPage.jsx` → `ActividadesPage.css`
+- `Actividades/CrearActividadPage.jsx` + `EditarActividadPage.jsx` → `CrearActividadPage.css`
+
+**Asistente — still using CSS:**
+- `AsistentePanel.jsx` + `asistente.jsx` → `asistentePanel.module.css`
+- `sidebar.jsx` → `sidebar.module.css`
+- `components/Dashboard/Dashboard.jsx` → `Dashboard.module.css`
+- `components/Encuestas/` (EncuestaCard, EncuestaModal, Encuestas) → `Encuestas.module.css`
+- `components/EventCard/EventCard.jsx` → `EventCard.module.css`
+- `components/EventModal/EventModal.jsx` → `EventModal.module.css`
+- `components/InscriptionModal/InscriptionModal.jsx` → `InscriptionModal.module.css`
+- `components/InscriptionsList/InscriptionsList.jsx` → `InscriptionsList.module.css`
+- `components/Agenda/Agenda.jsx` → `Agenda.module.css`
+
+**Ponente — still using CSS:**
+- `components/ui/ActividadCard.jsx` → `ActividadCard.module.css` (layout; badge migrado a StatusBadge)
+- `components/ui/EncuestaCard.jsx` → `EncuestaCard.module.css` (layout; badge migrado a StatusBadge)
+- `components/ui/ActividadDetallesModal.jsx` + `EventModal.jsx` → `EventModal.module.css`
+- `components/ui/EstadisticasModal.jsx` → `EstadisticasModal.module.css`
+- `components/ui/EventCard.jsx` → `EventoCard.module.css`
+- `components/sections/EventosSection.jsx` → `EventosSection.module.css`
+- `components/sections/EncuestasSection.jsx` → `EncuestasSection.module.css`
+- `components/sections/MisActividadesSection.jsx` → `MisActividadesSection.module.css`
+- `containers/PonenteDashboard.jsx` → `PonenteDashboard.module.css`
+
+**Auth — still using CSS:**
+- `auth/Login.jsx` → `Login.css`
+- `auth/register.jsx` → `register.css`
+
+**Empresa — still using CSS:**
+- `empresa/ActualizarEmpresa.jsx` → `ActualizarEmpresa.css` (diferente al del gerente)
+- `empresa/afiliaciones*.jsx` → `afiliaciones.module.css`
+- `empresa/components/CampoFormulario/` → `CampoFormulario.css`
+- `empresa/components/FormularioEmpresa/` → `FormularioEmpresa.css`
 
 ---
 
@@ -252,7 +294,7 @@ REACT_APP_API_URL=http://localhost:3000/api
 
 ---
 
-## Estado Fase 3 — Unificación Visual (en progreso)
+## Estado Fase 3 — Unificación Visual ✅ FINALIZADA
 
 ### Componentes completados
 | # | Componente | Archivos tocados |
@@ -260,16 +302,63 @@ REACT_APP_API_URL=http://localhost:3000/api
 | 1 | SharedSidebar.jsx | Reemplaza 5 sidebars legacy (Asistente, Ponente, Organizador, Gerente, Admin) |
 | 2 | KpiCard.jsx | Reemplaza todas las StatCard/MetricCard con inline styles |
 | 3 | DataTable.jsx + EmptyState.jsx | asistencia.jsx, EstadisticasEncuesta.jsx, AgendaSection.jsx migradas |
+| 4 | Modales → shadcn/ui Dialog | 23 archivos migrados (ver lista completa abajo) |
+| 5 | Formularios → shadcn/ui Input/Label/Select/Textarea/Button | 11 archivos migrados (ver lista completa abajo) |
+| 6 | StatusBadge.jsx | 9 archivos migrados (ver lista completa abajo) |
 
-### Componente actual
-**4 — Modales** → Migrar modales legacy a shadcn/ui `<Dialog>`.
-Prioridad: EventModal.jsx, CrearEncuestaModal.jsx, EstadisticasModal.jsx,
-OrganizadorNotificaciones.jsx y resto de modales con CSS Module.
-Regla crítica: NO tocar lógica, handlers ni formularios internos.
+### Componente 4 — detalle archivos tocados
+- AttendanceModal.jsx, EncuestaModal.jsx, AsistentePanel.jsx, Agenda.jsx
+- CrearEncuestaModal.jsx, EstadisticasModal.jsx, ActividadDetallesModal.jsx
+- ResponderInvitacionModal.jsx, SolicitarCambioModal.jsx, EditarEncuestaModal.jsx
+- EventosSection.jsx, ModalExito.jsx, ModalConfirmacion.jsx, empresa.jsx
+- EstadisticasEncuesta.jsx, ModalConfirmacion.js, GestionarAgendaPage.jsx
+- EnviarEncuestaAsistentes.jsx, EditarEventoPage.jsx, eventosPage.jsx
+- ActualizarEmpresa.jsx, ubicaciones.jsx, evento.jsx
+- NO tocados: lugares.jsx (ya usaba Dialog), asistente.jsx (legacy no enrutado)
 
-### Pendiente
-- Componente 5: Formularios — inputs con shadcn/ui Input/Label/Alert
-- Componente 6: StatusBadge.jsx — badges con tokens event-*
+### Componente 5 — detalle archivos tocados
+- AttendanceModal.jsx — Input, Label, Button; CSS Module eliminado
+- ResponderInvitacionModal.jsx — Textarea, Label, Button; CSS Module eliminado
+- SolicitarCambioModal.jsx — Input, Textarea, Label, Button; CSS Module eliminado
+- CrearEncuestaModal.jsx — Input, Select, Textarea, Label, Button; CSS Module eliminado
+- EditarEncuestaModal.jsx — Button (confirmación cierre); bare CSS classes eliminadas
+- empresa.jsx — Input, Select, Label, Alert, Button; CSS Module eliminado
+- ActualizarEmpresa.jsx (gerente) — Full Tailwind rewrite; ActualizarEmpresa.css eliminado; sidebar collapse + lucide icons; emojis removidos
+- EditarEventoPage.jsx — Input, Select, Textarea, Label, Button; mantiene CrearEventoPage.css
+- ubicaciones.jsx — Input, Select, Textarea, Label, Button en ambos modales; corregido import duplicado de Dialog
+- lugares.jsx — Input, Select, Textarea, Label, Button en ambos modales; CSS Module se mantiene para layout
+- eventosPage.jsx (gerente) — Input, Select para filtros de búsqueda
+- NO tocados: EncuestaModal.jsx (sin inputs), EnviarEncuestaAsistentes.jsx (sin inputs), GestionarAgendaPage.jsx (sin inputs)
+
+### Notas de implementación — Componente 5
+- Error state en inputs: `className="border-danger"` (usa token `danger: '#ef4444'` del tailwind.config)
+- Error messages: `<p className="text-sm text-danger">` (texto simple)
+- Bloques de error de página: `<Alert variant="destructive"><AlertDescription>`
+- Help text: `<p className="text-sm text-slate-500">`
+- Select en este proyecto es un `<select>` nativo estilizado (no Radix popper)
+
+### Componente 6 — detalle archivos tocados
+- **Nuevo:** `src/components/ui/StatusBadge.jsx` — usa `<Badge>` de shadcn/ui, acepta `status` y `label` opcionales, exporta `STATUS_MAP`
+- EstadisticasEncuesta.jsx (organizador) — eliminado `obtenerBadgeEstado`, reemplazado en 2 lugares
+- asistencia.jsx (organizador) — eliminado `getEstadoBadgeClasses`, reemplazado en columna de tabla
+- EventCard.jsx (gerente/components/lists) — eliminado `estadoVariants`, reemplazado badge span
+- EventDetailsModal.jsx (gerente/components/modals) — eliminado `estadoClasses`, reemplazado badge span
+- LocationsList.jsx (gerente/components/lists) — reemplazado inline ternary de estado activo/inactivo
+- PlacesList.jsx (gerente/components/lists) — reemplazado inline ternary de estado activo/inactivo
+- EncuestaCard.jsx (ponente) — eliminado `getEstadoColor`/`getEstadoText`, reemplazado estadoBadge
+- ActividadCard.jsx (ponente) — eliminado `getEstadoBadge`, reemplazado call site
+- EncuestaCard.jsx (asistente) — eliminado `getEstadoStyles`/`getEstadoTexto`, reemplazado estadoBadge
+
+### STATUS_MAP — estados cubiertos
+- Eventos: `publicado`→published, `activo`→success, `cancelado`→cancelled, `finalizado`→finished, `borrador`→draft
+- Encuestas/respuestas: `activa`→success, `completada`→success, `pendiente`→warning, `cerrada`→info, `expirada`→destructive
+- Asistencia: `confirmado`/`confirmada`→success, `ausente`→destructive
+- Invitaciones: `aceptado`→success, `rechazado`→destructive, `solicitud_cambio`→info
+- Ubicaciones/lugares: `habilitada`/`habilitado`→success, `deshabilitada`/`deshabilitado`→secondary
+- Fallback: `variant="outline"` para estados desconocidos
+
+### Fase 3 finalizada
+Todos los 6 componentes del sistema de diseño han sido completados.
 
 ### Invariantes globales (recordatorio)
 - useEffect, handlers, lógica de API y estado: nunca modificar

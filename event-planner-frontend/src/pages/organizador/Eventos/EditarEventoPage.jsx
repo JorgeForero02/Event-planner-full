@@ -13,6 +13,12 @@ import {
 import { useEvento } from '../../../components/useCrearEvento';
 import './CrearEventoPage.css';
 import Sidebar from '../Sidebar';
+import { Dialog, DialogContent, DialogFooter } from '../../../components/ui/dialog';
+import { Input } from '../../../components/ui/input';
+import { Label } from '../../../components/ui/label';
+import { Select } from '../../../components/ui/select';
+import { Textarea } from '../../../components/ui/textarea';
+import { Button } from '../../../components/ui/button';
 
 const ESTADOS = [
     { value: 0, label: 'Borrador' },
@@ -116,15 +122,14 @@ const EditarEventoPage = () => {
                         <h2 className="section-title">Información Básica</h2>
 
                         <div className="form-group-crear">
-                            <label className="form-label-crear">
+                            <Label>
                                 Nombre del Evento <span className="required">*</span>
-                            </label>
-                            <input
+                            </Label>
+                            <Input
                                 type="text"
                                 value={formData.titulo}
                                 onChange={(e) => handleInputChange('titulo', e.target.value)}
                                 placeholder="Ej: Conferencia Anual de Tecnología 2025"
-                                className="form-input-crear"
                                 required
                             />
                         </div>
@@ -132,28 +137,26 @@ const EditarEventoPage = () => {
                         <div className="form-row-crear">
                             {/* FECHA DE INICIO */}
                             <div className="form-group-crear">
-                                <label className="form-label-crear">
+                                <Label>
                                     <Calendar size={18} /> Fecha de Inicio <span className="required">*</span>
-                                </label>
-                                <input
+                                </Label>
+                                <Input
                                     type="date"
                                     value={formData.fecha_inicio}
                                     onChange={(e) => handleInputChange('fecha_inicio', e.target.value)}
-                                    className="form-input-crear"
                                     required
                                 />
                             </div>
 
                             {/* HORA DE INICIO */}
                             <div className="form-group-crear">
-                                <label className="form-label-crear">
+                                <Label>
                                     Hora de Inicio <span className="required">*</span>
-                                </label>
-                                <input
+                                </Label>
+                                <Input
                                     type="time"
                                     value={formData.hora}
                                     onChange={(e) => handleInputChange('hora', e.target.value)}
-                                    className="form-input-crear"
                                     required
                                 />
                             </div>
@@ -162,14 +165,13 @@ const EditarEventoPage = () => {
                         {/* FECHA DE FIN */}
                         <div className="form-row-crear">
                             <div className="form-group-crear">
-                                <label className="form-label-crear">
+                                <Label>
                                     <Calendar size={18} /> Fecha de Fin <span className="required">*</span>
-                                </label>
-                                <input
+                                </Label>
+                                <Input
                                     type="date"
                                     value={formData.fecha_fin}
                                     onChange={(e) => handleInputChange('fecha_fin', e.target.value)}
-                                    className="form-input-crear"
                                     required
                                 />
                             </div>
@@ -178,11 +180,10 @@ const EditarEventoPage = () => {
                         {/* ESTADO DEL EVENTO */}
                         <div className="form-row-crear">
                             <div className="form-group-crear">
-                                <label className="form-label-crear">Estado del Evento</label>
-                                <select
+                                <Label>Estado del Evento</Label>
+                                <Select
                                     value={formData.estado}
                                     onChange={(e) => handleInputChange('estado', e.target.value)}
-                                    className="form-select-crear"
                                     required
                                 >
                                     {ESTADOS.map((estado) => (
@@ -190,35 +191,32 @@ const EditarEventoPage = () => {
                                             {estado.label}
                                         </option>
                                     ))}
-                                </select>
+                                </Select>
                             </div>
                         </div>
 
                         {/* CUPOS DEL EVENTO */}
                         <div className="form-group-crear">
-                            <label className="form-label-crear">
+                            <Label>
                                 Cupos <span className="required">*</span>
-                            </label>
-                            <input
+                            </Label>
+                            <Input
                                 type="number"
                                 min={0}
                                 value={formData.cupos ?? ""}
                                 onChange={(e) => handleInputChange('cupos', e.target.value)}
-                                className="form-input-crear"
                                 placeholder="Ej: 50"
                                 required
                             />
                         </div>
 
-
                         {/* DESCRIPCIÓN ADICIONAL */}
                         <div className="form-group-crear">
-                            <label className="form-label-crear">Descripción Adicional</label>
-                            <textarea
-                                value={formData.descripcion ?? ""}   // <-- esto evita que se congele
+                            <Label>Descripción Adicional</Label>
+                            <Textarea
+                                value={formData.descripcion ?? ""}
                                 onChange={(e) => handleInputChange('descripcion', e.target.value)}
                             />
-
                         </div>
                     </section>
 
@@ -246,37 +244,34 @@ const EditarEventoPage = () => {
             </div>
 
             {/* Modal éxito */}
-            {
-                mostrarModalExito && (
-                    <div className="modal-overlay">
-                        <div className="modal-exito">
-                            <CheckCircle size={48} color="#28a745" />
-                            <h2>¡Evento actualizado correctamente!</h2>
-                            <p>Redirigiendo...</p>
-                        </div>
+            <Dialog open={mostrarModalExito}>
+                <DialogContent>
+                    <div className="modal-exito">
+                        <CheckCircle size={48} color="#28a745" />
+                        <h2>¡Evento actualizado correctamente!</h2>
+                        <p>Redirigiendo...</p>
                     </div>
-                )
-            }
+                </DialogContent>
+            </Dialog>
 
             {/* Modal error */}
-            {
-                mostrarModalError && (
-                    <div className="modal-overlay">
-                        <div className="modal-exito" style={{ borderTop: '4px solid #dc3545' }}>
-                            <XCircle size={48} color="#dc3545" />
-                            <h2>Error en los Cupos</h2>
-                            <p>{errorCupos?.mensaje || ''}</p>
-                            <button
-                                className="btn-submit-crear"
-                                style={{ backgroundColor: '#dc3545' }}
-                                onClick={() => setMostrarModalError(false)}
-                            >
-                                Entendido
-                            </button>
-                        </div>
+            <Dialog open={mostrarModalError} onOpenChange={(open) => !open && setMostrarModalError(false)}>
+                <DialogContent>
+                    <div className="modal-exito" style={{ borderTop: '4px solid #dc3545' }}>
+                        <XCircle size={48} color="#dc3545" />
+                        <h2>Error en los Cupos</h2>
+                        <p>{errorCupos?.mensaje || ''}</p>
                     </div>
-                )
-            }
+                    <DialogFooter>
+                        <Button
+                            variant="destructive"
+                            onClick={() => setMostrarModalError(false)}
+                        >
+                            Entendido
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div >
     );
 };

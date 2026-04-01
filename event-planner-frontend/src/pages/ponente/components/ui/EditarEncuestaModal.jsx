@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import CrearEncuestaModal from './CrearEncuestaModal';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../../../components/ui/dialog';
+import { Button } from '../../../../components/ui/button';
 
 const EditarEncuestaModal = ({
     encuesta,
@@ -114,52 +116,40 @@ const EditarEncuestaModal = ({
 
     if (mostrarConfirmacion) {
         return (
-            <div className="modalOverlay" onClick={() => setMostrarConfirmacion(false)}>
-                <div className="modalContent" onClick={(e) => e.stopPropagation()}>
-                    <div className="modalHeader">
-                        <h2 className="modalTitle">Confirmar Cierre de Encuesta</h2>
-                        <button
-                            className="closeButton"
-                            onClick={() => setMostrarConfirmacion(false)}
-                        >
-                            ×
-                        </button>
+            <Dialog open={true} onOpenChange={(open) => !open && setMostrarConfirmacion(false)}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Confirmar Cierre de Encuesta</DialogTitle>
+                    </DialogHeader>
+
+                    <div className="space-y-3 text-sm text-slate-700">
+                        <p className="font-medium">¿Estás seguro de cerrar esta encuesta?</p>
+                        <p>Al cerrar la encuesta:</p>
+                        <ul className="list-disc list-inside space-y-1 text-slate-600">
+                            <li>No se podrán enviar más invitaciones</li>
+                            <li>No se aceptarán nuevas respuestas</li>
+                            <li>Los asistentes ya no podrán completar la encuesta</li>
+                            <li>Las estadísticas quedarán fijadas</li>
+                        </ul>
+                        <p className="text-danger text-xs">Esta acción no se puede deshacer.</p>
                     </div>
 
-                    <div className="modalBody">
-                        <div className="confirmacionContainer">
-                            <h3>¿Estás seguro de cerrar esta encuesta?</h3>
-                            <p className="confirmacionTexto">
-                                Al cerrar la encuesta:
-                            </p>
-                            <ul className="listaConfirmacion">
-                                <li>No se podrán enviar más invitaciones</li>
-                                <li>No se aceptarán nuevas respuestas</li>
-                                <li>Los asistentes ya no podrán completar la encuesta</li>
-                                <li>Las estadísticas quedarán fijadas</li>
-                            </ul>
-                            <p className="confirmacionTexto">
-                                Esta acción no se puede deshacer.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="modalFooter">
-                        <button
-                            className="btnCancelar"
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
                             onClick={() => setMostrarConfirmacion(false)}
                         >
                             Cancelar
-                        </button>
-                        <button
-                            className="btnConfirmar"
+                        </Button>
+                        <Button
+                            variant="destructive"
                             onClick={handleConfirmarCierre}
                         >
                             Sí, Cerrar Encuesta
-                        </button>
-                    </div>
-                </div>
-            </div>
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         );
     }
 

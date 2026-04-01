@@ -3,6 +3,12 @@ import { Search, Plus, Eye, Pencil, X, Trash2, CheckCircle, XCircle, AlertCircle
 import styles from './lugares.module.css';
 import Header from '../../layouts/Header/header';
 import GerenteSidebar from '../gerente/GerenteSidebar';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog';
+import { Input } from '../../components/ui/input';
+import { Label } from '../../components/ui/label';
+import { Select } from '../../components/ui/select';
+import { Textarea } from '../../components/ui/textarea';
+import { Button } from '../../components/ui/button';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
@@ -542,12 +548,11 @@ const Lugares = () => {
                             <div className={styles.filtersRow}>
                                 <div className={styles.searchBox}>
                                     <Search size={20} className={styles.searchIcon} />
-                                    <input
+                                    <Input
                                         type="text"
                                         placeholder="Buscar por nombre o descripción..."
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        className={styles.searchInput}
                                     />
                                 </div>
                             </div>
@@ -600,33 +605,28 @@ const Lugares = () => {
             </div>
 
             {/* Modal para crear lugar */}
-            {showModal && empresaSeleccionada && (
-                <div className={styles.modalOverlay} onClick={closeAllModals}>
-                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-                        <div className={styles.modalHeader}>
-                            <h2>Crear Nuevo Lugar</h2>
-                            <button className={styles.btnClose} onClick={closeAllModals}>
-                                <X size={24} />
-                            </button>
-                        </div>
+            <Dialog open={showModal && !!empresaSeleccionada} onOpenChange={(open) => !open && closeAllModals()}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Crear Nuevo Lugar</DialogTitle>
+                    </DialogHeader>
 
-                        <form onSubmit={handleSubmit} className={styles.lugarForm}>
-                            <div className={styles.formGroup}>
-                                <label>Empresa</label>
-                                <div className={styles.empresaDisplay}>
-                                    <strong>{empresaSeleccionada.nombre}</strong>
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div className="space-y-2">
+                                <Label>Empresa</Label>
+                                <div className="text-sm font-medium text-slate-700 py-1">
+                                    {empresaSeleccionada?.nombre}
                                 </div>
                             </div>
 
-                            <div className={styles.formGroup}>
-                                <label htmlFor="id_ubicacion">Ubicación *</label>
-                                <select
+                            <div className="space-y-2">
+                                <Label htmlFor="id_ubicacion">Ubicación *</Label>
+                                <Select
                                     id="id_ubicacion"
                                     name="id_ubicacion"
                                     value={formData.id_ubicacion}
                                     onChange={handleInputChange}
                                     required
-                                    className={styles.formSelect}
                                 >
                                     <option value="">
                                         {Array.isArray(ubicaciones) && ubicaciones.length > 0
@@ -639,90 +639,81 @@ const Lugares = () => {
                                             {ubicacion.lugar} - {ubicacion.direccion} {ubicacion.ciudad_nombre ? `(${ubicacion.ciudad_nombre})` : ''}
                                         </option>
                                     ))}
-                                </select>
-                                <p className={styles.helpText}>
-                                    Seleccione una de las ubicaciones disponibles para {empresaSeleccionada.nombre}
+                                </Select>
+                                <p className="text-sm text-slate-500">
+                                    Seleccione una de las ubicaciones disponibles para {empresaSeleccionada?.nombre}
                                 </p>
                             </div>
 
-                            <div className={styles.formGroup}>
-                                <label htmlFor="nombre">Nombre del Lugar *</label>
-                                <input
+                            <div className="space-y-2">
+                                <Label htmlFor="nombre">Nombre del Lugar *</Label>
+                                <Input
                                     type="text"
                                     id="nombre"
                                     name="nombre"
                                     value={formData.nombre}
                                     onChange={handleInputChange}
                                     required
-                                    className={styles.formInput}
                                 />
                             </div>
 
-                            <div className={`${styles.formGroup} ${styles.fullWidth}`}>
-                                <label htmlFor="descripcion">Descripción *</label>
-                                <textarea
+                            <div className="space-y-2">
+                                <Label htmlFor="descripcion">Descripción *</Label>
+                                <Textarea
                                     id="descripcion"
                                     name="descripcion"
                                     value={formData.descripcion}
                                     onChange={handleInputChange}
                                     rows="4"
                                     required
-                                    className={styles.formTextarea}
                                 />
                             </div>
 
-                            <div className={styles.formActions}>
-                                <button
+                            <DialogFooter>
+                                <Button
                                     type="button"
-                                    className={styles.btnCancel}
+                                    variant="outline"
                                     onClick={closeAllModals}
                                 >
                                     Cancelar
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                     type="submit"
-                                    className={styles.btnSubmit}
                                     disabled={!formData.id_ubicacion || !formData.nombre || !formData.descripcion}
                                 >
                                     Crear Lugar
-                                </button>
-                            </div>
+                                </Button>
+                            </DialogFooter>
                         </form>
-                    </div>
-                </div>
-            )}
+                </DialogContent>
+            </Dialog>
 
             {/* Modal para editar lugar */}
-            {showEditModal && editingLugar && empresaSeleccionada && (
-                <div className={styles.modalOverlay} onClick={closeAllModals}>
-                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-                        <div className={styles.modalHeader}>
-                            <h2>Editar Lugar</h2>
-                            <button className={styles.btnClose} onClick={closeAllModals}>
-                                <X size={24} />
-                            </button>
-                        </div>
+            <Dialog open={showEditModal && !!editingLugar && !!empresaSeleccionada} onOpenChange={(open) => !open && closeAllModals()}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Editar Lugar</DialogTitle>
+                    </DialogHeader>
 
-                        <form onSubmit={handleUpdate} className={styles.lugarForm}>
-                            <div className={styles.formGroup}>
-                                <label>Empresa</label>
-                                <div className={styles.empresaDisplay}>
-                                    <strong>{empresaSeleccionada.nombre}</strong>
+                        <form onSubmit={handleUpdate} className="space-y-4">
+                            <div className="space-y-2">
+                                <Label>Empresa</Label>
+                                <div className="text-sm font-medium text-slate-700 py-1">
+                                    {empresaSeleccionada?.nombre}
                                 </div>
-                                <p className={styles.helpText}>
+                                <p className="text-sm text-slate-500">
                                     La empresa no se puede modificar al editar un lugar
                                 </p>
                             </div>
 
-                            <div className={styles.formGroup}>
-                                <label htmlFor="edit_id_ubicacion">Ubicación *</label>
-                                <select
+                            <div className="space-y-2">
+                                <Label htmlFor="edit_id_ubicacion">Ubicación *</Label>
+                                <Select
                                     id="edit_id_ubicacion"
                                     name="id_ubicacion"
                                     value={formData.id_ubicacion}
                                     onChange={handleInputChange}
                                     required
-                                    className={styles.formSelect}
                                 >
                                     <option value="">Seleccione una ubicación</option>
                                     {Array.isArray(ubicaciones) && ubicaciones.map((ubicacion) => (
@@ -730,79 +721,71 @@ const Lugares = () => {
                                             {ubicacion.lugar} - {ubicacion.direccion} {ubicacion.ciudad_nombre ? `(${ubicacion.ciudad_nombre})` : ''}
                                         </option>
                                     ))}
-                                </select>
+                                </Select>
                             </div>
 
-                            <div className={styles.formGroup}>
-                                <label htmlFor="edit_nombre">Nombre del Lugar *</label>
-                                <input
+                            <div className="space-y-2">
+                                <Label htmlFor="edit_nombre">Nombre del Lugar *</Label>
+                                <Input
                                     type="text"
                                     id="edit_nombre"
                                     name="nombre"
                                     value={formData.nombre}
                                     onChange={handleInputChange}
                                     required
-                                    className={styles.formInput}
                                 />
                             </div>
 
-                            <div className={`${styles.formGroup} ${styles.fullWidth}`}>
-                                <label htmlFor="edit_descripcion">Descripción *</label>
-                                <textarea
+                            <div className="space-y-2">
+                                <Label htmlFor="edit_descripcion">Descripción *</Label>
+                                <Textarea
                                     id="edit_descripcion"
                                     name="descripcion"
                                     value={formData.descripcion}
                                     onChange={handleInputChange}
                                     rows="4"
                                     required
-                                    className={styles.formTextarea}
                                 />
                             </div>
 
-                            <div className={styles.formActions}>
-                                <button
+                            <DialogFooter>
+                                <Button
                                     type="button"
-                                    className={styles.btnCancel}
+                                    variant="outline"
                                     onClick={closeAllModals}
                                 >
                                     Cancelar
-                                </button>
-                                <button
+                                </Button>
+                                <Button
                                     type="submit"
-                                    className={styles.btnSubmit}
                                     disabled={!formData.id_ubicacion || !formData.nombre || !formData.descripcion}
                                 >
                                     Actualizar Lugar
-                                </button>
-                            </div>
+                                </Button>
+                            </DialogFooter>
                         </form>
-                    </div>
-                </div>
-            )}
+                </DialogContent>
+            </Dialog>
 
             {/* Modal de confirmación para eliminar */}
-            {showDeleteModal && deletingLugar && (
-                <div className={styles.modalOverlay} onClick={closeAllModals}>
-                    <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-                        <div className={styles.modalHeader}>
-                            <h2>Confirmar Eliminación</h2>
-                            <button className={styles.btnClose} onClick={closeAllModals}>
-                                <X size={24} />
-                            </button>
-                        </div>
+            <Dialog open={showDeleteModal && !!deletingLugar} onOpenChange={(open) => !open && closeAllModals()}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Confirmar Eliminación</DialogTitle>
+                    </DialogHeader>
 
                         <div className={styles.confirmDeleteContent}>
                             <div className={styles.warningIcon}>
                                 <Trash2 size={48} className={styles.warningIcon} />
                             </div>
                             <p>
-                                ¿Está seguro de que desea eliminar el lugar <strong>"{deletingLugar.nombre}"</strong>?
+                                ¿Está seguro de que desea eliminar el lugar <strong>"{deletingLugar?.nombre}"</strong>?
                             </p>
                             <p className={styles.warningText}>
                                 Esta acción no se puede deshacer.
                             </p>
 
-                            <div className={styles.formActions}>
+                            <DialogFooter>
                                 <button
                                     type="button"
                                     className={styles.btnCancel}
@@ -817,11 +800,10 @@ const Lugares = () => {
                                 >
                                     Eliminar Lugar
                                 </button>
-                            </div>
+                            </DialogFooter>
                         </div>
-                    </div>
-                </div>
-            )}
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

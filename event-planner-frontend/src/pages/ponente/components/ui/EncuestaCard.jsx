@@ -1,27 +1,10 @@
 import React, { useState } from 'react';
 import styles from '../styles/EncuestaCard.module.css';
+import StatusBadge from '../../../../components/ui/StatusBadge';
 
 const EncuestaCard = ({ encuesta, onEdit, onDelete, onEnviar, onVerEstadisticas }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-    // Función para obtener color según estado
-    const getEstadoColor = (estado) => {
-        switch (estado) {
-            case 'borrador': return '#6b7280';
-            case 'activa': return '#059669';
-            case 'cerrada': return '#dc2626';
-            default: return '#6b7280';
-        }
-    };
-
-    const getEstadoText = (estado) => {
-        switch (estado) {
-            case 'borrador': return 'Borrador';
-            case 'activa': return 'Activa';
-            case 'cerrada': return 'Cerrada';
-            default: return estado;
-        }
-    };
 
     const getTipoText = (tipo) => {
         switch (tipo) {
@@ -79,7 +62,7 @@ const EncuestaCard = ({ encuesta, onEdit, onDelete, onEnviar, onVerEstadisticas 
         <div
             className={styles.encuestaCard}
             style={{
-                borderLeftColor: getEstadoColor(encuesta.estado),
+                borderLeftColor: ({ borrador: '#6b7280', activa: '#059669', cerrada: '#dc2626' })[encuesta.estado] ?? '#6b7280',
                 borderLeftWidth: '4px'
             }}
         >
@@ -111,12 +94,7 @@ const EncuestaCard = ({ encuesta, onEdit, onDelete, onEnviar, onVerEstadisticas 
                                 </span>
                             )}
 
-                            <span className={`${styles.estadoBadge} ${encuesta.estado === 'completada' ? styles.estadoCompletada :
-                                encuesta.estado === 'pendiente' ? styles.estadoPendiente :
-                                    styles.estadoNoEnviada
-                                }`}>
-                                {getEstadoText(encuesta.estado)}
-                            </span>
+                            <StatusBadge status={encuesta.estado} />
                         </div>
                     </div>
 

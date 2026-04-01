@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pencil, Power, PowerOff } from 'lucide-react';
+import StatusBadge from '../../../../components/ui/StatusBadge';
 
 const LocationsList = ({ ubicaciones, onEdit, onToggle }) => {
     const getCiudadNombre = (ubicacion) =>
@@ -32,9 +33,7 @@ const LocationsList = ({ ubicaciones, onEdit, onToggle }) => {
                                 <td className="px-4 py-3 text-slate-500 max-w-[200px] truncate">{getDescripcion(ubicacion)}</td>
                                 <td className="px-4 py-3 text-slate-600">{getCiudadNombre(ubicacion)}</td>
                                 <td className="px-4 py-3">
-                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${activo ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
-                                        {activo ? 'Habilitada' : 'Deshabilitada'}
-                                    </span>
+                                    <StatusBadge status={activo ? 'habilitada' : 'deshabilitada'} />
                                 </td>
                                 <td className="px-4 py-3">
                                     <div className="flex items-center gap-2">
