@@ -4,10 +4,9 @@
     min-height: 100vh;
     background: transparent;
     padding: 2rem;
-    width: 100%;
+    width: calc(100% - 280px);
     box-sizing: border-box;
-    margin-left: 50px;
-    /* Espacio para el sidebar */
+    margin-left: 280px;
     transition: margin-left 0.3s ease;
 }
 

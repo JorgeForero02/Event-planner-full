@@ -34,6 +34,7 @@ const EncuestasManager = () => {
         cerrarFormulario,
         eliminarEncuesta,
         activarEncuesta,
+        habilitarParaPonente,
         abrirEnvioEncuesta,
         cerrarEnvioEncuesta,
         handleEnvioExitoso,
@@ -47,7 +48,6 @@ const EncuestasManager = () => {
             <div className="encuestas-header">
                 <div className="header-left">
                     <div className="icon-title">
-                        <span className="icon-encuestas">📋</span>
                         <h2>Gestionar Encuestas</h2>
                     </div>
                 </div>
@@ -65,7 +65,7 @@ const EncuestasManager = () => {
 
             {mensaje.texto && (
                 <div className={`mensaje mensaje-${mensaje.tipo}`}>
-                    {mensaje.tipo === 'success' ? '✓' : '⚠'} {mensaje.texto}
+                    {mensaje.texto}
                 </div>
             )}
 
@@ -81,8 +81,7 @@ const EncuestasManager = () => {
                     <h3>Selecciona un Evento</h3>
                     {eventos.length === 0 ? (
                         <div className="empty-state">
-                            <span className="empty-icon">📅</span>
-                            <h3>No hay eventos disponibles</h3>
+                                <h3>No hay eventos disponibles</h3>
                             <p>Crea un evento primero para poder gestionar sus encuestas</p>
                         </div>
                     ) : (
@@ -92,8 +91,8 @@ const EncuestasManager = () => {
                                     <div className="evento-info">
                                         <h4>{evento.titulo}</h4>
                                         <div className="evento-meta">
-                                            <span>📅 {evento.fecha_inicio} - {evento.fecha_fin}</span>
-                                            <span>🎟️ {evento.modalidad || 'Sin modalidad'}</span>
+                                            <span>{evento.fecha_inicio} - {evento.fecha_fin}</span>
+                                            <span>{evento.modalidad || 'Sin modalidad'}</span>
                                         </div>
                                     </div>
                                     <div className="evento-accion">
@@ -109,12 +108,14 @@ const EncuestasManager = () => {
             {eventoSeleccionado && !mostrarFormulario && !mostrarResultados && (
                 <ListaEncuestas
                     encuestas={encuestas}
+                    actividades={actividades}
                     onVerResultados={verResultados}
                     onVerEstadisticas={abrirEstadisticas}
                     onEditar={editarEncuesta}
                     onActivar={activarEncuesta}
                     onEliminar={eliminarEncuesta}
                     onEnviar={abrirEnvioEncuesta}
+                    onHabilitar={habilitarParaPonente}
                     onCrearPrimera={abrirFormularioNuevo}
                 />
             )}
@@ -145,7 +146,7 @@ const EncuestasManager = () => {
             {mostrarResultados && encuestaSeleccionada && (
                 <div className="resultados-panel">
                     <div className="resultados-header">
-                        <h3>📊 Estadísticas: {encuestaSeleccionada.titulo}</h3>
+                        <h3>Estadísticas: {encuestaSeleccionada.titulo}</h3>
                         <button className="btn-cerrar" onClick={() => setMostrarResultados(false)}>✕</button>
                     </div>
 

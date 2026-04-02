@@ -1,5 +1,6 @@
-const { Empresa } = require('../models');
+const { Empresa, Lugar, Evento } = require('../models');
 const { MENSAJES_VALIDACION, ESTADOS, MODALIDADES } = require('../constants/evento.constants');
+const { Op } = require('sequelize');
 const ActividadService = require('../services/actividad.service');
 
 class EventoValidator {
@@ -50,12 +51,63 @@ class EventoValidator {
             };
         }
 
+        if (datos.fecha_limite_cancelacion && fecha_inicio) {
+            if (new Date(datos.fecha_limite_cancelacion) > new Date(fecha_inicio)) {
+                return {
+                    esValida: false,
+                    mensaje: MENSAJES_VALIDACION.FECHA_LIMITE_CANCELACION_INVALIDA
+                };
+            }
+        }
+
         return { esValida: true };
+    }
+
+    async validarDisponibilidadSala(lugarId, fechaInicio, fechaFin, eventoIdExcluir = null) {
+        if (!lugarId) return null;
+
+        const lugar = await Lugar.findByPk(lugarId, { attributes: ['id', 'nombre', 'activo'] });
+        if (!lugar) {
+            return { esValida: false, mensaje: 'La sala seleccionada no existe.' };
+        }
+        if (!lugar.activo) {
+            return { esValida: false, mensaje: `La sala "${lugar.nombre}" está deshabilitada.` };
+        }
+
+        const where = {
+            lugar_id: lugarId,
+            estado: { [Op.notIn]: [2, 3] },
+            fecha_inicio: { [Op.lte]: fechaFin },
+            fecha_fin: { [Op.gte]: fechaInicio }
+        };
+        if (eventoIdExcluir) where.id = { [Op.ne]: eventoIdExcluir };
+
+        const conflicto = await Evento.findOne({ where, attributes: ['id', 'titulo', 'fecha_inicio', 'fecha_fin'] });
+        if (conflicto) {
+            return {
+                esValida: false,
+                mensaje: `La sala ya está ocupada por el evento "${conflicto.titulo}" (${conflicto.fecha_inicio} – ${conflicto.fecha_fin}).`
+            };
+        }
+        return null;
+    }
+
+    async validarCapacidadEvento(lugarId, cupos) {
+        if (!lugarId || !cupos) return null;
+
+        const lugar = await Lugar.findByPk(lugarId, { attributes: ['id', 'nombre', 'capacidad'] });
+        if (lugar && lugar.capacidad !== null && cupos > lugar.capacidad) {
+            return {
+                esValida: false,
+                mensaje: `Los cupos (${cupos}) superan la capacidad de la sala "${lugar.nombre}" (${lugar.capacidad}).`
+            };
+        }
+        return null;
     }
 
     // [BACKEND-FIX] B13: Aceptar evento actual para cruzar fechas parciales
     validarActualizacion(datos, eventoActual = {}) {
-        const { titulo, modalidad, fecha_inicio, fecha_fin } = datos;
+        const { titulo, modalidad, fecha_inicio, fecha_fin, fecha_limite_cancelacion } = datos;
 
         if (titulo !== undefined && (!titulo || titulo.trim().length < 3)) {
             return MENSAJES_VALIDACION.TITULO_REQUERIDO;
@@ -72,6 +124,22 @@ class EventoValidator {
         if (fechaInicioEfectiva && fechaFinEfectiva &&
             new Date(fechaInicioEfectiva) > new Date(fechaFinEfectiva)) {
             return MENSAJES_VALIDACION.FECHAS_INVALIDAS;
+        }
+
+        // Al publicar el evento, fecha_limite_cancelacion es obligatoria
+        const nuevoEstado = datos.estado !== undefined ? Number(datos.estado) : undefined;
+        if (nuevoEstado === ESTADOS.PUBLICADO) {
+            const limiteEfectivo = fecha_limite_cancelacion || eventoActual.fecha_limite_cancelacion;
+            if (!limiteEfectivo) {
+                return MENSAJES_VALIDACION.FECHA_LIMITE_CANCELACION_REQUERIDA;
+            }
+        }
+
+        // Si se proporciona, validar que no supere la fecha de inicio del evento
+        if (fecha_limite_cancelacion && fechaInicioEfectiva) {
+            if (new Date(fecha_limite_cancelacion) > new Date(fechaInicioEfectiva)) {
+                return MENSAJES_VALIDACION.FECHA_LIMITE_CANCELACION_INVALIDA;
+            }
         }
 
         return null;

@@ -465,6 +465,169 @@ class EncuestaController {
             });
         }
     }
+
+    async habilitarParaPonente(req, res) {
+        const transaction = await EncuestaService.crearTransaccion();
+        try {
+            const { encuestaId } = req.params;
+            const { actividad_id } = req.body;
+            const usuario = req.usuario;
+
+            if (!actividad_id) {
+                await transaction.rollback();
+                return res.status(CODIGOS_HTTP.BAD_REQUEST).json({
+                    success: false,
+                    message: 'actividad_id es requerido'
+                });
+            }
+
+            const actividad = await Actividad.findByPk(actividad_id);
+            if (!actividad) {
+                await transaction.rollback();
+                return res.status(CODIGOS_HTTP.NOT_FOUND).json({
+                    success: false,
+                    message: 'Actividad no encontrada'
+                });
+            }
+
+            const encuesta = await EncuestaService.habilitarParaPonente(encuestaId, actividad_id, transaction);
+
+            await AuditoriaService.registrar({
+                mensaje: `Encuesta ID ${encuestaId} habilitada para ponente de actividad ID ${actividad_id}`,
+                tipo: 'PATCH',
+                accion: 'habilitar_encuesta_ponente',
+                usuario: { id: usuario.id, nombre: usuario.nombre }
+            });
+
+            await transaction.commit();
+
+            return res.json({
+                success: true,
+                message: 'Encuesta habilitada para el ponente',
+                data: encuesta
+            });
+        } catch (error) {
+            await transaction.rollback();
+            console.error('Error al habilitar encuesta para ponente:', error);
+            return res.status(CODIGOS_HTTP.ERROR_INTERNO).json({
+                success: false,
+                message: error.message || MENSAJES.ERROR_ACTUALIZAR
+            });
+        }
+    }
+
+    async crearEncuestaRapida(req, res) {
+        const transaction = await EncuestaService.crearTransaccion();
+        try {
+            const usuario = req.usuario;
+            const { titulo, url_google_form, id_actividad, tipo_encuesta, momento, descripcion, fecha_inicio, fecha_fin } = req.body;
+
+            if (!titulo || !url_google_form || !id_actividad) {
+                await transaction.rollback();
+                return res.status(CODIGOS_HTTP.BAD_REQUEST).json({
+                    success: false,
+                    message: 'titulo, url_google_form e id_actividad son requeridos'
+                });
+            }
+
+            const ponente = await Ponente.findOne({ where: { id_usuario: usuario.id } });
+            if (!ponente) {
+                await transaction.rollback();
+                return res.status(403).json({
+                    success: false,
+                    message: 'Solo ponentes pueden crear encuestas rápidas'
+                });
+            }
+
+            const asignacion = await PonenteActividad.findOne({
+                where: { id_ponente: ponente.id_ponente, id_actividad, estado: 'aceptado' }
+            });
+            if (!asignacion) {
+                await transaction.rollback();
+                return res.status(403).json({
+                    success: false,
+                    message: 'No tienes una asignación aceptada para esta actividad'
+                });
+            }
+
+            const actividad = await Actividad.findByPk(id_actividad, { attributes: ['id_actividad', 'id_evento'] });
+
+            const encuesta = await EncuestaService.crearEncuestaRapida({
+                titulo,
+                url_google_form,
+                id_actividad,
+                id_evento: actividad?.id_evento || null,
+                tipo_encuesta: tipo_encuesta || 'durante_actividad',
+                momento: momento || 'durante',
+                descripcion: descripcion || null,
+                fecha_inicio: fecha_inicio || null,
+                fecha_fin: fecha_fin || null
+            }, transaction);
+
+            await AuditoriaService.registrar({
+                mensaje: `Ponente creó encuesta rápida: ${encuesta.titulo}`,
+                tipo: 'POST',
+                accion: 'crear_encuesta_rapida',
+                usuario: { id: usuario.id, nombre: usuario.nombre }
+            });
+
+            await transaction.commit();
+
+            return res.status(CODIGOS_HTTP.CREADO).json({
+                success: true,
+                message: 'Encuesta rápida creada y activa',
+                data: encuesta
+            });
+        } catch (error) {
+            await transaction.rollback();
+            console.error('Error al crear encuesta rápida:', error);
+            return res.status(CODIGOS_HTTP.ERROR_INTERNO).json({
+                success: false,
+                message: MENSAJES.ERROR_CREAR,
+                error: error.message
+            });
+        }
+    }
+
+    async exportarResultadosCSV(req, res) {
+        try {
+            const { encuestaId } = req.params;
+            const encuesta = await EncuestaService.obtenerPorId(encuestaId);
+            if (!encuesta) {
+                return res.status(404).json({ success: false, message: MENSAJES.NO_ENCONTRADA });
+            }
+
+            const respuestas = await RespuestaEncuesta.findAll({
+                where: { id_encuesta: encuestaId },
+                include: [{
+                    model: Asistente,
+                    as: 'asistente',
+                    include: [{ model: require('../models').Usuario, as: 'usuario', attributes: ['nombre', 'apellidos', 'correo'] }]
+                }],
+                order: [['id', 'ASC']]
+            });
+
+            const escapar = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+            const filas = [
+                ['ID', 'Nombre', 'Apellidos', 'Correo', 'Estado', 'Puntaje', 'Fecha'].map(escapar).join(',')
+            ];
+            for (const r of respuestas) {
+                const u = r.asistente?.usuario;
+                filas.push([
+                    r.id, u?.nombre ?? '', u?.apellidos ?? '', u?.correo ?? '',
+                    r.estado ?? '', r.puntaje ?? '', r.createdAt ?? ''
+                ].map(escapar).join(','));
+            }
+
+            const nombre = encuesta.titulo?.replace(/[^a-zA-Z0-9]/g, '_') ?? 'encuesta';
+            res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+            res.setHeader('Content-Disposition', `attachment; filename="resultados_${nombre}.csv"`);
+            return res.send('\uFEFF' + filas.join('\n'));
+        } catch (error) {
+            console.error('Error al exportar resultados CSV:', error);
+            return res.status(CODIGOS_HTTP.ERROR_INTERNO).json({ success: false, message: 'Error al exportar CSV' });
+        }
+    }
 }
 
 module.exports = new EncuestaController();

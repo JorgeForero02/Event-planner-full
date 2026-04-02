@@ -8,7 +8,7 @@ import { Select } from '../../components/ui/select';
 import { Textarea } from '../../components/ui/textarea';
 import { Button } from '../../components/ui/button';
 import Header from '../../layouts/Header/header';
-import GerenteSidebar from '../gerente/GerenteSidebar';
+import GerenteSidebar from '../../layouts/Sidebar/sidebarGerente/GerenteSidebar';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 

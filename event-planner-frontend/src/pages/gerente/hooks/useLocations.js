@@ -22,6 +22,12 @@ export const useLocations = () => {
     deletingUbicacion: null
   });
 
+  const [bloqueoState, setBloqueoState] = useState({
+    showBloqueoModal: false,
+    eventosBloqueantes: [],
+    ubicacionBloqueo: null
+  });
+
   const [formData, setFormData] = useState({
     lugar: '',
     direccion: '',
@@ -125,8 +131,21 @@ export const useLocations = () => {
       showNotification('success', 'Éxito', `Ubicación ${newActivo ? 'habilitada' : 'deshabilitada'} exitosamente`);
       await fetchUbicacionesByEmpresa(state.empresa.id);
     } catch (error) {
-      showNotification('error', 'Error', error.message);
+      const eventos = error.data?.eventos || error.eventos || null;
+      if (eventos && eventos.length > 0) {
+        setBloqueoState({
+          showBloqueoModal: true,
+          eventosBloqueantes: eventos,
+          ubicacionBloqueo: ubicacion
+        });
+      } else {
+        showNotification('error', 'Error', error.message);
+      }
     }
+  };
+
+  const closeBloqueoModal = () => {
+    setBloqueoState({ showBloqueoModal: false, eventosBloqueantes: [], ubicacionBloqueo: null });
   };
 
   const openCreateModal = () => {
@@ -164,6 +183,7 @@ export const useLocations = () => {
   };
 
   const closeAllModals = () => {
+    closeBloqueoModal && setBloqueoState({ showBloqueoModal: false, eventosBloqueantes: [], ubicacionBloqueo: null });
     setModalState({
       showModal: false,
       showEditModal: false,
@@ -208,6 +228,8 @@ export const useLocations = () => {
     handleUpdate,
     handleDelete,
     handleToggle,
+    ...bloqueoState,
+    closeBloqueoModal,
     openCreateModal,
     openEditModal,
     openDeleteModal,

@@ -257,7 +257,7 @@ class EventoService {
 
     construirActualizaciones(datos) {
         // [BACKEND-FIX] B13: Añadir fecha_inicio y fecha_fin al whitelist
-        const camposPermitidos = ['titulo', 'descripcion', 'modalidad', 'hora', 'cupos', 'estado', 'fecha_inicio', 'fecha_fin'];
+        const camposPermitidos = ['titulo', 'descripcion', 'modalidad', 'hora', 'cupos', 'estado', 'fecha_inicio', 'fecha_fin', 'lugar_id', 'url_virtual', 'fecha_limite_cancelacion'];
         const actualizaciones = {};
         camposPermitidos.forEach(campo => {
             if (datos[campo] !== undefined) {
@@ -426,6 +426,24 @@ class EventoService {
                 presupuesto: parseFloat(a.presupuesto || 0)
             }))
         };
+    }
+
+    async obtenerInscritosConfirmados(eventoId) {
+        const inscripciones = await Inscripcion.findAll({
+            where: { id_evento: eventoId, estado: 'Confirmada' },
+            include: [{
+                model: Asistente,
+                as: 'asistente',
+                required: true,
+                include: [{
+                    model: Usuario,
+                    as: 'usuario',
+                    attributes: ['id', 'nombre', 'correo'],
+                    required: true
+                }]
+            }]
+        });
+        return inscripciones.map(i => i.asistente.usuario);
     }
 
     async enviarEncuestasSatisfaccion(eventoId, transaction) {

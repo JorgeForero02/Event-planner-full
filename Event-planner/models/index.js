@@ -6,6 +6,8 @@ const Asistente = require('./Asistente');
 const Ponente = require('./Ponente');
 const Empresa = require('./Empresa');
 const AdministradorEmpresa = require('./AdministradorEmpresa');
+const SolicitudActualizacionEmpresa = require('./SolicitudActualizacionEmpresa');
+const PresupuestoItem = require('./PresupuestoItem');
 const Pais = require('./Pais');
 const Ciudad = require('./Ciudad');
 const Ubicacion = require('./Ubicacion');
@@ -36,6 +38,11 @@ AdministradorEmpresa.belongsTo(Usuario, { foreignKey: 'id_usuario', as: 'usuario
 
 Empresa.hasMany(AdministradorEmpresa, { foreignKey: 'id_empresa', as: 'administradores' });
 AdministradorEmpresa.belongsTo(Empresa, { foreignKey: 'id_empresa', as: 'empresa' });
+
+Empresa.hasMany(SolicitudActualizacionEmpresa, { foreignKey: 'id_empresa', as: 'solicitudesActualizacion' });
+SolicitudActualizacionEmpresa.belongsTo(Empresa, { foreignKey: 'id_empresa', as: 'empresa' });
+SolicitudActualizacionEmpresa.belongsTo(Usuario, { foreignKey: 'id_solicitante', as: 'solicitante' });
+SolicitudActualizacionEmpresa.belongsTo(Usuario, { foreignKey: 'id_admin_decision', as: 'adminDecision' });
 
 Empresa.belongsTo(Pais, { foreignKey: 'id_pais', as: 'pais' });
 Empresa.belongsTo(Ciudad, { foreignKey: 'id_ciudad', as: 'ciudad' });
@@ -164,6 +171,11 @@ RespuestaEncuesta.belongsTo(Asistente, { foreignKey: 'id_asistente', as: 'asiste
 Asistente.hasMany(RespuestaEncuesta, { foreignKey: 'id_asistente', as: 'respuestasEncuesta' });
 Encuesta.hasMany(RespuestaEncuesta, { foreignKey: 'id_encuesta', as: 'respuestas' });
 
+Evento.hasMany(PresupuestoItem, { foreignKey: 'id_evento', as: 'presupuestoItems' });
+PresupuestoItem.belongsTo(Evento, { foreignKey: 'id_evento', as: 'evento' });
+Actividad.hasMany(PresupuestoItem, { foreignKey: 'id_actividad', as: 'presupuestoItems' });
+PresupuestoItem.belongsTo(Actividad, { foreignKey: 'id_actividad', as: 'actividad' });
+
 const db = {
   sequelize,
   Sequelize: require('sequelize'),
@@ -173,6 +185,8 @@ const db = {
   Ponente,
   Empresa,
   AdministradorEmpresa,
+  SolicitudActualizacionEmpresa,
+  PresupuestoItem,
   Pais,
   Ciudad,
   Ubicacion,

@@ -53,6 +53,14 @@ class AuthService {
             };
         }
 
+        if (usuario.activo === 0) {
+            return {
+                exito: false,
+                mensaje: MENSAJES_AUTH.CUENTA_DESHABILITADA,
+                codigoEstado: CODIGOS_HTTP.NO_AUTORIZADO
+            };
+        }
+
         const { rol, rolData } = await UsuarioService.buscarRolUsuario(usuario.id);
 
         if (!rol) {

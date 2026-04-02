@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Info, Edit, AlertCircle, CheckCircle2, X } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Search, Info, Edit, AlertCircle, CheckCircle2, X, Loader2 } from 'lucide-react';
+import { API_URL } from '../../../../config/apiConfig';
 import { Input } from '../../../../components/ui/input';
 import { Button } from '../../../../components/ui/button';
 import { Badge } from '../../../../components/ui/badge';
@@ -61,37 +62,63 @@ const SYSTEM_ROLES = [
   }
 ];
 
+const getToken = () => localStorage.getItem('access_token');
+
 const useRolesState = () => {
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [toggling, setToggling] = useState(null);
 
-  useEffect(() => {
-    const loadRoles = () => {
-      setLoading(true);
-      try {
-        const savedRoles = localStorage.getItem('rolesState');
-        if (savedRoles) {
-          setRoles(JSON.parse(savedRoles));
-        } else {
-          localStorage.setItem('rolesState', JSON.stringify(SYSTEM_ROLES));
-          setRoles(SYSTEM_ROLES);
-        }
-      } catch (error) {
-        console.error('Error loading roles:', error);
+  const cargarRoles = useCallback(async () => {
+    setLoading(true);
+    try {
+      const token = getToken();
+      const resp = await fetch(`${API_URL}/admin/roles`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        const rolesApi = data.data.map(r => ({
+          ...SYSTEM_ROLES.find(s => s.tipo === r.tipo) || {},
+          ...r,
+          id: SYSTEM_ROLES.find(s => s.tipo === r.tipo)?.id ?? r.tipo
+        }));
+        const administrador = SYSTEM_ROLES.find(r => r.tipo === 'administrador');
+        setRoles([administrador, ...rolesApi]);
+      } else {
         setRoles(SYSTEM_ROLES);
       }
-      setLoading(false);
-    };
-
-    loadRoles();
+    } catch {
+      setRoles(SYSTEM_ROLES);
+    }
+    setLoading(false);
   }, []);
 
-  const updateRoles = (newRoles) => {
-    setRoles(newRoles);
-    localStorage.setItem('rolesState', JSON.stringify(newRoles));
+  useEffect(() => { cargarRoles(); }, [cargarRoles]);
+
+  const toggleRol = async (tipo, nuevoActivo, showNotification) => {
+    setToggling(tipo);
+    try {
+      const token = getToken();
+      const resp = await fetch(`${API_URL}/admin/roles/${tipo}/toggle-estado`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ activo: nuevoActivo })
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        showNotification('error', data.message || 'Error al cambiar estado del rol');
+      } else {
+        showNotification('success', data.message);
+        await cargarRoles();
+      }
+    } catch {
+      showNotification('error', 'Error de conexión al servidor');
+    }
+    setToggling(null);
   };
 
-  return { roles, loading, updateRoles };
+  return { roles, loading, toggling, toggleRol };
 };
 
 const useNotification = () => {
@@ -129,26 +156,16 @@ const Notification = ({ notification, onClose }) => {
 
 const RolesSection = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const { roles, loading, updateRoles } = useRolesState();
+  const { roles, loading, toggling, toggleRol } = useRolesState();
   const { notification, showNotification } = useNotification();
 
-  const handleToggleStatus = (rolId) => {
+  const handleToggleStatus = async (rolId) => {
     const rol = roles.find(r => r.id === rolId);
-    
-    if (!rol.editable) {
+    if (!rol?.editable) {
       showNotification('error', 'Este rol del sistema no puede ser modificado');
       return;
     }
-
-    const newRoles = roles.map(rol =>
-      rol.id === rolId ? { ...rol, activo: !rol.activo } : rol
-    );
-    
-    updateRoles(newRoles);
-    showNotification(
-      'success', 
-      `Rol "${rol.nombre}" ${!rol.activo ? 'activado' : 'desactivado'} exitosamente`
-    );
+    await toggleRol(rol.tipo, !rol.activo, showNotification);
   };
 
   const filteredRoles = roles.filter(rol =>
@@ -232,10 +249,12 @@ const RolesSection = () => {
                           size="icon"
                           onClick={() => handleToggleStatus(rol.id)}
                           title={!rol.editable ? 'Rol del sistema no modificable' : (rol.activo ? 'Desactivar rol' : 'Activar rol')}
-                          disabled={!rol.editable}
+                          disabled={!rol.editable || toggling === rol.tipo}
                           className="h-8 w-8 text-slate-500 hover:text-brand-600 disabled:opacity-50"
                         >
-                          <Edit className="h-4 w-4" />
+                          {toggling === rol.tipo
+                            ? <Loader2 className="h-4 w-4 animate-spin" />
+                            : <Edit className="h-4 w-4" />}
                         </Button>
                       </TableCell>
                     </TableRow>

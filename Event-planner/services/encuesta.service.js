@@ -82,9 +82,10 @@ class EncuestaService {
     }
 
     async obtenerPorPonente(listaActividadId) {
-        return await Encuesta. findAll({
+        return await Encuesta.findAll({
             where: {
-                id_actividad: { [Op.in]: listaActividadId }
+                id_actividad: { [Op.in]: listaActividadId },
+                habilitada_para_ponente: true
             },
             include: [
                 { model: RespuestaEncuesta, as: 'respuestas', attributes: ['id', 'estado', 'fecha_envio', 'fecha_completado'] }
@@ -97,7 +98,8 @@ class EncuestaService {
         return await Encuesta.findAll({
             where: {
                 id_actividad: { [Op.in]: listaActividadId },
-                id_evento: eventoId
+                id_evento: eventoId,
+                habilitada_para_ponente: true
             },
             include: [
                 { model: RespuestaEncuesta, as: 'respuestas', attributes: ['id', 'estado', 'fecha_envio', 'fecha_completado'] }
@@ -109,13 +111,36 @@ class EncuestaService {
     async obtenerPorPonenteActividad(actividadId) {
         return await Encuesta.findAll({
             where: {
-                id_actividad: actividadId
+                id_actividad: actividadId,
+                habilitada_para_ponente: true
             },
             include: [
                 { model: RespuestaEncuesta, as: 'respuestas', attributes: ['id', 'estado', 'fecha_envio', 'fecha_completado'] }
             ],
             order: [['fecha_creacion', 'DESC']]
         });
+    }
+
+    async habilitarParaPonente(encuestaId, actividadId, transaction) {
+        const encuesta = await Encuesta.findByPk(encuestaId);
+        if (!encuesta) {
+            throw new Error('Encuesta no encontrada');
+        }
+        await encuesta.update({
+            habilitada_para_ponente: true,
+            id_actividad: actividadId
+        }, { transaction });
+        return encuesta;
+    }
+
+    async crearEncuestaRapida(datos, transaction) {
+        const encuesta = await Encuesta.create({
+            ...datos,
+            es_encuesta_rapida: true,
+            tipo_creador: 'ponente',
+            estado: ESTADOS_ENCUESTA.ACTIVA
+        }, { transaction });
+        return encuesta;
     }
 
     async obtenerEncuestasActivas(filtros = {}) {
@@ -361,7 +386,11 @@ class EncuestaService {
             'fecha_inicio',
             'fecha_fin',
             'obligatoria',
-            'descripcion'
+            'descripcion',
+            'habilitada_para_ponente',
+            'es_encuesta_rapida',
+            'tipo_creador',
+            'id_actividad'
         ];
 
         const actualizaciones = {};

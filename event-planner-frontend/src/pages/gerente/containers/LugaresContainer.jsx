@@ -31,7 +31,6 @@ const LugaresContainer = () => {
         handleToggle,
         openCreateModal,
         openEditModal,
-        openDeleteModal,
         closeAllModals,
         handleInputChange,
         handleSearchChange,

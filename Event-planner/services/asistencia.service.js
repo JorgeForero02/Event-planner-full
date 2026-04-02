@@ -103,6 +103,67 @@ class AsistenciaService {
         });
     }
 
+    // Devuelve el registro manual del organizador para esta inscripción, si existe
+    async buscarAsistenciaManual(inscripcionId, transaction) {
+        return await Asistencia.findOne({
+            where: { inscripcion: inscripcionId, estado_manual: true },
+            transaction
+        });
+    }
+
+    // Inscripción con el evento incluido (campos mínimos para validar permisos)
+    async buscarInscripcionConEvento(inscripcionId, transaction) {
+        return await Inscripcion.findByPk(inscripcionId, {
+            include: [{
+                model: Evento,
+                as: 'evento',
+                attributes: ['id', 'titulo', 'estado', 'id_creador', 'id_empresa']
+            }],
+            transaction
+        });
+    }
+
+    // Crea o sobrescribe la asistencia con marca de registro manual del organizador.
+    // Prioridad:
+    //   1. Si ya existe un registro con estado_manual=true → actualiza estado y fecha
+    //   2. Si existe un registro sin marca manual para hoy → convierte a manual
+    //   3. Si no existe ninguno → crea uno nuevo
+    async crearOSobrescribirManual(inscripcionId, estado, fechaHoy, transaction) {
+        let asistencia = await Asistencia.findOne({
+            where: { inscripcion: inscripcionId, estado_manual: true },
+            transaction
+        });
+
+        if (asistencia) {
+            await asistencia.update(
+                { estado, fecha: fechaHoy, registrado_por: 'organizador' },
+                { transaction }
+            );
+            return asistencia;
+        }
+
+        asistencia = await Asistencia.findOne({
+            where: { inscripcion: inscripcionId, fecha: fechaHoy },
+            transaction
+        });
+
+        if (asistencia) {
+            await asistencia.update(
+                { estado, registrado_por: 'organizador', estado_manual: true },
+                { transaction }
+            );
+            return asistencia;
+        }
+
+        return await Asistencia.create({
+            inscripcion: inscripcionId,
+            fecha: fechaHoy,
+            estado,
+            registrado_por: 'organizador',
+            estado_manual: true
+        }, { transaction });
+    }
+
     async obtenerAsistenciasPorEvento(eventoId, fecha = null) {
         const whereAsistencia = {};
         if (fecha) {

@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
-import Login from './pages/auth/Login';
+import { ToastProvider } from './contexts/ToastContext';
+import Login from './pages/Login';
 import Dashboard from './components/Dashboard';
 import Admin from './pages/admin/admin';
 import PrivateRoute from './components/PrivateRoute';
@@ -15,12 +16,13 @@ import AdminLogin from './pages/AdminLogin';
 import Register from './pages/auth/register';
 import ForgotPassword from './pages/ForgotPassword';
 import GerenteDashboard from './pages/gerente/containers/GerenteDashboard';
-import ActualizarEmpresa from './pages/empresa/ActualizarEmpresa';
+import ActualizarEmpresa from './pages/gerente/ActualizarEmpresa';
 import AfiliacionesAprobadas from './pages/admin/components/sections/AfiliacionesAprobadasSection';
 import AfiliacionesPendientes from './pages/admin/components/sections/AfiliacionesPendientesSection';
 import AfiliacionesRechazadas from './pages/admin/components/sections/AfiliacionesRechazadasSection';
 import EventosContainer from './pages/gerente/containers/EventosContainer';
 import CrearOrganizadorContainer from './pages/gerente/containers/CrearOrganizadorContainer';
+import EquipoContainer from './pages/gerente/containers/EquipoContainer';
 import UbicacionesContainer from './pages/gerente/containers/UbicacionesContainer';
 import LugaresContainer from './pages/gerente/containers/LugaresContainer';
 import EditarEventoPage from './pages/organizador/Eventos/EditarEventoPage';
@@ -28,6 +30,11 @@ import Asistente from './pages/asistente/AsistentePanel';
 
 import OrganizerDashboard from './pages/organizador/OrganizerDashboard';
 import PonenteDashboard from './pages/ponente/containers/PonenteDashboard';
+import CatalogoEventos from './pages/public/CatalogoEventos';
+import SolicitudesActualizacionPage from './pages/gerente/SolicitudesActualizacionPage';
+import ReporteDesempenhoPage from './pages/gerente/ReporteDesempenhoPage';
+import PresupuestoItemsPage from './pages/organizador/Eventos/PresupuestoItemsPage';
+
 import CrearEventoPage from './pages/organizador/Eventos/CrearEventoPage';
 import GestionarAgendaPage from './pages/organizador/Agenda/GestionarAgendaPage';
 import CrearActividadPage from './pages/organizador/Actividades/CrearActividadPage';
@@ -42,10 +49,12 @@ import EncuestasManager from './pages/organizador/Encuestas/EncuestasManager';
 function App() {
   return (
     <AuthProvider>
+      <ToastProvider>
       <BrowserRouter>
         <Routes>
-          {/* Ruta pública */}
+          {/* Rutas públicas */}
           <Route path="/login" element={<Login />} />
+          <Route path="/catalogo" element={<CatalogoEventos />} />
 
           {/* Ruta protegida */}
           <Route
@@ -88,6 +97,14 @@ function App() {
             }
           />
           <Route
+            path="/gerente/equipo"
+            element={
+              <GerenteRoute>
+                <EquipoContainer />
+              </GerenteRoute>
+            }
+          />
+          <Route
             path="/gerente/ubicaciones"
             element={
               <GerenteRoute>
@@ -112,6 +129,22 @@ function App() {
             }
           />
           <Route
+            path="/gerente/eventos/crear"
+            element={
+              <GerenteRoute>
+                <CrearEventoPage />
+              </GerenteRoute>
+            }
+          />
+          <Route
+            path="/gerente/eventos/editar/:id"
+            element={
+              <GerenteRoute>
+                <EditarEventoPage />
+              </GerenteRoute>
+            }
+          />
+          <Route
             path="/gerente/actualizar-empresa"
             element={
               <GerenteRoute>
@@ -119,55 +152,37 @@ function App() {
               </GerenteRoute>
             }
           />
-
-          {/* Rutas para Asistente — protegidas por AsistenteRoute (F2) */}
           <Route
-            path="/asistente/*"
+            path="/gerente/solicitudes-actualizacion"
             element={
-              <AsistenteRoute>
-                <Asistente />
-              </AsistenteRoute>
+              <GerenteRoute>
+                <SolicitudesActualizacionPage />
+              </GerenteRoute>
+            }
+          />
+          <Route
+            path="/gerente/reporte-desempenho"
+            element={
+              <GerenteRoute>
+                <ReporteDesempenhoPage />
+              </GerenteRoute>
             }
           />
 
-          {/* Rutas específicas del asistente para mantener compatibilidad */}
-          <Route
-            path="/asistente/dashboard"
-            element={
-              <AsistenteRoute>
-                <Asistente />
-              </AsistenteRoute>
-            }
-          />
-          <Route
-            path="/asistente/eventos"
-            element={
-              <AsistenteRoute>
-                <Asistente />
-              </AsistenteRoute>
-            }
-          />
-          <Route
-            path="/asistente/agenda"
-            element={
-              <AsistenteRoute>
-                <Asistente />
-              </AsistenteRoute>
-            }
-          />
-          <Route
-            path="/asistente/inscripciones"
-            element={
-              <AsistenteRoute>
-                <Asistente />
-              </AsistenteRoute>
-            }
-          />
+          {/* Rutas Asistente — /asistente/* cubre dashboard, eventos, agenda, inscripciones, encuestas */}
           <Route
             path="/asistente/empresa"
             element={
               <AsistenteRoute>
                 <Empresa />
+              </AsistenteRoute>
+            }
+          />
+          <Route
+            path="/asistente/*"
+            element={
+              <AsistenteRoute>
+                <Asistente />
               </AsistenteRoute>
             }
           />
@@ -305,18 +320,18 @@ function App() {
               </OrganizadorRoute>
             }
           />
-
-          {/* Rutas Ponente — protegidas por PonenteRoute (F2) */}
           <Route
-            path="/ponente"
+            path="/organizador/eventos/:eventoId/presupuesto"
             element={
-              <PonenteRoute>
-                <PonenteDashboard />
-              </PonenteRoute>
+              <OrganizadorRoute>
+                <PresupuestoItemsPage />
+              </OrganizadorRoute>
             }
           />
+
+          {/* Rutas Ponente — protegidas por PonenteRoute */}
           <Route
-            path="/ponente/dashboard"
+            path="/ponente"
             element={
               <PonenteRoute>
                 <PonenteDashboard />
@@ -332,7 +347,7 @@ function App() {
             }
           />
           <Route
-            path="/ponente/agenda"
+            path="/ponente/actividades"
             element={
               <PonenteRoute>
                 <PonenteDashboard />
@@ -340,7 +355,7 @@ function App() {
             }
           />
           <Route
-            path="/ponente/actividades"
+            path="/ponente/encuestas"
             element={
               <PonenteRoute>
                 <PonenteDashboard />
@@ -365,6 +380,7 @@ function App() {
           />
         </Routes>
       </BrowserRouter>
+      </ToastProvider>
     </AuthProvider>
   );
 }

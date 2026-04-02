@@ -44,6 +44,36 @@ class AsistenciaService {
             throw error;
         }
     }
+
+    async actualizarAsistenciaManual(idAsistencia, estado) {
+        try {
+            const token = localStorage.getItem('access_token') || localStorage.getItem('token');
+            const response = await axios.patch(
+                `${API_URL}/asistencias/${idAsistencia}/manual`,
+                { estado },
+                { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } }
+            );
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async exportarInscritosCSV(idEvento) {
+        try {
+            const token = localStorage.getItem('access_token') || localStorage.getItem('token');
+            const response = await axios.get(
+                `${API_URL}/eventos/${idEvento}/inscritos/exportar-csv`,
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                    responseType: 'blob'
+                }
+            );
+            return response;
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 
 const asistenciaService = new AsistenciaService();

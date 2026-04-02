@@ -15,7 +15,6 @@ export const EstadoError = ({ error, onReintentar, onVolver }) => {
                     gap: '1rem',
                     padding: '2rem'
                 }}>
-                    <div style={{ fontSize: '4rem' }}>⚠️</div>
                     <p style={{
                         color: '#e74c3c',
                         fontSize: '1.2rem',
@@ -39,7 +38,7 @@ export const EstadoError = ({ error, onReintentar, onVolver }) => {
                                 transition: 'background-color 0.3s'
                             }}
                         >
-                            🔄 Reintentar
+                            Reintentar
                         </button>
                         <button
                             onClick={onVolver}

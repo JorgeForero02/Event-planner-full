@@ -1,5 +1,6 @@
 import React from 'react';
-import { Calendar, Users, Building2, Eye } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Calendar, Users, Building2, Eye, Pencil } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import StatusBadge from '../../../../components/ui/StatusBadge';
 
@@ -17,6 +18,7 @@ const EventCard = ({
   formatHora,
   getEstadoEvento
 }) => {
+  const navigate = useNavigate();
   const estado = getEstadoEvento(evento);
   const fechaInicio = formatFecha(evento.fecha_inicio || evento.fecha);
   const hora = formatHora(evento.hora);
@@ -85,13 +87,20 @@ const EventCard = ({
       </div>
 
       {/* CTA */}
-      <div className="mt-auto px-5 pb-5">
+      <div className="mt-auto px-5 pb-5 flex gap-2">
         <button
           onClick={() => onVerDetalles(evento)}
-          className="w-full flex items-center justify-center gap-2 h-9 rounded-lg bg-brand-50 text-brand-700 text-xs font-semibold hover:bg-brand-100 transition-colors border border-brand-200"
+          className="flex-1 flex items-center justify-center gap-2 h-9 rounded-lg bg-brand-50 text-brand-700 text-xs font-semibold hover:bg-brand-100 transition-colors border border-brand-200"
         >
           <Eye size={14} />
-          Ver Detalles
+          Ver
+        </button>
+        <button
+          onClick={() => navigate(`/gerente/eventos/editar/${evento.id}`)}
+          className="flex-1 flex items-center justify-center gap-2 h-9 rounded-lg bg-slate-50 text-slate-700 text-xs font-semibold hover:bg-slate-100 transition-colors border border-slate-200"
+        >
+          <Pencil size={14} />
+          Editar
         </button>
       </div>
     </div>

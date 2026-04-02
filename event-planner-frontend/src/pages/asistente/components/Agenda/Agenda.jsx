@@ -622,7 +622,7 @@ const Agenda = ({ misInscripciones, onRegisterAttendance }) => {
                                                 rel="noopener noreferrer"
                                                 className={styles.enlaceActividad}
                                             >
-                                                🔗 Acceder a la actividad
+                                                Acceder a la actividad
                                             </a>
                                         </div>
                                     )}

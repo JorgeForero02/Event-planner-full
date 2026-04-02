@@ -49,57 +49,81 @@ class ActividadValidator {
     }
 
     async validarSolapamiento(actividadId, eventoId, fechaActividad, horaInicio, horaFin, idsLugares = [], idsPonentes = []) {
-        const actividadesEnFecha = await Actividad.findAll({
-            where: {
-                id_evento: eventoId,
-                fecha_actividad: fechaActividad,
-                id_actividad: {
-                    [Op.ne]: actividadId || 0 
-                }
-            },
-            include: [
-                {
-                    model: Lugar,
-                    as: 'lugares',
-                    attributes: ['id'],
-                    through: { attributes: [] }
-                }
-            ]
-        });
-
-        for (const actividad of actividadesEnFecha) {
-            const haySolapamiento = this._detectarSolapamientoHorario(
-                horaInicio,
-                horaFin,
-                actividad.hora_inicio,
-                actividad.hora_fin
+        if (idsLugares.length > 0) {
+            const conflictoSala = await this._verificarConflictoSala(
+                actividadId, fechaActividad, horaInicio, horaFin, idsLugares
             );
-
-            if (haySolapamiento) {
-                const lugaresActividad = actividad.lugares.map(l => l.id);
-                const compartenSala = idsLugares.some(id => lugaresActividad.includes(id));
-
-                if (compartenSala) {
-                    return 'Conflicto detectado: el horario seleccionado se superpone con otra actividad en la misma sala.';
-                }
-
-                if (idsPonentes && idsPonentes.length > 0) {
-                    const ponentesActividad = await PonenteActividad.findAll({
-                        where: { id_actividad: actividad.id_actividad },
-                        attributes: ['id_ponente']
-                    });
-
-                    const idsPonenteActividad = ponentesActividad.map(pa => pa.id_ponente);
-                    const compartenPonente = idsPonentes.some(id => idsPonenteActividad.includes(id));
-
-                    if (compartenPonente) {
-                        return 'Conflicto detectado: el horario seleccionado se superpone con otra actividad con el mismo ponente.';
-                    }
-                }
-            }
+            if (conflictoSala) return conflictoSala;
         }
 
-        return null; 
+        if (idsPonentes && idsPonentes.length > 0) {
+            const conflictoPonente = await this._verificarConflictoPonente(
+                actividadId, eventoId, fechaActividad, horaInicio, horaFin, idsPonentes
+            );
+            if (conflictoPonente) return conflictoPonente;
+        }
+
+        return null;
+    }
+
+    async _verificarConflictoSala(actividadId, fechaActividad, horaInicio, horaFin, idsLugares) {
+        const asignaciones = await LugarActividad.findAll({
+            where: { id_lugar: { [Op.in]: idsLugares } },
+            include: [{
+                model: Actividad,
+                as: 'actividad',
+                required: true,
+                where: {
+                    fecha_actividad: fechaActividad,
+                    id_actividad: { [Op.ne]: actividadId || 0 }
+                }
+            }]
+        });
+
+        for (const asignacion of asignaciones) {
+            const act = asignacion.actividad;
+            if (this._detectarSolapamientoHorario(horaInicio, horaFin, act.hora_inicio, act.hora_fin)) {
+                return {
+                    mensaje: `Conflicto de sala: el horario se superpone con la actividad "${act.titulo}" (${act.hora_inicio.slice(0,5)}–${act.hora_fin.slice(0,5)}).`,
+                    actividadConflicto: {
+                        titulo: act.titulo,
+                        hora_inicio: act.hora_inicio,
+                        hora_fin: act.hora_fin
+                    }
+                };
+            }
+        }
+        return null;
+    }
+
+    async _verificarConflictoPonente(actividadId, eventoId, fechaActividad, horaInicio, horaFin, idsPonentes) {
+        const asignaciones = await PonenteActividad.findAll({
+            where: { id_ponente: { [Op.in]: idsPonentes } },
+            include: [{
+                model: Actividad,
+                as: 'actividad',
+                required: true,
+                where: {
+                    fecha_actividad: fechaActividad,
+                    id_actividad: { [Op.ne]: actividadId || 0 }
+                }
+            }]
+        });
+
+        for (const asignacion of asignaciones) {
+            const act = asignacion.actividad;
+            if (this._detectarSolapamientoHorario(horaInicio, horaFin, act.hora_inicio, act.hora_fin)) {
+                return {
+                    mensaje: `Conflicto de ponente: el horario se superpone con la actividad "${act.titulo}" (${act.hora_inicio.slice(0,5)}–${act.hora_fin.slice(0,5)}).`,
+                    actividadConflicto: {
+                        titulo: act.titulo,
+                        hora_inicio: act.hora_inicio,
+                        hora_fin: act.hora_fin
+                    }
+                };
+            }
+        }
+        return null;
     }
 
     async validarCapacidadSala(idsLugares, eventoId) {

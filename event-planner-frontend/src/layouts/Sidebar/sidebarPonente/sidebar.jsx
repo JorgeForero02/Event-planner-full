@@ -5,29 +5,31 @@ import {
     FileText,
     LayoutDashboard,
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import SharedSidebar from '../SharedSidebar';
 
 const navItems = [
-    { id: 'dashboard',   view: 'dashboard',   label: 'Dashboard',      Icon: LayoutDashboard },
-    { id: 'eventos',     view: 'eventos',      label: 'Eventos',         Icon: CalendarDays    },
-    { id: 'actividades', view: 'actividades',  label: 'Mis Actividades', Icon: ClipboardList   },
-    { id: 'encuestas',   view: 'encuestas',    label: 'Encuestas',       Icon: FileText        },
+    { id: 'dashboard',   path: '/ponente',             label: 'Dashboard',      Icon: LayoutDashboard },
+    { id: 'eventos',     path: '/ponente/eventos',      label: 'Eventos',         Icon: CalendarDays    },
+    { id: 'actividades', path: '/ponente/actividades',  label: 'Mis Actividades', Icon: ClipboardList   },
+    { id: 'encuestas',   path: '/ponente/encuestas',    label: 'Encuestas',       Icon: FileText        },
 ];
 
-const Sidebar = ({ onToggle, onNavigate, currentView }) => {
+const Sidebar = ({ onToggle }) => {
+    const navigate = useNavigate();
+
     const handleLogout = () => {
         localStorage.removeItem('user');
-        localStorage.removeItem('token');
-        window.location.href = '/login';
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        navigate('/login');
     };
 
     return (
         <SharedSidebar
             title="Panel de Ponente"
             items={navItems}
-            mode="view"
-            currentView={currentView}
-            onNavigate={onNavigate}
+            mode="router"
             onToggle={onToggle}
             onLogout={handleLogout}
         />

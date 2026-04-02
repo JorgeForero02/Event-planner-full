@@ -106,6 +106,19 @@ const Encuesta = sequelize.define('Encuesta', {
         type: DataTypes.TEXT,
         allowNull: true
     },
+    habilitada_para_ponente: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
+    es_encuesta_rapida: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    },
+    tipo_creador: {
+        type: DataTypes.ENUM('organizador', 'ponente'),
+        allowNull: true,
+        defaultValue: 'organizador'
+    },
     fecha_creacion: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW

@@ -80,6 +80,24 @@ const Evento = sequelize.define('Evento', {
       }
     }
   },
+  lugar_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: { model: 'Lugar', key: 'id' }
+  },
+  url_virtual: {
+    type: DataTypes.STRING(500),
+    allowNull: true
+  },
+  fecha_limite_cancelacion: {
+    type: DataTypes.DATEONLY,
+    allowNull: true,
+    validate: {
+      isDate: {
+        msg: 'La fecha límite de cancelación debe ser una fecha válida'
+      }
+    }
+  },
   estado: {
     type: DataTypes.TINYINT,
     allowNull: false,

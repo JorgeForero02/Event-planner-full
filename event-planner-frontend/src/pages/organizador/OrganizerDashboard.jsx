@@ -1,31 +1,11 @@
 // OrganizerDashboard.jsx
 import React from 'react';
 import { useOrganizerDashboard } from '../../components/DashboardOrganizador';
-import {
-    Header,
-    MainContent,
-    PasswordModal
-} from './OrganizerComponents';
+import { Header, MainContent } from './OrganizerComponents';
 import Sidebar from './Sidebar';
 
 export default function OrganizerDashboard() {
-    const {
-        activeSection,
-        isSidebarOpen,
-        stats,
-        recentEvents,
-        showPasswordModal,
-        passwordData,
-        showPasswords,
-        passwordError,
-        passwordSuccess,
-        isLoading,
-        toggleSidebar,
-        closePasswordModal,
-        handlePasswordChange,
-        togglePasswordVisibility,
-        handleSubmitPassword
-    } = useOrganizerDashboard();
+    const { activeSection, isSidebarOpen, stats, recentEvents, toggleSidebar } = useOrganizerDashboard();
 
     return (
         <div className="flex min-h-screen bg-slate-50">
@@ -36,26 +16,12 @@ export default function OrganizerDashboard() {
                     isSidebarOpen={isSidebarOpen}
                     onToggleSidebar={toggleSidebar}
                 />
-
                 <MainContent
                     activeSection={activeSection}
                     stats={stats}
                     recentEvents={recentEvents}
                 />
             </div>
-
-            <PasswordModal
-                isOpen={showPasswordModal}
-                onClose={closePasswordModal}
-                passwordData={passwordData}
-                showPasswords={showPasswords}
-                passwordError={passwordError}
-                passwordSuccess={passwordSuccess}
-                isLoading={isLoading}
-                onPasswordChange={handlePasswordChange}
-                onToggleVisibility={togglePasswordVisibility}
-                onSubmit={handleSubmitPassword}
-            />
         </div>
     );
 }

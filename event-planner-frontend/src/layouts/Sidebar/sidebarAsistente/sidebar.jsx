@@ -5,24 +5,27 @@ import {
     ClipboardList,
     FileText,
     LayoutDashboard,
+    BookOpen,
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import SharedSidebar from '../SharedSidebar';
 
 const navItems = [
-    { id: 'dashboard', view: 'dashboard', label: 'Dashboard', Icon: LayoutDashboard },
-    { id: 'eventos',   view: 'eventos',   label: 'Eventos',   Icon: CalendarDays    },
-    { id: 'agenda',    view: 'agenda',    label: 'Agenda',    Icon: ClipboardList   },
-    { id: 'encuestas', view: 'encuestas', label: 'Encuestas', Icon: FileText        },
+    { id: 'dashboard',       path: '/asistente/dashboard',      label: 'Dashboard',         Icon: LayoutDashboard },
+    { id: 'eventos',         path: '/asistente/eventos',         label: 'Eventos',            Icon: CalendarDays    },
+    { id: 'agenda',          path: '/asistente/agenda',          label: 'Agenda',             Icon: ClipboardList   },
+    { id: 'inscripciones',   path: '/asistente/inscripciones',   label: 'Mis Inscripciones',  Icon: BookOpen        },
+    { id: 'encuestas',       path: '/asistente/encuestas',       label: 'Encuestas',          Icon: FileText        },
 ];
 
-const Sidebar = ({ onToggle, onNavigate, currentView }) => {
+const Sidebar = ({ onToggle }) => {
     const navigate = useNavigate();
 
     const handleLogout = () => {
         localStorage.removeItem('user');
-        localStorage.removeItem('token');
-        window.location.href = '/login';
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        navigate('/login');
     };
 
     const footerSlot = (isCollapsed) =>
@@ -46,9 +49,7 @@ const Sidebar = ({ onToggle, onNavigate, currentView }) => {
         <SharedSidebar
             title="Panel de Asistente"
             items={navItems}
-            mode="view"
-            currentView={currentView}
-            onNavigate={onNavigate}
+            mode="router"
             onToggle={onToggle}
             onLogout={handleLogout}
             footerSlot={footerSlot}

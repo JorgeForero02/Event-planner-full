@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
 import { usePonenteAgenda } from '../hooks/usePonenteAgenda';
 import { useEventosActividadesAceptadas } from '../hooks/useEventosActividadesAceptadas';
@@ -11,10 +12,19 @@ import MisActividadesSection from '../components/sections/MisActividadesSection'
 import EncuestasSection from '../components/sections/EncuestasSection';
 import styles from '../components/styles/PonenteDashboard.module.css';
 
+const PATH_TO_VIEW = {
+  '/ponente':             'dashboard',
+  '/ponente/eventos':     'eventos',
+  '/ponente/actividades': 'actividades',
+  '/ponente/encuestas':   'encuestas',
+};
+
 const PonenteDashboard = () => {
-  const [currentView, setCurrentView] = useState('dashboard');
+  const location = useLocation();
   const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
   const [selectedEvento, setSelectedEvento] = useState(null);
+
+  const currentView = PATH_TO_VIEW[location.pathname] ?? 'dashboard';
 
   const { user } = useAuth();
 
@@ -26,21 +36,11 @@ const PonenteDashboard = () => {
     error: errorEventos
   } = useEventosActividadesAceptadas();
 
-  const handleNavigate = (view) => {
-    setCurrentView(view);
-  };
-
-  const handleToggleSidebar = (collapsed) => {
-    setIsMenuCollapsed(collapsed);
-  };
-
   const obtenerIdPonente = () => {
     if (!user) return null;
-
     if (user.rol === 'ponente' && user.rolData?.id_ponente) {
       return user.rolData.id_ponente;
     }
-
     return null;
   };
 
@@ -70,11 +70,7 @@ const PonenteDashboard = () => {
 
   return (
     <div className={styles.dashboard}>
-      <Sidebar
-        onToggle={handleToggleSidebar}
-        onNavigate={handleNavigate}
-        currentView={currentView}
-      />
+      <Sidebar onToggle={(collapsed) => setIsMenuCollapsed(collapsed)} />
       <div className={`${styles.mainContent} ${isMenuCollapsed ? styles.menuCollapsed : ''}`}>
         <Header isMenuCollapsed={isMenuCollapsed} />
         <div className={styles.content}>

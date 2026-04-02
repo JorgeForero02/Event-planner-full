@@ -1,25 +1,38 @@
 import { Eye, EyeOff, Shield, AlertCircle, Lock } from 'lucide-react';
-import React from 'react';
-import { useAdminLogin } from '../components/useAdminLogin';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import logo from '../assets/evento-remove.png';
 import './AdminLogin.css';
 
 export default function AdminLogin() {
-  const {
-    adminEmail,
-    adminPassword,
-    showAdminPassword,
-    adminError,
-    adminLoading,
-    setAdminEmail,
-    setAdminPassword,
-    handleAdminLogin,
-    toggleAdminPasswordVisibility
-  } = useAdminLogin();
+  const navigate = useNavigate();
+  const { login } = useAuth();
+  const [adminEmail, setAdminEmail] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
+  const [showAdminPassword, setShowAdminPassword] = useState(false);
+  const [adminError, setAdminError] = useState('');
+  const [adminLoading, setAdminLoading] = useState(false);
+
+  const toggleAdminPasswordVisibility = () => setShowAdminPassword(prev => !prev);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await handleAdminLogin(e);
+    setAdminError('');
+    if (!adminEmail.trim() || !adminPassword) {
+      setAdminError('Por favor completa todos los campos');
+      return;
+    }
+    setAdminLoading(true);
+    try {
+      const result = await login(adminEmail, adminPassword, 'admin');
+      if (!result.success) throw new Error(result.error || 'Error durante el inicio de sesión de administrador');
+      navigate(result.redirectPath || '/admin');
+    } catch (err) {
+      setAdminError(err.message);
+    } finally {
+      setAdminLoading(false);
+    }
   };
 
   return (

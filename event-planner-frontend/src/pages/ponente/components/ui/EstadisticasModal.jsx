@@ -519,7 +519,7 @@ const EstadisticasModal = ({ encuestaId, onClose }) => {
             <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
                 <DialogContent>
                     <div className={styles.errorContainer}>
-                        <div className={styles.errorIcon}>⚠️</div>
+                        <div className={styles.errorIcon}></div>
                         <h3>Error</h3>
                         <p>{error || 'No se pudieron cargar las estadísticas'}</p>
                         <button className={styles.btnCerrar} onClick={onClose}>
@@ -753,10 +753,7 @@ const EstadisticasModal = ({ encuestaId, onClose }) => {
 
                                 {respuestasFiltradas.length === 0 ? (
                                     <div className={styles.sinRespuestas}>
-                                        <div className={styles.emptyIcon}>
-                                            {filtroRespuestas === 'completadas' ? '✅' :
-                                                filtroRespuestas === 'pendientes' ? '⏳' : '📭'}
-                                        </div>
+                                        <div className={styles.emptyIcon}></div>
                                         <p>
                                             {filtroRespuestas === 'todas'
                                                 ? 'No hay respuestas registradas'

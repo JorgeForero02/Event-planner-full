@@ -44,7 +44,7 @@ const ActualizarEmpresa = () => {
             setMensajeModal("Solicitud de actualización fue registrada correctamente. Será revisada por el equipo de administración.");
             setShowModalExito(true);
         } catch (error) {
-            setMensajeModal("❌ Ocurrió un error al actualizar la empresa");
+            setMensajeModal("Ocurrió un error al actualizar la empresa");
             setShowModalExito(true);
         }
     };

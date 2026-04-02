@@ -175,6 +175,11 @@ export const eliminarEvento = async (eventoId) => {
   return res.data;
 };
 
+export const cancelarEvento = async (eventoId) => {
+  const res = await api.put(`/eventos/${eventoId}`, { estado: 2 });
+  return res.data;
+};
+
 const eventosService = {
   getHeaders,
   obtenerEventos,
@@ -183,6 +188,7 @@ const eventosService = {
   crearEvento,
   actualizarEvento,
   eliminarEvento,
+  cancelarEvento,
   crearActividad,
   actualizarActividad,
   eliminarActividad,

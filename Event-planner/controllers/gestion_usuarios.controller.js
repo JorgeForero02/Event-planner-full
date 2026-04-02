@@ -160,7 +160,14 @@ class GestionUsuariosController {
 
     async getAllUsersComplete(req, res, next) {
         try {
-            const usuarios = await UsuarioService.obtenerTodosCompletos();
+            const { nombre, correo, rol, estado } = req.query;
+            const filtros = {};
+            if (nombre) filtros.nombre = nombre;
+            if (correo) filtros.correo = correo;
+            if (rol) filtros.rol = rol;
+            if (estado !== undefined) filtros.estado = estado;
+
+            const usuarios = await UsuarioService.obtenerTodosCompletos(filtros);
 
             await AuditoriaService.registrar({
                 mensaje: `Consulta de listado completo de usuarios (${usuarios.length} registros)`,

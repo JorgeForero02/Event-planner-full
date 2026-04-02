@@ -53,6 +53,44 @@ export class AdminService extends BaseService {
     return { aprobar: aprobarResp, promote: promoteResult };
   }
 
+  async getRoles() {
+    return this.request('/admin/roles');
+  }
+
+  async toggleRolEstado(tipoRol) {
+    return this.request(`/admin/roles/${tipoRol}/toggle-estado`, { method: 'PATCH' });
+  }
+
+  async exportUsuariosCSV() {
+    const token = this.getToken();
+    const response = await fetch(`${this.baseURL}/gestion-usuarios/export/csv`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!response.ok) throw new Error('Error al exportar usuarios');
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `usuarios_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async exportEventosCSV() {
+    const token = this.getToken();
+    const response = await fetch(`${this.baseURL}/eventos/export/csv`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!response.ok) throw new Error('Error al exportar eventos');
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `eventos_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   processAfiliacionesData(data) {
     if (!data?.data) return { pendientes: 0, aprobadas: 0, rechazadas: 0 };
 

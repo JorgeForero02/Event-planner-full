@@ -6,6 +6,8 @@ import {
     AlertCircle,
     ArrowLeft,
     Save,
+    MapPin,
+    Link as LinkIcon,
 } from "lucide-react";
 
 import Sidebar from "../Sidebar";
@@ -14,7 +16,7 @@ import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
 import { Alert, AlertDescription } from "../../../components/ui/alert";
-import { cn } from "../../../lib/utils";
+
 
 const CrearEventoPage = () => {
     const {
@@ -28,7 +30,13 @@ const CrearEventoPage = () => {
         mostrarModalExito,
         handleCerrarModal,
         handleVolver,
+        lugaresEmpresa,
+        obtenerCapacidadLugar,
+        errorCupos,
     } = useEvento(null);
+
+    const mostrarSala = formData.modalidad === 'Presencial' || formData.modalidad === 'Híbrida';
+    const mostrarUrl  = formData.modalidad === 'Virtual'    || formData.modalidad === 'Híbrida';
 
     const handleHoraInicio = (value) => {
         handleInputChange("hora", value);
@@ -205,15 +213,77 @@ const CrearEventoPage = () => {
                     </div>
 
                     <div className="space-y-1.5">
+                        <Label htmlFor="crear-fecha-limite">
+                            Fecha Límite de Cancelación
+                        </Label>
+                        <Input
+                            id="crear-fecha-limite"
+                            type="date"
+                            value={formData.fecha_limite_cancelacion || ''}
+                            onChange={(e) => handleInputChange('fecha_limite_cancelacion', e.target.value)}
+                            max={formData.fecha_inicio || undefined}
+                        />
+                        <p className="text-xs text-slate-500">Debe ser anterior o igual a la fecha de inicio. Obligatoria al publicar.</p>
+                    </div>
+
+                    {mostrarSala && (
+                        <div className="space-y-1.5">
+                            <Label htmlFor="crear-sala" className="flex items-center gap-1.5">
+                                <MapPin size={14} className="text-slate-500" />
+                                Sala / Lugar *
+                            </Label>
+                            <select
+                                id="crear-sala"
+                                value={formData.lugar_id || ''}
+                                onChange={(e) => handleInputChange('lugar_id', e.target.value ? Number(e.target.value) : '')}
+                                className="flex h-9 w-full rounded-md border border-slate-300 bg-white px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:border-brand-500"
+                            >
+                                <option value="">-- Selecciona una sala --</option>
+                                {lugaresEmpresa.map(l => (
+                                    <option key={l.id} value={l.id}>
+                                        {l.nombre}{l.capacidad ? ` (cap. ${l.capacidad})` : ''}
+                                    </option>
+                                ))}
+                            </select>
+                            {formData.lugar_id && obtenerCapacidadLugar && obtenerCapacidadLugar(formData.lugar_id) && (
+                                <p className="text-xs text-slate-500 mt-1">
+                                    Capacidad máxima de esta sala: <strong>{obtenerCapacidadLugar(formData.lugar_id)}</strong> personas
+                                </p>
+                            )}
+                        </div>
+                    )}
+
+                    {mostrarUrl && (
+                        <div className="space-y-1.5">
+                            <Label htmlFor="crear-url-virtual" className="flex items-center gap-1.5">
+                                <LinkIcon size={14} className="text-slate-500" />
+                                URL de reunión virtual *
+                            </Label>
+                            <Input
+                                id="crear-url-virtual"
+                                type="url"
+                                value={formData.url_virtual || ''}
+                                onChange={(e) => handleInputChange('url_virtual', e.target.value)}
+                                placeholder="https://meet.google.com/..."
+                            />
+                        </div>
+                    )}
+
+                    <div className="space-y-1.5">
                         <Label htmlFor="crear-cupos">Cupos</Label>
                         <Input
                             id="crear-cupos"
                             type="number"
                             min="0"
+                            max={obtenerCapacidadLugar && formData.lugar_id ? (obtenerCapacidadLugar(formData.lugar_id) ?? undefined) : undefined}
                             value={formData.cupos || ""}
                             onChange={(e) => handleInputChange("cupos", e.target.value)}
                             placeholder="Ej: 100"
+                            className={errorCupos?.mostrar ? 'border-rose-400' : ''}
                         />
+                        {errorCupos?.mostrar && (
+                            <p className="text-xs text-rose-600 mt-1">{errorCupos.mensaje}</p>
+                        )}
                     </div>
 
                     <div className="space-y-1.5">

@@ -1,3 +1,4 @@
+const { Op } = require('sequelize');
 const { PonenteActividad, Ponente, Actividad, Usuario, Evento, Lugar, Ubicacion } = require('../models');
 const { MENSAJES } = require('../constants/ponenteActividad.constants');
 const NotificacionService = require('./notificacion.service');
@@ -72,7 +73,7 @@ class PonenteActividadService {
         };
     }
 
-    async obtenerPorPonente(ponenteId) {
+    async obtenerPorPonente(ponenteId, filtros = {}) {
         const ponente = await Ponente.findByPk(ponenteId);
         if (!ponente) {
             return {
@@ -81,12 +82,28 @@ class PonenteActividadService {
             };
         }
 
+        const whereAsignacion = { id_ponente: ponenteId };
+        if (filtros.estado) whereAsignacion.estado = filtros.estado;
+
+        const whereActividad = {};
+        if (filtros.evento_id) whereActividad.id_evento = filtros.evento_id;
+        if (filtros.fecha_inicio && filtros.fecha_fin) {
+            whereActividad.fecha_actividad = { [Op.between]: [filtros.fecha_inicio, filtros.fecha_fin] };
+        } else if (filtros.fecha_inicio) {
+            whereActividad.fecha_actividad = { [Op.gte]: filtros.fecha_inicio };
+        } else if (filtros.fecha_fin) {
+            whereActividad.fecha_actividad = { [Op.lte]: filtros.fecha_fin };
+        }
+
+        const hayFiltrosActividad = Object.keys(whereActividad).length > 0;
+
         const asignaciones = await PonenteActividad.findAll({
-            where: { id_ponente: ponenteId },
+            where: whereAsignacion,
             include: [
                 {
                     model: Actividad,
                     as: 'actividad',
+                    ...(hayFiltrosActividad ? { where: whereActividad, required: true } : {}),
                     include: [{
                         model: Evento,
                         as: 'evento',

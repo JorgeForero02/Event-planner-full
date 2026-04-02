@@ -75,6 +75,28 @@ class ActividadService {
             ]
         });
 
+        const ahora = new Date();
+        const formatter = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Bogota', year: 'numeric', month: '2-digit', day: '2-digit' });
+        const fechaHoy = formatter.format(ahora);
+        const horaActual = ahora.toLocaleTimeString('en-GB', { timeZone: 'America/Bogota', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const fechaActividad = actividad.fecha_actividad;
+
+        const estaEnCurso = fechaActividad === fechaHoy &&
+            actividad.hora_inicio <= horaActual && actividad.hora_fin > horaActual;
+        const esFinalizada = fechaActividad < fechaHoy ||
+            (fechaActividad === fechaHoy && actividad.hora_fin <= horaActual);
+
+        if (estaEnCurso) {
+            const err = new Error('No se puede eliminar una actividad que está en curso.');
+            err.codigoEstado = 400;
+            throw err;
+        }
+        if (esFinalizada) {
+            const err = new Error('No se puede eliminar una actividad que ya finalizó.');
+            err.codigoEstado = 400;
+            throw err;
+        }
+
         const ponentesActividad = await PonenteActividad.findAll({
             where: { id_actividad: actividadId },
             include: [

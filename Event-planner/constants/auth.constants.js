@@ -33,6 +33,7 @@ const MENSAJES_AUTH = {
     USUARIO_YA_ES_GERENTE: 'El usuario ya es gerente de una empresa',
     GERENTE_SOLO_SU_EMPRESA: 'Un gerente solo puede crear organizadores para su propia empresa',
     CORREO_NO_REGISTRADO: 'El correo no está registrado',
+    CUENTA_DESHABILITADA: 'La cuenta está deshabilitada. Contacte al administrador del sistema.',
     ID_EMPRESA_REQUERIDO: 'Se requiere el ID de empresa para gerentes y organizadores',
     REFRESH_TOKEN_INVALIDO: 'Refresh token inválido o expirado'
 };

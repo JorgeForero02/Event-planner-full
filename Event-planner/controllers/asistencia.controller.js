@@ -35,6 +35,16 @@ class AsistenciaController {
                 return ApiResponse.error(res, validacionFecha.mensaje, CODIGOS_HTTP.BAD_REQUEST);
             }
 
+            const asistenciaManual = await AsistenciaService.buscarAsistenciaManual(
+                id_inscripcion,
+                transaction
+            );
+
+            if (asistenciaManual) {
+                await transaction.rollback();
+                return ApiResponse.error(res, MENSAJES.ASISTENCIA_BLOQUEADA_POR_ORGANIZADOR, CODIGOS_HTTP.FORBIDDEN);
+            }
+
             const existeAsistencia = await AsistenciaService.verificarAsistenciaExistente(
                 id_inscripcion,
                 fechaHoy,
@@ -49,6 +59,7 @@ class AsistenciaController {
             const nuevaAsistencia = await AsistenciaService.crear({
                 fecha: fechaHoy,
                 estado: 'Presente',
+                registrado_por: 'asistente',
                 inscripcion: id_inscripcion
             }, transaction);
 
@@ -127,6 +138,16 @@ class AsistenciaController {
                 return ApiResponse.error(res, validacionFecha.mensaje, CODIGOS_HTTP.BAD_REQUEST);
             }
 
+            const asistenciaManual = await AsistenciaService.buscarAsistenciaManual(
+                inscripcion.id,
+                transaction
+            );
+
+            if (asistenciaManual) {
+                await transaction.rollback();
+                return ApiResponse.error(res, MENSAJES.ASISTENCIA_BLOQUEADA_POR_ORGANIZADOR, CODIGOS_HTTP.FORBIDDEN);
+            }
+
             const existeAsistencia = await AsistenciaService.verificarAsistenciaExistente(
                 inscripcion.id,
                 fechaHoy,
@@ -141,6 +162,7 @@ class AsistenciaController {
             const nuevaAsistencia = await AsistenciaService.crear({
                 fecha: fechaHoy,
                 estado: 'Presente',
+                registrado_por: 'asistente',
                 inscripcion: inscripcion.id
             }, transaction);
 
@@ -208,6 +230,63 @@ class AsistenciaController {
                 MENSAJES.ASISTENCIAS_EVENTO_OBTENIDAS
             );
         } catch (error) {
+            next(error);
+        }
+    }
+
+    registrarAsistenciaManual = async (req, res, next) => {
+        const transaction = await AsistenciaService.crearTransaccion();
+
+        try {
+            const inscripcionId = parseInt(req.params.id, 10);
+            const { estado } = req.body;
+            const usuario = req.usuario;
+
+            if (!estado || !['Presente', 'Ausente'].includes(estado)) {
+                await transaction.rollback();
+                return ApiResponse.error(res, MENSAJES.ESTADO_MANUAL_INVALIDO, CODIGOS_HTTP.BAD_REQUEST);
+            }
+
+            const inscripcion = await AsistenciaService.buscarInscripcionConEvento(inscripcionId, transaction);
+
+            if (!inscripcion) {
+                await transaction.rollback();
+                return ApiResponse.notFound(res, MENSAJES.INSCRIPCION_NO_ENCONTRADA);
+            }
+
+            if (inscripcion.estado !== 'Confirmada') {
+                await transaction.rollback();
+                return ApiResponse.error(res, MENSAJES.INSCRIPCION_NO_CONFIRMADA, CODIGOS_HTTP.BAD_REQUEST);
+            }
+
+            const evento = inscripcion.evento;
+            const tienePermiso = PermisosService.verificarPermisoLecturaEvento(usuario, evento);
+
+            if (!tienePermiso) {
+                await transaction.rollback();
+                return ApiResponse.forbidden(res, MENSAJES.SIN_PERMISO_REGISTRO_MANUAL);
+            }
+
+            const fechaHoy = AsistenciaService.obtenerFechaHoy();
+            const asistencia = await AsistenciaService.crearOSobrescribirManual(
+                inscripcionId, estado, fechaHoy, transaction
+            );
+
+            await AuditoriaService.registrarCreacion('asistencia_manual', {
+                id: asistencia.id,
+                inscripcion: inscripcionId,
+                estado,
+                evento: evento.titulo,
+                registrado_por: usuario.nombre
+            }, usuario);
+
+            await transaction.commit();
+
+            return ApiResponse.success(res, asistencia, MENSAJES.ASISTENCIA_MANUAL_REGISTRADA);
+        } catch (error) {
+            if (transaction && !transaction.finished) {
+                await transaction.rollback();
+            }
             next(error);
         }
     }

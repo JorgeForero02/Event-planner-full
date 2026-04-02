@@ -157,6 +157,7 @@ export const useEncuestasPonente = (ponenteIdProp) => {
         } finally {
             setLoading(false);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const crearEncuesta = useCallback(async (encuestaData) => {

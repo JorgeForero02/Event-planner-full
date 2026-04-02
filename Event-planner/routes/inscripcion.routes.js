@@ -6,7 +6,6 @@ const auditoriaMiddleware = require('../middlewares/auditoria.middleware');
 
 router.get(
     '/eventos-disponibles',
-    auth,
     InscripcionController.obtenerEventosDisponibles
 );
 

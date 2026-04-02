@@ -1,10 +1,11 @@
 // File: GestionAsistentes.jsx
 import React, { useState, useEffect } from 'react';
-import { Search, Eye, Users, AlertCircle } from 'lucide-react';
+import { Search, Users, AlertCircle, UserCheck, UserX, Download } from 'lucide-react';
 import StatusBadge from '../../components/ui/StatusBadge';
 import Sidebar from './Sidebar';
 import asistenciaService from '../../components/asistenciaService';
 import DataTable from '../../components/ui/DataTable';
+import { Button } from '../../components/ui/button';
 
 export default function GestionAsistentes() {
     const [eventos, setEventos] = useState([]);
@@ -128,11 +129,48 @@ export default function GestionAsistentes() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchTerm, filtroEstado, asistentes]);
 
+    const [loadingAsistencia, setLoadingAsistencia] = useState({});
+    const [exportingCSV, setExportingCSV] = useState(false);
+
     const totalInscritos = asistentes.length;
     const confirmados = asistentes.filter(a => a.estado.toLowerCase() === 'confirmado' || a.estado.toLowerCase() === 'confirmada').length;
     const pendientes = asistentes.filter(a => a.estado.toLowerCase() === 'pendiente').length;
     const ausentes = asistentes.filter(a => a.estado.toLowerCase() === 'ausente').length;
 
+    const actualizarAsistencia = async (idAsistencia, nuevoEstado) => {
+        setLoadingAsistencia(prev => ({ ...prev, [idAsistencia]: nuevoEstado }));
+        try {
+            await asistenciaService.actualizarAsistenciaManual(idAsistencia, nuevoEstado);
+            await cargarAsistentes(selectedEventoId);
+        } catch (err) {
+            console.error('Error actualizando asistencia:', err);
+            setError('No se pudo actualizar la asistencia.');
+        } finally {
+            setLoadingAsistencia(prev => { const s = { ...prev }; delete s[idAsistencia]; return s; });
+        }
+    };
+
+    const handleExportarCSV = async () => {
+        if (!selectedEventoId) return;
+        setExportingCSV(true);
+        try {
+            const response = await asistenciaService.exportarInscritosCSV(selectedEventoId);
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            const eventoActual = eventos.find(e => String(e.id || e._id) === String(selectedEventoId));
+            link.setAttribute('download', `inscritos_${eventoActual?.titulo || selectedEventoId}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error('Error exportando CSV:', err);
+            setError('Error al exportar el CSV.');
+        } finally {
+            setExportingCSV(false);
+        }
+    };
 
     const columns = [
         {
@@ -166,12 +204,32 @@ export default function GestionAsistentes() {
         },
         {
             key: 'acciones',
-            label: 'Acciones',
-            render: () => (
-                <button className="rounded-lg p-1.5 text-slate-400 hover:text-brand-600 hover:bg-brand-50 transition-colors cursor-pointer">
-                    <Eye size={16} />
-                </button>
-            ),
+            label: 'Asistencia',
+            render: (_, row) => {
+                const isLoading = loadingAsistencia[row.id];
+                return (
+                    <div className="flex items-center gap-1.5">
+                        <button
+                            onClick={() => actualizarAsistencia(row.id, 'confirmado')}
+                            disabled={!!isLoading}
+                            title="Marcar Asistió"
+                            className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 disabled:opacity-50 transition-colors"
+                        >
+                            <UserCheck size={13} />
+                            {isLoading === 'confirmado' ? '...' : 'Asistió'}
+                        </button>
+                        <button
+                            onClick={() => actualizarAsistencia(row.id, 'ausente')}
+                            disabled={!!isLoading}
+                            title="Marcar No asistió"
+                            className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 disabled:opacity-50 transition-colors"
+                        >
+                            <UserX size={13} />
+                            {isLoading === 'ausente' ? '...' : 'No asistió'}
+                        </button>
+                    </div>
+                );
+            },
         },
     ];
 
@@ -179,7 +237,7 @@ export default function GestionAsistentes() {
         return (
             <div className="flex h-screen bg-slate-50">
                 <Sidebar />
-                <div className="flex-1 flex items-center justify-center">
+                <div className="flex-1 flex items-center justify-center ml-[280px]">
                     <div className="flex flex-col items-center gap-3 text-slate-500">
                         <div className="w-8 h-8 rounded-full border-2 border-brand-600 border-t-transparent animate-spin" />
                         <p className="text-sm">Cargando...</p>
@@ -192,7 +250,7 @@ export default function GestionAsistentes() {
     return (
         <div className="flex h-screen bg-slate-50">
             <Sidebar />
-            <div className="flex-1 overflow-auto p-6 space-y-6">
+            <div className="flex-1 overflow-auto p-6 space-y-6 ml-[280px]">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight text-slate-900">Gestión de Inscritos</h1>
                 </div>
@@ -256,7 +314,7 @@ export default function GestionAsistentes() {
                     </div>
                 </div>
 
-                {/* Filtros */}
+                {/* Filtros + Exportar */}
                 <div className="flex flex-col sm:flex-row gap-3">
                     <div className="relative flex-1">
                         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
@@ -279,6 +337,15 @@ export default function GestionAsistentes() {
                         <option value="pendiente">Pendiente</option>
                         <option value="ausente">Ausente</option>
                     </select>
+                    <Button
+                        variant="outline"
+                        onClick={handleExportarCSV}
+                        disabled={!selectedEventoId || exportingCSV || asistentes.length === 0}
+                        className="gap-2 shrink-0"
+                    >
+                        <Download size={14} />
+                        {exportingCSV ? 'Exportando...' : 'Exportar CSV'}
+                    </Button>
                 </div>
 
                 {/* Tabla */}

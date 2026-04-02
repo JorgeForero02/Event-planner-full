@@ -1,9 +1,9 @@
 .gestionar-agenda-page {
     min-height: 100vh;
-    background: #f8f9fa;
+    background: #f9fafb;
     padding: 2rem;
-    width: 75%;
-    margin-left: 350px;
+    width: calc(100% - 280px);
+    margin-left: 280px;
     box-sizing: border-box;
 }
 
@@ -20,7 +20,7 @@
 }
 
 .header-icon-agenda {
-    color: #667eea;
+    color: #2563eb;
 }
 
 .page-header-agenda h1 {
@@ -31,12 +31,13 @@
 }
 
 .evento-info-card {
-    background: linear-gradient(135deg, #fff7e6 0%, #ffe8cc 100%);
-    border: 2px solid #ffd699;
+    background: white;
+    border: 1px solid #e2e8f0;
     border-radius: 12px;
     padding: 1.5rem;
     margin-bottom: 1.5rem;
     color: #1a202c;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
 
 .evento-info-card h3 {
@@ -84,18 +85,19 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.75rem 1.5rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #2563eb;
     color: white;
     border: none;
     border-radius: 8px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
 }
 
 .btn-crear-actividad:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+    background: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
 .estadisticas-grid {
@@ -126,11 +128,11 @@
 }
 
 .estadistica-icon.blue {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #2563eb;
 }
 
 .estadistica-icon.purple {
-    background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%);
+    background: #7c3aed;
 }
 
 .estadistica-icon.green {
@@ -409,7 +411,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 2rem 2.5rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #1e3a5f;
     color: white;
     border-radius: 20px 20px 0 0;
     position: relative;
@@ -527,11 +529,11 @@
 }
 
 .card-icon.blue {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #2563eb;
 }
 
 .card-icon.purple {
-    background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%);
+    background: #7c3aed;
 }
 
 .card-icon.green {
@@ -539,7 +541,7 @@
 }
 
 .card-icon.orange {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    background: #d97706;
 }
 
 .modal-card-header h3 {
@@ -561,9 +563,9 @@
     align-items: start;
     gap: 1rem;
     padding: 0.75rem;
-    background: #f8f9fa;
+    background: #f8fafc;
     border-radius: 10px;
-    border-left: 3px solid #667eea;
+    border-left: 3px solid #2563eb;
 }
 
 .info-row.full-width {
@@ -606,12 +608,12 @@
 }
 
 .info-item:hover {
-    background: #f1f3f5;
-    border-left-color: #667eea;
+    background: #f1f5f9;
+    border-left-color: #2563eb;
 }
 
 .item-icon {
-    color: #667eea;
+    color: #2563eb;
     flex-shrink: 0;
     margin-top: 2px;
 }
@@ -706,14 +708,15 @@
 }
 
 .btn-modal.btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #2563eb;
     color: white;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
 }
 
 .btn-modal.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    background: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
 .btn-modal.btn-secondary {
@@ -827,10 +830,11 @@
 }
 
 .modal-content::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #2563eb;
     border-radius: 10px;
 }
 
 .modal-content::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%);
+    background: #1d4ed8;
+    border-radius: 10px;
 }

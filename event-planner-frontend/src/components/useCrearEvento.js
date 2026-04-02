@@ -7,6 +7,7 @@ import {
     crearActividad,
     actualizarEvento,
     actualizarActividad,
+    obtenerLugares,
 } from './eventosService';
 import { useNavigate } from 'react-router-dom';
 
@@ -20,11 +21,16 @@ export const useEvento = (idEvento = null) => {
         descripcion: '',
         fecha_inicio: '',
         fecha_fin: '',
-        modalidad: 'Presencial',   // Ahora permitiremos "Hibrido"
+        fecha_limite_cancelacion: '',
+        modalidad: 'Presencial',
         cupos: '',
         estado: 0,
-        hora: "",
+        hora: '',
+        lugar_id: '',
+        url_virtual: '',
     });
+
+    const [lugaresEmpresa, setLugaresEmpresa] = useState([]);
 
     const [actividades, setActividades] = useState([
         { titulo: '', descripcion: '', fecha_actividad: '', hora_inicio: '', hora_fin: '', presupuesto: '' }
@@ -32,11 +38,13 @@ export const useEvento = (idEvento = null) => {
 
     const [mensaje, setMensaje] = useState({ tipo: '', texto: '' });
     const [loading, setLoading] = useState(true);
+    const [cargando, setCargando] = useState(true);
     const [guardando, setGuardando] = useState(false);
     const [enviando, setEnviando] = useState(false);
     const [mostrarModalExito, setMostrarModalExito] = useState(false);
     const [mostrarModalError, setMostrarModalError] = useState(false);
     const [error, setError] = useState(null);
+    const [errorCupos, setErrorCupos] = useState({ mostrar: false, mensaje: '', capacidadLugar: 0 });
 
     const handleVolver = () => navigate('/organizador');
 
@@ -66,7 +74,31 @@ export const useEvento = (idEvento = null) => {
             return false;
         }
 
-        // NO hay validación de lugar ni URL porque backend NO los pide
+        if (Number(formData.estado) === 1) {
+            if (!formData.fecha_limite_cancelacion) {
+                setMensaje({ tipo: 'error', texto: 'La fecha límite de cancelación es obligatoria al publicar el evento' });
+                return false;
+            }
+            if (formData.fecha_inicio && new Date(formData.fecha_limite_cancelacion) > new Date(formData.fecha_inicio)) {
+                setMensaje({ tipo: 'error', texto: 'La fecha límite de cancelación debe ser anterior o igual a la fecha de inicio' });
+                return false;
+            }
+        } else if (formData.fecha_limite_cancelacion && formData.fecha_inicio) {
+            if (new Date(formData.fecha_limite_cancelacion) > new Date(formData.fecha_inicio)) {
+                setMensaje({ tipo: 'error', texto: 'La fecha límite de cancelación debe ser anterior o igual a la fecha de inicio' });
+                return false;
+            }
+        }
+
+        if ((formData.modalidad === 'Presencial' || formData.modalidad === 'Híbrida') && !formData.lugar_id) {
+            setMensaje({ tipo: 'error', texto: 'Debes seleccionar una sala para eventos presenciales o híbridos' });
+            return false;
+        }
+
+        if ((formData.modalidad === 'Virtual' || formData.modalidad === 'Híbrida') && !formData.url_virtual.trim()) {
+            setMensaje({ tipo: 'error', texto: 'Debes ingresar la URL de la reunión virtual' });
+            return false;
+        }
 
         return true;
     };
@@ -84,10 +116,13 @@ export const useEvento = (idEvento = null) => {
                 descripcion: evento.descripcion ?? "",
                 fecha_inicio: formatearFecha(evento.fecha_inicio),
                 fecha_fin: formatearFecha(evento.fecha_fin),
+                fecha_limite_cancelacion: formatearFecha(evento.fecha_limite_cancelacion),
                 modalidad: evento.modalidad ?? "Presencial",
                 cupos: evento.cupos ?? "",
                 estado: evento.estado ?? 0,
                 hora: formatearHora(evento.hora),
+                lugar_id: evento.lugar_id ?? '',
+                url_virtual: evento.url_virtual ?? '',
             });
 
             const actsRes = await obtenerActividadesEvento(id);
@@ -124,8 +159,43 @@ export const useEvento = (idEvento = null) => {
         }
     }, []);
 
+    const obtenerCapacidadLugar = (idLugar) => {
+        const lugar = lugaresEmpresa.find(l => String(l.id) === String(idLugar));
+        return lugar?.capacidad ?? null;
+    };
+
+    const validarCuposContraCapacidad = (idLugar, cupos) => {
+        const capacidad = obtenerCapacidadLugar(idLugar);
+        if (capacidad && parseInt(cupos) > capacidad) {
+            setErrorCupos({
+                mostrar: true,
+                mensaje: `Los cupos (${cupos}) exceden la capacidad del lugar (${capacidad}).`,
+                capacidadLugar: capacidad,
+            });
+            return false;
+        }
+        setErrorCupos({ mostrar: false, mensaje: '', capacidadLugar: 0 });
+        return true;
+    };
+
     const handleInputChange = (campo, valor) => {
-        setFormData(prev => ({ ...prev, [campo]: valor }));
+        setFormData(prev => {
+            const next = { ...prev, [campo]: valor };
+            if (campo === 'lugar_id' || campo === 'cupos') {
+                const idLugar = campo === 'lugar_id' ? valor : prev.lugar_id;
+                const cupos   = campo === 'cupos'   ? valor : prev.cupos;
+                if (idLugar && cupos && (next.modalidad === 'Presencial' || next.modalidad === 'Híbrida')) {
+                    validarCuposContraCapacidad(idLugar, cupos);
+                }
+            }
+            if (campo === 'modalidad' && valor === 'Virtual') {
+                next.lugar_id = '';
+            }
+            if (campo === 'modalidad' && valor === 'Presencial') {
+                next.url_virtual = '';
+            }
+            return next;
+        });
     };
 
     const guardarEvento = async () => {
@@ -137,37 +207,20 @@ export const useEvento = (idEvento = null) => {
         const dataAEnviar = {
             ...formData,
             hora: formatearHora(formData.hora),
-            estado: Number(formData.estado),   // Aseguramos que sea número
-            cupos: Number(formData.cupos)      // Aseguramos que sea número
+            estado: Number(formData.estado),
+            cupos: Number(formData.cupos)
         };
-        console.log(dataAEnviar)
 
-        // Normalizamos modalidad para backend (sin tilde)
-        if (dataAEnviar.modalidad === "Híbrida") {
-            dataAEnviar.modalidad = "Híbrida";
-        }
-
-        // Sanitizar: eliminar campos explícitamente nulos para evitar errores en backend
         const sanitized = {};
         Object.keys(dataAEnviar).forEach((k) => {
             const v = dataAEnviar[k];
-            // send empty strings (user may clear), but avoid sending null
             if (v !== null && v !== undefined) sanitized[k] = v;
         });
 
-        // Asegurar tipos básicos
-        if (sanitized.cupos !== undefined && sanitized.cupos !== null) {
+        if (sanitized.cupos !== undefined) {
             const num = Number(sanitized.cupos);
             sanitized.cupos = Number.isNaN(num) ? sanitized.cupos : num;
         }
-
-        console.log("ENVIANDO (sanitized):", sanitized);
-
-        // === LOGS DE DEPURACIÓN ===
-        console.log("=== GUARDANDO EVENTO ===");
-        console.log("Datos a enviar:", dataAEnviar);
-        console.log("Tipo de estado:", typeof dataAEnviar.estado);
-        console.log("Tipo de cupos:", typeof dataAEnviar.cupos);
 
         try {
             const eventoGuardado = idEvento
@@ -207,6 +260,7 @@ export const useEvento = (idEvento = null) => {
         const cargarDatos = async () => {
             try {
                 setLoading(true);
+                setCargando(true);
 
                 const perfil = await obtenerPerfil();
                 const empresaId = perfil.data?.usuario?.rolData?.id_empresa;
@@ -218,12 +272,20 @@ export const useEvento = (idEvento = null) => {
 
                 setEmpresa({ id: empresaId, nombre: nombreEmpresa });
 
+                try {
+                    const lugaresRes = await obtenerLugares(empresaId);
+                    setLugaresEmpresa(Array.isArray(lugaresRes.data) ? lugaresRes.data : []);
+                } catch {
+                    setLugaresEmpresa([]);
+                }
+
                 if (idEvento) await cargarEvento(idEvento);
             } catch {
                 setError("Error al cargar datos");
                 setMensaje({ tipo: "error", texto: "Error al cargar datos" });
             } finally {
                 setLoading(false);
+                setCargando(false);
             }
         };
 
@@ -246,11 +308,16 @@ export const useEvento = (idEvento = null) => {
         setFormData,
         actividades,
         setActividades,
+        lugaresEmpresa,
         mensaje,
         loading,
+        cargando,
         guardando,
         enviando,
         error,
+        errorCupos,
+        setErrorCupos,
+        obtenerCapacidadLugar,
         mostrarModalExito,
         mostrarModalError,
         setMostrarModalExito,

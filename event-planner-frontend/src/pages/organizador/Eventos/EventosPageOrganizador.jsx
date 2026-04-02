@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import { Calendar, CalendarDays, Plus, Search, Pencil, Eye, Trash2, X, MapPin, Users, FileText, AlertCircle } from 'lucide-react';
-import { obtenerEventos, eliminarEvento, obtenerPerfil } from "../../../components/eventosService";
+import { Calendar, CalendarDays, Plus, Search, Pencil, Eye, Trash2, X, MapPin, Users, FileText, AlertCircle, DollarSign, Ban, Bell, Send } from 'lucide-react';
+import { obtenerEventos, eliminarEvento, cancelarEvento, obtenerPerfil } from "../../../components/eventosService";
+import { Input } from '../../../components/ui/input';
+import { Label } from '../../../components/ui/label';
+import { Textarea } from '../../../components/ui/textarea';
 import Sidebar from '../Sidebar';
 import { Badge } from '../../../components/ui/badge';
 import { Button } from '../../../components/ui/button';
@@ -32,6 +35,16 @@ const EventosPageOrganizador = () => {
     const [eventoAEliminar, setEventoAEliminar] = useState(null);
     const [eventoAVer, setEventoAVer] = useState(null);
     const [loadingEliminar, setLoadingEliminar] = useState(false);
+    // FIX 2: Cancelar evento
+    const [modalCancelarVisible, setModalCancelarVisible] = useState(false);
+    const [eventoACancelar, setEventoACancelar] = useState(null);
+    const [loadingCancelar, setLoadingCancelar] = useState(false);
+    // FIX 5: Notificaciones manuales
+    const [modalNotifVisible, setModalNotifVisible] = useState(false);
+    const [eventoNotif, setEventoNotif] = useState(null);
+    const [notifForm, setNotifForm] = useState({ asunto: '', mensaje: '' });
+    const [loadingNotif, setLoadingNotif] = useState(false);
+    const [notifSuccess, setNotifSuccess] = useState(false);
     // [UI-FIX] U2: Estado de error inline en lugar de alert()
     const [errorMsg, setErrorMsg] = useState(null);
     // [UI-FIX] U3: Estado de carga para spinner
@@ -111,6 +124,61 @@ const EventosPageOrganizador = () => {
             setErrorMsg('Error al eliminar el evento.');
         } finally {
             setLoadingEliminar(false);
+        }
+    };
+
+    const confirmarCancelar = (evento) => {
+        setEventoACancelar(evento);
+        setModalCancelarVisible(true);
+    };
+
+    const handleCancelar = async () => {
+        if (!eventoACancelar) return;
+        try {
+            setLoadingCancelar(true);
+            await cancelarEvento(eventoACancelar.id);
+            setModalCancelarVisible(false);
+            setEventoACancelar(null);
+            await cargarEventos();
+        } catch {
+            setErrorMsg('Error al cancelar el evento.');
+        } finally {
+            setLoadingCancelar(false);
+        }
+    };
+
+    const abrirNotificaciones = (evento) => {
+        setEventoNotif(evento);
+        setNotifForm({ asunto: '', mensaje: '' });
+        setNotifSuccess(false);
+        setModalNotifVisible(true);
+    };
+
+    const handleEnviarNotificacion = async (e) => {
+        e.preventDefault();
+        if (!eventoNotif || !notifForm.asunto.trim() || !notifForm.mensaje.trim()) return;
+        try {
+            setLoadingNotif(true);
+            const token = localStorage.getItem('access_token');
+            const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
+            const res = await fetch(`${API_URL}/eventos/${eventoNotif.id}/notificaciones-manuales`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ asunto: notifForm.asunto, mensaje: notifForm.mensaje }),
+            });
+            const data = await res.json();
+            if (res.ok && (data.success !== false)) {
+                setNotifSuccess(true);
+                setNotifForm({ asunto: '', mensaje: '' });
+            } else {
+                setErrorMsg(data.message || 'Error al enviar la notificación.');
+                setModalNotifVisible(false);
+            }
+        } catch {
+            setErrorMsg('Error al enviar la notificación.');
+            setModalNotifVisible(false);
+        } finally {
+            setLoadingNotif(false);
         }
     };
 
@@ -264,11 +332,44 @@ const EventosPageOrganizador = () => {
                                                     <Button
                                                         variant="ghost"
                                                         size="sm"
+                                                        onClick={() => navigate(`/organizador/eventos/${evento.id}/presupuesto`)}
+                                                        className="text-slate-600 hover:text-emerald-600 h-7 px-2"
+                                                        title="Gestionar presupuesto"
+                                                    >
+                                                        <DollarSign size={13} />
+                                                        <span className="sr-only sm:not-sr-only sm:ml-1 text-xs">Presupuesto</span>
+                                                    </Button>
+                                                    {/* FIX 2: Cancelar — solo visible si estado es Publicado (1) */}
+                                                    {evento.estado === 1 && (
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => confirmarCancelar(evento)}
+                                                            className="text-slate-600 hover:text-amber-600 h-7 px-2"
+                                                            title="Cancelar evento"
+                                                        >
+                                                            <Ban size={13} />
+                                                            <span className="sr-only sm:not-sr-only sm:ml-1 text-xs">Cancelar</span>
+                                                        </Button>
+                                                    )}
+                                                    {/* FIX 5: Notificaciones manuales */}
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() => abrirNotificaciones(evento)}
+                                                        className="text-slate-600 hover:text-violet-600 h-7 px-2"
+                                                        title="Enviar notificación a inscritos"
+                                                    >
+                                                        <Bell size={13} />
+                                                        <span className="sr-only">Notificar</span>
+                                                    </Button>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
                                                         onClick={() => confirmarEliminar(evento)}
                                                         className="text-slate-600 hover:text-rose-600 h-7 px-2"
                                                     >
                                                         <Trash2 size={13} />
-                                                        {/* [UI-FIX] U6: "Eliminar" en vez de "Cancelar" */}
                                                         <span className="sr-only sm:not-sr-only sm:ml-1 text-xs">Eliminar</span>
                                                     </Button>
                                                 </div>
@@ -281,6 +382,94 @@ const EventosPageOrganizador = () => {
                     </div>
                 )}
             </main>
+
+            {/* ── Dialog: Confirmar cancelación ───────────────────────────────── */}
+            <Dialog open={modalCancelarVisible} onOpenChange={setModalCancelarVisible}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Ban size={18} className="text-amber-500" />
+                            Cancelar evento
+                        </DialogTitle>
+                        <DialogDescription>
+                            ¿Deseas cancelar el evento{' '}
+                            <strong className="text-slate-900">{eventoACancelar?.titulo}</strong>?{' '}
+                            El evento cambiará a estado <strong>Cancelado</strong> y los inscritos serán notificados.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="gap-2">
+                        <Button variant="outline" onClick={() => setModalCancelarVisible(false)} disabled={loadingCancelar}>
+                            Volver
+                        </Button>
+                        <Button variant="destructive" onClick={handleCancelar} disabled={loadingCancelar}
+                            className="bg-amber-600 hover:bg-amber-700">
+                            {loadingCancelar ? 'Cancelando...' : 'Sí, cancelar evento'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* ── Dialog: Notificaciones manuales ──────────────────────────────── */}
+            <Dialog open={modalNotifVisible} onOpenChange={(open) => { setModalNotifVisible(open); if (!open) setNotifSuccess(false); }}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Bell size={18} className="text-violet-600" />
+                            Enviar notificación a inscritos
+                        </DialogTitle>
+                        <DialogDescription>
+                            El mensaje será enviado a todos los inscritos del evento{' '}
+                            <strong className="text-slate-900">{eventoNotif?.titulo}</strong>.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    {notifSuccess ? (
+                        <div className="flex flex-col items-center gap-3 py-6 text-center">
+                            <div className="flex items-center justify-center w-14 h-14 rounded-full bg-emerald-100">
+                                <Send size={24} className="text-emerald-600" />
+                            </div>
+                            <p className="font-semibold text-slate-800">¡Notificación enviada!</p>
+                            <p className="text-sm text-slate-500">Todos los inscritos han recibido el mensaje.</p>
+                            <Button variant="outline" onClick={() => setModalNotifVisible(false)} className="mt-2">
+                                Cerrar
+                            </Button>
+                        </div>
+                    ) : (
+                        <form onSubmit={handleEnviarNotificacion} className="space-y-4 mt-1">
+                            <div className="space-y-1.5">
+                                <Label htmlFor="notif-asunto">Asunto *</Label>
+                                <Input
+                                    id="notif-asunto"
+                                    placeholder="Ej: Recordatorio de asistencia"
+                                    value={notifForm.asunto}
+                                    onChange={(e) => setNotifForm(p => ({ ...p, asunto: e.target.value }))}
+                                    required
+                                />
+                            </div>
+                            <div className="space-y-1.5">
+                                <Label htmlFor="notif-mensaje">Mensaje *</Label>
+                                <Textarea
+                                    id="notif-mensaje"
+                                    placeholder="Escribe aquí el mensaje para los inscritos..."
+                                    value={notifForm.mensaje}
+                                    onChange={(e) => setNotifForm(p => ({ ...p, mensaje: e.target.value }))}
+                                    rows={4}
+                                    required
+                                />
+                            </div>
+                            <DialogFooter className="gap-2">
+                                <Button type="button" variant="outline" onClick={() => setModalNotifVisible(false)} disabled={loadingNotif}>
+                                    Cancelar
+                                </Button>
+                                <Button type="submit" disabled={loadingNotif || !notifForm.asunto.trim() || !notifForm.mensaje.trim()} className="gap-2">
+                                    <Send size={14} />
+                                    {loadingNotif ? 'Enviando...' : 'Enviar notificación'}
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    )}
+                </DialogContent>
+            </Dialog>
 
             {/* ── Dialog: Confirmar eliminación (Radix — focus trap + Esc nativo) ── */}
             <Dialog open={modalVisible} onOpenChange={setModalVisible}>

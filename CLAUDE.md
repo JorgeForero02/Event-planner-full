@@ -365,3 +365,132 @@ Todos los 6 componentes del sistema de diseño han sido completados.
 - Tablas Admin/Gerente en shadcn/ui: no tocar
 - style dinámico (ej: backgroundColor: row.color): preservar siempre
 - Si ya usa shadcn/ui: no tocar
+
+---
+
+## Auditoría de Completitud — Backend vs Especificación
+
+Auditoría realizada el 2026-04-02. Cubre los 5 roles del sistema contra el código del backend (`Event-planner/`).
+
+**Resumen**: 73 funcionalidades ✅ completas · 10 ⚠️ incompletas · 14 ❌ faltantes.
+
+**Última actualización**: 2026-04-02 — implementados: IP en auditoría, filtros usuarios/eventos/ponente, CSV empresa+evento, verificarEmpresaAprobada, asistencia manual, Grupo C completo (encuestas ponente + encuesta rápida), Grupo E completo, Grupo F completo, notificación cancelación inscripción.
+
+---
+
+### Lo que está bien implementado ✅
+
+#### Administrador
+- CRUD completo de usuarios: crear, modificar datos/rol, deshabilitar (sin borrar historial), listar.
+- Filtros dinámicos en `GET /gestion-usuarios/`: nombre, correo, rol, estado aplicados como `WHERE` en Sequelize.
+- Aprobación de empresas con ascenso automático del solicitante a Gerente + email de notificación.
+- Rechazo de empresas con notificación al gerente.
+- Aprobación/rechazo de solicitudes de actualización de empresa (`/admin/solicitudes-actualizacion`).
+- Bitácora de auditoría consultable (`GET /auditoria/`). Modelo `Auditoria` captura fecha, hora, acción, usuario, IP, datos anteriores y nuevos. `auditoriaMiddleware` extrae `req.ip` (con fallback `x-forwarded-for`) y lo pasa a `AuditoriaService.registrar()`.
+- Toggle de roles con validación de usuarios activos asignados (impide deshabilitar si hay usuarios en ese rol).
+- Dashboard de estadísticas del sistema y exportación a CSV.
+
+#### Gerente
+- Solicitud de afiliación, consulta de estado, solicitudes de actualización de datos empresariales con historial.
+- CRUD de ubicaciones físicas con `toggle-estado` que valida eventos futuros activos.
+- CRUD de salas/lugares con `toggle-estado` que valida actividades futuras.
+- Estadísticas de ocupación por sala (`GET /empresas/:id/estadisticas-ocupacion`).
+- Reporte de desempeño de empresa con métricas de inscripciones, asistencia, encuestas y presupuesto.
+- Exportación CSV del reporte de desempeño (`GET /empresas/:id/reporte-desempenho/exportar-csv`).
+- `verificarEmpresaAprobada` aplicado en rutas de ubicaciones y salas: empresa `pendiente` o `rechazada` recibe 403; solo estado `aprobada` tiene acceso completo.
+
+#### Organizador Líder
+- Crear/modificar/cancelar eventos con validación de sala disponible, cupo vs. capacidad y solapamientos.
+- Cancelación de evento dispara notificaciones automáticas a todos los inscritos y ponentes (email + notificación interna).
+- Auto-finalización de eventos pasados vía UPDATE atómico en `buscarUno()` (sin race conditions).
+- Gestión completa de agenda: crear/modificar/eliminar actividades con validación de solapamiento de sala.
+- Notificaciones automáticas a ponentes al asignar, modificar o remover de una actividad.
+- Lista de inscritos con exportación CSV (`GET /eventos/:id/inscritos/exportar-csv`).
+- Módulo de presupuesto por ítem y por concepto con cálculo de totales.
+- Encuestas: crear, enviar, estadísticas, exportar CSV.
+- Reporte estadístico del evento (inscritos, asistencias, tasa, encuestas) con exportación CSV (`GET /eventos/:id/reporte/exportar-csv`).
+- Asistencia manual: `PATCH /asistencias/:id/manual` crea o sobrescribe el registro con `registrado_por='organizador'` y `estado_manual=true` (campos añadidos al modelo `Asistencia`).
+- Mensajes manuales a inscritos: `POST /eventos/:id/notificaciones-manuales` (body: `asunto`, `mensaje`) envía email + notificación interna a todos los inscritos confirmados; solo el Org. Líder/Gerente del evento puede usarlo; registra en auditoría.
+- Habilitar encuesta para ponente: `PATCH /encuestas/:id/habilitar-ponente` (body: `actividad_id`) activa `habilitada_para_ponente=true` en la encuesta seleccionada.
+
+#### Ponente
+- Panel "Mis actividades" vía `GET /ponente-actividad/ponente/:id` con filtros opcionales: `evento_id`, `fecha_inicio`, `fecha_fin`, `estado`.
+- Solicitar cambio sobre una actividad asignada con justificación.
+- El responsable puede aprobar/rechazar la solicitud; el ponente recibe notificación de la decisión.
+- Lanzar encuestas y cerrarlas desde su panel; encuestas filtradas por `habilitada_para_ponente=true` y `id_actividad` coincidente en todos los endpoints del ponente.
+- Encuesta rápida: `POST /encuestas/rapida` crea una encuesta con `es_encuesta_rapida=true`, `tipo_creador='ponente'` y estado `activa` de inmediato (sin aprobación previa). Solo accesible por ponentes con asignación `aceptada` en la actividad.
+
+#### Asistente
+- Catálogo de eventos disponibles con filtros opcionales: `modalidad`, `empresa`, `palabras_clave`, `fecha_inicio`, `fecha_fin`.
+- Inscripción con validación de cupo, estado del evento y duplicados (transacción con lock de fila).
+- Panel "Mis inscripciones".
+- Registro de asistencia por botón y por código QR.
+- Validación de que el registro solo ocurre durante el rango de fechas del evento.
+- Responder encuestas sin posibilidad de duplicado (valida `RespuestaEncuesta` existente).
+- Cancelación de inscripción notifica automáticamente al Organizador Líder del evento (email + notificación interna).
+
+#### Infraestructura transversal
+- JWT two-token (access 24 h + refresh 7 d) con endpoint de refresco.
+- `auditoriaMiddleware` intercepta todas las respuestas 2xx; registra operación, usuario, ruta e IP del cliente.
+- Middleware global de error maneja `ValidationError`, `UniqueConstraintError` y `ForeignKeyConstraintError` de Sequelize.
+- `utils/response.js` garantiza forma uniforme `{ success, message, data }` en todos los endpoints.
+- Cron diario (08:00 Bogotá) envía recordatorios a ponentes con actividades al día siguiente.
+- Transacciones con `lock: LOCK.UPDATE` en inscripción y asistencia para prevenir race conditions de cupo.
+
+---
+
+### Lo que existe pero está incompleto ⚠️
+
+| # | Área | Problema |
+|---|------|---------|
+| 1 | **Roles — modificar permisos** | `GET /admin/roles` solo lista; no hay endpoint para editar permisos de un rol |
+| 2 | **Roles — persistencia** | `toggleRolEstado` guarda el estado en una variable en memoria JS (`_rolesEstado`). Se pierde al reiniciar el servidor |
+| 3 | **Rechazo de empresa** | El campo `motivo` se acepta en el body pero el validator no lo marca como obligatorio cuando `aprobar = false` |
+| 4 | **Historial de cambios del evento** | `PUT /eventos/:id` funciona y la auditoría general captura datos anteriores/nuevos, pero no hay tabla ni endpoint dedicado para consultar el historial de versiones de un evento concreto |
+| 5 | **Listar organizadores con sub-roles** | `GET /empresas/:id/equipo` devuelve solo el flag gerente/organizador genérico; no hay sub-roles porque no existen |
+| 6 | **Historial de solicitudes de cambio del ponente** | El estado de la solicitud se guarda en `PonenteActividad.notas`; no hay tabla de historial con múltiples entradas, fechas y responsables |
+| 7 | **Agenda personal del asistente** | No hay un endpoint que consolide todos los eventos + actividades de un asistente en vista de agenda; solo existen `/mis-inscripciones` y `/mis-asistencias` por separado |
+| 8 | **Cancelación de inscripción — BD** | El campo `fecha_limite_cancelacion` fue añadido al modelo `Evento`; la lógica ya lo usa, pero la columna debe existir en BD (ver Pendientes de DB) |
+| 9 | **Grupo B — Bloqueo de autorregistro** | `estado_manual=true` está en el modelo y el path manual lo marca correctamente, pero el path de autorregistro del asistente (`verificarAsistenciaExistente`) no comprueba este flag → el asistente puede sobrescribir el registro del organizador |
+| 10 | **Grupo G — Coordinador de Inscripciones** | El Org. Líder ya recibe notificación cuando se cancela una inscripción. Falta notificar al Coordinador de Inscripciones (depende de Grupo A) |
+
+---
+
+### Lo que falta completamente ❌
+
+#### Grupo A — Sistema de equipos de trabajo y sub-roles de organizador ⚠️ PENDIENTE
+Es el bloque de mayor impacto. No existe ninguna pieza de esta funcionalidad.
+
+- **Modelo `Equipo`** — no existe. La tabla `Administrador_Empresa` solo tiene `es_Gerente` (0/1); no hay campo `sub_rol`.
+- **CRUD de equipos** — el Gerente no puede crear, editar, deshabilitar ni asignar equipos.
+- **5 sub-roles de Coordinador** — Logístico, Inscripciones, Ponentes, Agenda, Encuestas — no existen en el modelo ni en los middlewares.
+- **Vinculación equipo ↔ evento** — el Gerente no puede asignar un equipo a un evento; por tanto ningún organizador tiene permisos acotados sobre un evento concreto.
+- **Guards por sub-rol** — los middlewares actuales distinguen solo el rol raíz (`organizador`); no hay control de acceso por sub-rol en ningún endpoint.
+- **Impacto**: toda la especificación de "Organizadores con Sub-rol" (Coordinadores) queda sin implementar.
+
+#### Grupo D — Escalado automático de solicitudes de cambio del ponente ⚠️ PENDIENTE
+- No hay campo `plazo_respuesta_solicitudes_horas` en `Evento` (configurable por el Org. Líder; default 48 h).
+- No hay campo `fecha_limite_respuesta` ni `escalado_en` en `PonenteActividad`.
+- No hay cron job que detecte solicitudes vencidas y las escale automáticamente al Organizador Líder.
+- La dirección de la solicitud es fija (va a quien la procese vía el endpoint); no hay lógica para encontrar al Coordinador de Ponentes del equipo y dirigirle la solicitud primero.
+
+#### Grupo H — Creación dinámica de roles con permisos granulares
+- Los 5 roles del sistema están hardcodeados como middlewares. No hay modelo `Rol` / `Permiso` ni endpoints para que el Administrador cree nuevos roles con permisos por módulo (lectura, creación, modificación, eliminación, aprobación).
+
+---
+
+### Pendientes de DB para cambios ya implementados en código
+
+```sql
+-- Campo añadido al modelo Evento
+ALTER TABLE Evento ADD COLUMN fecha_limite_cancelacion DATE NULL AFTER url_virtual;
+
+-- Campos añadidos al modelo Asistencia
+ALTER TABLE Asistencia ADD COLUMN registrado_por ENUM('asistente','organizador') NULL;
+ALTER TABLE Asistencia ADD COLUMN estado_manual TINYINT(1) NOT NULL DEFAULT 0;
+
+-- Campos añadidos al modelo Encuesta
+ALTER TABLE Encuesta ADD COLUMN habilitada_para_ponente TINYINT(1) NOT NULL DEFAULT 0;
+ALTER TABLE Encuesta ADD COLUMN es_encuesta_rapida TINYINT(1) NOT NULL DEFAULT 0;
+ALTER TABLE Encuesta ADD COLUMN tipo_creador ENUM('organizador','ponente') NULL DEFAULT 'organizador';
+```

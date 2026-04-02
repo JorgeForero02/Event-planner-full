@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const EncuestaController = require('../controllers/encuesta.controller');
-const { auth, isAdminGerenteOrOrganizador, isAdminGerenteOrganizadorOrPonente } = require('../middlewares/auth');
+const { auth, isAdminGerenteOrOrganizador, isAdminGerenteOrganizadorOrPonente, isPonente, isOrganizadorOGerente } = require('../middlewares/auth');
 const { 
     validarPermisoLecturaEncuestas, 
     validarPermiso,
@@ -32,6 +32,14 @@ router.post(
     '/completar',
     auth,
     EncuestaController.completarEncuesta
+);
+
+// Encuesta rápida del ponente (solo ponente, activa de inmediato)
+router.post(
+    '/rapida',
+    auth,
+    isPonente,
+    EncuestaController.crearEncuestaRapida
 );
 
 router.get(
@@ -71,6 +79,16 @@ router.get(
     isAdminGerenteOrganizadorOrPonente,
     validarPermiso,
     EncuestaController.obtenerEstadisticas
+);
+
+router.get('/:encuestaId/exportar-csv', auth, EncuestaController.exportarResultadosCSV);
+
+// Habilitar encuesta para el ponente de una actividad
+router.patch(
+    '/:encuestaId/habilitar-ponente',
+    auth,
+    isOrganizadorOGerente,
+    EncuestaController.habilitarParaPonente
 );
 
 module.exports = router;

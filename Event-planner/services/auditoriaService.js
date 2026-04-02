@@ -1,7 +1,8 @@
 const { Auditoria } = require('../models');
+const { Op } = require('sequelize');
 
 class AuditoriaService {
-    static async registrar({ mensaje, tipo, accion, usuario = null }) {
+    static async registrar({ mensaje, tipo, accion, usuario = null, entidad = null, datosAnteriores = null, datosNuevos = null, ip = null }) {
         try {
             const ahora = new Date();
 
@@ -12,7 +13,12 @@ class AuditoriaService {
                     ? `${mensaje} - Usuario: ${usuario.nombre} (ID: ${usuario.id})`
                     : mensaje,
                 tipo: tipo,
-                accion: accion
+                accion: accion,
+                id_admin: usuario ? usuario.id : null,
+                entidad_afectada: entidad,
+                datos_anteriores: datosAnteriores,
+                datos_nuevos: datosNuevos,
+                ip_address: ip
             });
 
             return registroAuditoria;
@@ -40,31 +46,40 @@ class AuditoriaService {
         });
     }
 
-    static async registrarCreacion(entidad, datos, usuario = null) {
+    static async registrarCreacion(entidad, datos, usuario = null, ip = null) {
         return await this.registrar({
             mensaje: `Creación de ${entidad}: ${JSON.stringify(datos)}`,
             tipo: 'POST',
             accion: `crear_${entidad}`,
-            usuario
+            usuario,
+            entidad,
+            datosNuevos: datos,
+            ip
         });
     }
 
-    static async registrarActualizacion(entidad, id, datosAnteriores, datosNuevos, usuario = null) {
+    static async registrarActualizacion(entidad, id, datosAnteriores, datosNuevos, usuario = null, ip = null) {
         const cambios = this.calcularCambios(datosAnteriores, datosNuevos);
         return await this.registrar({
             mensaje: `Actualización de ${entidad} ID ${id}. Cambios: ${JSON.stringify(cambios)}`,
             tipo: 'PUT',
             accion: `actualizar_${entidad}`,
-            usuario
+            usuario,
+            entidad,
+            datosAnteriores,
+            datosNuevos,
+            ip
         });
     }
 
-    static async registrarEliminacion(entidad, id, usuario = null) {
+    static async registrarEliminacion(entidad, id, usuario = null, ip = null) {
         return await this.registrar({
             mensaje: `Eliminación de ${entidad} con ID ${id}`,
             tipo: 'DELETE',
             accion: `eliminar_${entidad}`,
-            usuario
+            usuario,
+            entidad,
+            ip
         });
     }
 
@@ -102,8 +117,16 @@ class AuditoriaService {
 
             if (filtros.tipo) where.tipo = filtros.tipo;
             if (filtros.accion) where.accion = filtros.accion;
-            if (filtros.fechaInicio) where.fecha = { [Op.gte]: filtros.fechaInicio };
-            if (filtros.fechaFin) where.fecha = { [Op.lte]: filtros.fechaFin };
+            if (filtros.id_admin) where.id_admin = filtros.id_admin;
+            if (filtros.entidad) where.entidad_afectada = filtros.entidad;
+
+            if (filtros.fechaInicio && filtros.fechaFin) {
+                where.fecha = { [Op.between]: [filtros.fechaInicio, filtros.fechaFin] };
+            } else if (filtros.fechaInicio) {
+                where.fecha = { [Op.gte]: filtros.fechaInicio };
+            } else if (filtros.fechaFin) {
+                where.fecha = { [Op.lte]: filtros.fechaFin };
+            }
 
             const registros = await Auditoria.findAll({
                 where,

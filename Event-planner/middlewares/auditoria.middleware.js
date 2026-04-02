@@ -13,11 +13,14 @@ const auditoriaMiddleware = (tipoOperacion) => {
 
                 const rutaBase = req.baseUrl || req.route?.path || req.path;
 
+                const ip = req.ip || req.headers['x-forwarded-for'] || null;
+
                 AuditoriaService.registrar({
                     mensaje: `${req.method} ${rutaBase} - Status: ${res.statusCode}`,
                     tipo: tipoOperacion || req.method,
                     accion: `${req.method.toLowerCase()}_${rutaBase.replace(/\//g, '_')}`,
-                    usuario
+                    usuario,
+                    ip
                 }).catch(err => console.error('Error en auditoría:', err));
             }
 

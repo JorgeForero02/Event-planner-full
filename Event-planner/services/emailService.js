@@ -469,6 +469,28 @@ const EmailService = {
         }
     },
 
+    enviarMensajePersonalizado: async (destinatario, nombreUsuario, nombreEvento, asunto, mensaje) => {
+        try {
+            await resend.emails.send({
+                from: process.env.EMAIL_USER,
+                to: destinatario,
+                subject: asunto,
+                html: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                        <h2>Hola ${nombreUsuario},</h2>
+                        <p>Tienes un mensaje del organizador del evento <strong>${nombreEvento}</strong>:</p>
+                        <hr style="margin: 20px 0;" />
+                        <div style="background: #f8f9fa; padding: 16px; border-radius: 6px; white-space: pre-wrap;">${mensaje}</div>
+                        <hr style="margin: 20px 0;" />
+                        <p style="color: #888; font-size: 13px;">Atentamente,<br>El equipo de Event Planner</p>
+                    </div>
+                `
+            });
+        } catch (error) {
+            console.error('Error enviando mensaje personalizado a', destinatario, ':', error);
+        }
+    },
+
     enviarEncuesta: async (correoDestinatario, nombreDestinatario, urlEncuesta) => {
         try {
             const data = await resend.emails.send({

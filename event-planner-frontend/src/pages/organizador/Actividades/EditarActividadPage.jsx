@@ -307,7 +307,13 @@ const EditarActividadPage = () => {
             navigate(`/organizador/eventos/${eventoId}/agenda`);
         } catch (error) {
             console.error("Error al actualizar actividad:", error);
-            setErrorSubmit(error.response?.data?.message || 'Error al actualizar la actividad');
+            const data = error.response?.data;
+            let mensaje = data?.message || 'Error al actualizar la actividad';
+            if (data?.conflicto) {
+                const c = data.conflicto;
+                mensaje += ` — Conflicto con: "${c.titulo}" (${c.hora_inicio?.slice(0, 5)} – ${c.hora_fin?.slice(0, 5)})`;
+            }
+            setErrorSubmit(mensaje);
         } finally {
             setGuardando(false);
         }

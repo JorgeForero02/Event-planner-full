@@ -23,6 +23,10 @@ const GerenteRoute = ({ children }) => {
     return <Navigate to="/dashboard" replace />;
   }
 
+  if (!user?.rolData?.id_empresa) {
+    return <Navigate to="/dashboard" replace state={{ error: 'Tu cuenta de gerente aún no tiene una empresa afiliada. Contacta al administrador.' }} />;
+  }
+
   return children;
 };
 

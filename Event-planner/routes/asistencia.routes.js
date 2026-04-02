@@ -12,4 +12,8 @@ router.get('/mis-asistencias', auth, AsistenciaController.obtenerMisAsistencias)
 
 router.get('/evento/:id_evento', auth, isOrganizadorOGerente, AsistenciaController.obtenerAsistenciasEvento);
 
+// Registro manual del organizador: crea o sobrescribe la asistencia de un participante
+// :id = id de la inscripción; body: { estado: 'Presente' | 'Ausente' }
+router.patch('/:id/manual', auth, isOrganizadorOGerente, auditoriaMiddleware('PATCH'), AsistenciaController.registrarAsistenciaManual);
+
 module.exports = router;

@@ -189,19 +189,18 @@ class LocationsAPI extends BaseService {
     }
 
     toggleUbicacion = async (ubicacionId) => {
-        try {
-            const result = await this.fetch(`/ubicaciones/${ubicacionId}/toggle-estado`, {
-                method: 'PATCH'
-            });
+        const result = await this.fetch(`/ubicaciones/${ubicacionId}/toggle-estado`, {
+            method: 'PATCH'
+        });
 
-            if (!result.success) {
-                throw new Error(result.message || 'Error al cambiar estado de ubicación');
-            }
-
-            return result;
-        } catch (error) {
-            throw new Error(error.message || 'Error al cambiar estado de ubicación');
+        if (!result.success) {
+            const err = new Error(result.message || 'Error al cambiar estado de ubicación');
+            err.data = result;
+            err.eventos = result?.eventos ?? result?.data?.eventos ?? null;
+            throw err;
         }
+
+        return result;
     }
 }
 

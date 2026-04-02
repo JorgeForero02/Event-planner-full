@@ -14,13 +14,13 @@ const FormularioEncuesta = ({
     return (
         <div className="formulario-encuesta">
             <div className="formulario-header">
-                <h3>{modoEdicion ? '✏️ Editar Encuesta' : '➕ Crear Nueva Encuesta'}</h3>
+                <h3>{modoEdicion ? 'Editar Encuesta' : 'Crear Nueva Encuesta'}</h3>
                 <button className="btn-cerrar" onClick={onCerrar}>✕</button>
             </div>
 
             <div>
                 <div className="form-section">
-                    <h4>📋 Información Básica</h4>
+                    <h4>Información Básica</h4>
 
                     <div className="form-group">
                         <label>Título *</label>
@@ -32,7 +32,7 @@ const FormularioEncuesta = ({
                             placeholder="Ej: Encuesta de Satisfacción - Conferencia 2024"
                             className={errores.titulo ? 'input-error' : ''}
                         />
-                        {errores.titulo && <span className="error-text">⚠ {errores.titulo}</span>}
+                        {errores.titulo && <span className="error-text">{errores.titulo}</span>}
                     </div>
 
                     <div className="form-row">
@@ -77,7 +77,7 @@ const FormularioEncuesta = ({
                 </div>
 
                 <div className="form-section">
-                    <h4>🎯 Asociación</h4>
+                    <h4>Asociación</h4>
 
                     <div className="form-row">
                         <div className="form-group">
@@ -111,7 +111,7 @@ const FormularioEncuesta = ({
                 </div>
 
                 <div className="form-section">
-                    <h4>🔗 URLs del Formulario</h4>
+                    <h4>URLs del Formulario</h4>
 
                     <div className="form-group">
                         <label>URL del Formulario *</label>
@@ -139,7 +139,7 @@ const FormularioEncuesta = ({
                 </div>
 
                 <div className="form-section">
-                    <h4>⚙️ Configuración</h4>
+                    <h4>Configuración</h4>
 
                     <div className="form-row">
                         <div className="form-group">

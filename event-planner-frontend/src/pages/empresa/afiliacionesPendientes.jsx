@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { adminService } from '../../services/adminService';
 import { API_URL } from '../../config/apiConfig';
 import styles from './afiliaciones.module.css';
+import { useToast } from '../../contexts/ToastContext';
 
 const AfiliacionesPendientes = () => {
+  const toast = useToast();
   const [empresas, setEmpresas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [approvingIds, setApprovingIds] = useState([]);
@@ -77,18 +79,18 @@ const AfiliacionesPendientes = () => {
       if (promoteResp.ok) {
         const promoteResult = await promoteResp.json().catch(() => ({}));
         if (promoteResult.success) {
-          alert('🔔 El usuario solicitante ha sido promovido a Gerente (fallback).');
+          toast.success('El usuario solicitante ha sido promovido a Gerente.');
         } else {
           console.warn('Fallback promoción fallida:', promoteResult);
-          alert('⚠️ Empresa aprobada, pero no se pudo promover al usuario solicitante (fallback).');
+          toast.warning('Empresa aprobada, pero no se pudo promover al usuario solicitante.');
         }
       } else {
         console.warn('Fallback promote API responded with status', promoteResp.status);
-        alert('⚠️ Empresa aprobada, pero la promoción del usuario falló en el servidor (fallback).');
+        toast.warning('Empresa aprobada, pero la promoción del usuario falló en el servidor.');
       }
     } catch (err) {
       console.error('Error en fallback promotion:', err);
-      alert('⚠️ Empresa aprobada, pero hubo un error al promover al usuario solicitante (fallback).');
+      toast.warning('Empresa aprobada, pero hubo un error al promover al usuario solicitante.');
     }
   };
 
@@ -134,7 +136,7 @@ const AfiliacionesPendientes = () => {
   };
 
   const handleApprove = async (id, nombre) => {
-    if (!window.confirm(`¿Aprobar la empresa "${nombre}"?`)) return;
+    if (!window.confirm(`¿Aprobar la empresa "${nombre}"? Esta acción no se puede deshacer.`)) return;
 
     // Evitar reintentos concurrentes
     if (approvingIds.includes(id)) return;
@@ -144,12 +146,10 @@ const AfiliacionesPendientes = () => {
     try {
       const result = await adminService.aprobarEmpresaYPromover(id);
 
-      // Mostrar feedback al usuario
-      alert('✅ Empresa aprobada exitosamente');
+      toast.success('Empresa aprobada exitosamente');
 
-      // Si hubo promoción, notificar
       if (result?.promote?.success) {
-        alert('🔔 El usuario solicitante ha sido promovido a Gerente.');
+        toast.success('El usuario solicitante ha sido promovido a Gerente.');
       } else if (result?.promote && !result.promote.success) {
         console.warn('Promoción fallida o no disponible:', result.promote);
         if (result.promote.status === 404) {
@@ -162,7 +162,7 @@ const AfiliacionesPendientes = () => {
       fetchEmpresas();
     } catch (error) {
       console.error('Error aprobando empresa:', error);
-      alert(error.message || 'Error al aprobar empresa');
+      toast.error(error.message || 'Error al aprobar empresa');
       fetchEmpresas();
     } finally {
       setApprovingIds(prev => prev.filter(x => x !== id));
@@ -174,7 +174,7 @@ const AfiliacionesPendientes = () => {
     if (motivo === null) return;
 
     if (!motivo.trim()) {
-      alert('Debes proporcionar un motivo para el rechazo');
+      toast.warning('Debes proporcionar un motivo para el rechazo');
       return;
     }
 
@@ -194,15 +194,15 @@ const AfiliacionesPendientes = () => {
       });
 
       if (response.ok) {
-        alert('❌ Empresa rechazada');
+        toast.success('Empresa rechazada');
         fetchEmpresas();
       } else {
         const result = await response.json();
-        alert(result.message || 'Error al rechazar empresa');
+        toast.error(result.message || 'Error al rechazar empresa');
       }
     } catch (error) {
       console.error('Error:', error);
-      alert('Error al rechazar empresa');
+      toast.error('Error al rechazar empresa');
     }
   };
 

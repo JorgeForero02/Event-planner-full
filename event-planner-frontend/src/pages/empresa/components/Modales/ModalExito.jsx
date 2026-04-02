@@ -15,7 +15,7 @@ export const ModalExito = ({
                 </DialogHeader>
 
                 <div className="modal-body">
-                    <div className="modal-icon success">✅</div>
+                    <div className="modal-icon success"></div>
                     <p>{mensaje}</p>
                 </div>
 

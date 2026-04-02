@@ -13,7 +13,7 @@ export const ModalConfirmacion = ({
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>
-                        <span className="modal-icon warning">⚠️</span> {titulo}
+                        {titulo}
                     </DialogTitle>
                 </DialogHeader>
 

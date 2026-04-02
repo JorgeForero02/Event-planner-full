@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Plus, Eye, Pencil, X, Trash2, CheckCircle, XCircle, AlertCircle, Info } from 'lucide-react';
 import styles from './lugares.module.css';
 import Header from '../../layouts/Header/header';
-import GerenteSidebar from '../gerente/GerenteSidebar';
+import GerenteSidebar from '../../layouts/Sidebar/sidebarGerente/GerenteSidebar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
@@ -72,6 +72,9 @@ const Lugares = () => {
     const [empresaSeleccionada, setEmpresaSeleccionada] = useState(null);
     const [editingLugar, setEditingLugar] = useState(null);
     const [deletingLugar, setDeletingLugar] = useState(null);
+    const [showBloqueoModal, setShowBloqueoModal] = useState(false);
+    const [eventosBloqueantes, setEventosBloqueantes] = useState([]);
+    const [lugarBloqueo, setLugarBloqueo] = useState(null);
 
     const showNotification = (type, title, message, duration = 5000) => {
         const id = Date.now() + Math.random();
@@ -452,6 +455,30 @@ const Lugares = () => {
         }
     };
 
+    const handleToggleEstado = async (lugar) => {
+        try {
+            const token = getToken();
+            const response = await fetch(`${API_URL}/lugares/${lugar.id}/toggle-estado`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json', ...(token && { Authorization: `Bearer ${token}` }) }
+            });
+            const result = await response.json();
+            if (response.status === 409 && result.eventosBloqueantes?.length > 0) {
+                setLugarBloqueo(lugar);
+                setEventosBloqueantes(result.eventosBloqueantes);
+                setShowBloqueoModal(true);
+            } else if (result.success) {
+                showNotification('success', 'Éxito', result.message || 'Estado actualizado');
+                if (selectedEmpresaId) await fetchLugaresByEmpresa(selectedEmpresaId, token);
+            } else {
+                showNotification('error', 'Error', result.message || 'No se pudo cambiar el estado');
+            }
+        } catch (error) {
+            console.error('Error al cambiar estado del lugar:', error);
+            showNotification('error', 'Error', 'Error al cambiar estado del lugar');
+        }
+    };
+
     const closeAllModals = () => {
         setShowModal(false);
         setShowEditModal(false);
@@ -578,6 +605,13 @@ const Lugares = () => {
                                                     <td>{lugar.descripcion || 'Sin descripción'}</td>
                                                     <td>{lugar.ubicacion_nombre || 'Sin ubicación'}</td>
                                                     <td className={styles.actionsCell}>
+                                                        <button
+                                                            className={styles.btnIcon}
+                                                            title={lugar.activo ? 'Deshabilitar' : 'Habilitar'}
+                                                            onClick={() => handleToggleEstado(lugar)}
+                                                        >
+                                                            {lugar.activo ? <XCircle size={18} /> : <CheckCircle size={18} />}
+                                                        </button>
                                                         <button
                                                             className={styles.btnIcon}
                                                             title="Editar"
@@ -764,6 +798,43 @@ const Lugares = () => {
                                 </Button>
                             </DialogFooter>
                         </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* Modal de eventos bloqueantes al deshabilitar */}
+            <Dialog open={showBloqueoModal} onOpenChange={(open) => { if (!open) { setShowBloqueoModal(false); setEventosBloqueantes([]); setLugarBloqueo(null); } }}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-amber-700">
+                            <AlertCircle size={20} />
+                            No se puede deshabilitar: "{lugarBloqueo?.nombre}"
+                        </DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-3 py-2">
+                        <p className="text-sm text-slate-600">
+                            Esta sala tiene actividades programadas en los siguientes eventos activos o por iniciar. Debes reasignar o cancelar esas actividades antes de deshabilitar la sala.
+                        </p>
+                        <ul className="space-y-2">
+                            {eventosBloqueantes.map(ev => (
+                                <li key={ev.id} className="flex items-start gap-2 rounded-md bg-amber-50 border border-amber-200 px-3 py-2 text-sm text-amber-900">
+                                    <AlertCircle size={16} className="mt-0.5 shrink-0 text-amber-500" />
+                                    <span>
+                                        <strong>{ev.titulo}</strong>
+                                        {ev.fecha_inicio && (
+                                            <span className="text-amber-700 ml-1">
+                                                ({new Date(ev.fecha_inicio).toLocaleDateString()} – {new Date(ev.fecha_fin).toLocaleDateString()})
+                                            </span>
+                                        )}
+                                    </span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                    <DialogFooter>
+                        <Button onClick={() => { setShowBloqueoModal(false); setEventosBloqueantes([]); setLugarBloqueo(null); }}>
+                            Entendido
+                        </Button>
+                    </DialogFooter>
                 </DialogContent>
             </Dialog>
 

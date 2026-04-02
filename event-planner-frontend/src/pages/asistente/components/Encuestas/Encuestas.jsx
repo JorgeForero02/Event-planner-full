@@ -259,7 +259,7 @@ const Encuestas = ({ actividadesDisponibles = [], cargandoActividades = false })
             }
 
             await marcarComoCompletada(encuestaSeleccionada.id);
-            mostrarAlertaExito('✅ Encuesta completada exitosamente');
+            mostrarAlertaExito('Encuesta completada exitosamente');
             setModalAbierto(false);
             setConfirmandoCompletar(false);
             cargarEncuestas();
@@ -456,7 +456,6 @@ const Encuestas = ({ actividadesDisponibles = [], cargandoActividades = false })
 
             {!eventoSeleccionado ? (
                 <div className={styles.noSeleccion}>
-                    <div className={styles.infoIcon}>📅</div>
                     <h3>Selecciona un evento</h3>
                     <p>Elige un evento para ver las encuestas disponibles</p>
                 </div>
@@ -467,7 +466,6 @@ const Encuestas = ({ actividadesDisponibles = [], cargandoActividades = false })
                 </div>
             ) : error ? (
                 <div className={styles.errorContainer}>
-                    <div className={styles.errorIcon}>⚠️</div>
                     <h3>Error al cargar encuestas</h3>
                     <p>{error}</p>
                     <button className={styles.retryButton} onClick={cargarEncuestas}>

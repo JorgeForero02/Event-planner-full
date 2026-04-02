@@ -57,7 +57,7 @@ const Dashboard = () => {
               onMouseOver={(e) => e.target.style.backgroundColor = '#5a95e8'}
               onMouseOut={(e) => e.target.style.backgroundColor = '#67a6f9'}
             >
-              🛡️ Panel de Administración
+              Panel de Administración
             </button>
           )}
         </div>

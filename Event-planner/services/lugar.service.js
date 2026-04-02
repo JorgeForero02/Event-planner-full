@@ -110,7 +110,37 @@ class LugarService {
             });
 
             if (actividadFutura) {
-                return { exito: false, mensaje: MENSAJES.TIENE_ACTIVIDADES_FUTURAS, codigoEstado: 400 };
+                const todasBloqueantes = await LugarActividad.findAll({
+                    where: { id_lugar: lugarId },
+                    include: [{
+                        model: Actividad,
+                        as: 'actividad',
+                        required: true,
+                        where: { fecha_actividad: { [Op.gte]: hoy } },
+                        attributes: ['id_actividad', 'titulo', 'fecha_actividad', 'hora_inicio', 'hora_fin'],
+                        include: [{
+                            model: Evento,
+                            as: 'evento',
+                            required: true,
+                            where: { estado: { [Op.in]: [0, 1] } },
+                            attributes: ['id', 'titulo', 'fecha_inicio', 'fecha_fin']
+                        }]
+                    }],
+                    transaction
+                });
+
+                const eventosBloqueantes = [...new Map(
+                    todasBloqueantes
+                        .filter(la => la.actividad?.evento)
+                        .map(la => [la.actividad.evento.id, {
+                            id: la.actividad.evento.id,
+                            titulo: la.actividad.evento.titulo,
+                            fecha_inicio: la.actividad.evento.fecha_inicio,
+                            fecha_fin: la.actividad.evento.fecha_fin
+                        }])
+                ).values()];
+
+                return { exito: false, mensaje: MENSAJES.TIENE_ACTIVIDADES_FUTURAS, codigoEstado: 409, eventosBloqueantes };
             }
         }
 

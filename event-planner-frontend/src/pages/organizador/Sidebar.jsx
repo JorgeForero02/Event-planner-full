@@ -5,7 +5,6 @@ import SharedSidebar from '../../layouts/Sidebar/SharedSidebar';
 import { cn } from '../../lib/utils';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
-import { useNavigate } from 'react-router-dom';
 
 const Sidebar = ({ onSectionChange }) => {
     const {
@@ -28,8 +27,6 @@ const Sidebar = ({ onSectionChange }) => {
         handleSubmitPassword,
         handleLogout
     } = useSidebar();
-
-    const navigate = useNavigate();
 
     const onMenuClickHandler = (sectionId) => {
         handleMenuClick(sectionId);

@@ -3,6 +3,7 @@ import { useGerenteDashboard } from '../hooks/useGerenteDashboard';
 import GerenteSidebar from '../../../layouts/Sidebar/sidebarGerente/GerenteSidebar';
 import Header from '../../../layouts/Header/header';
 import WelcomeCard from '../components/dashboard/WelcomeCard';
+import EmpresaStatusBanner from '../components/dashboard/EmpresaStatusBanner';
 import StatsCards from '../components/dashboard/StatsCards';
 import TeamCard from '../components/dashboard/TeamCard';
 import ActivitiesCard from '../components/dashboard/ActivitiesCard';
@@ -16,6 +17,7 @@ const GerenteDashboard = () => {
     user,
     equipo,
     stats,
+    empresa,
     loading,
     error,
     reloadTeam
@@ -47,6 +49,7 @@ const GerenteDashboard = () => {
 
         <main className="flex-1 overflow-auto p-6 space-y-6">
           <WelcomeCard user={user} />
+          <EmpresaStatusBanner empresa={empresa} />
           <StatsCards stats={stats} />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <TeamCard equipo={equipo} onReload={reloadTeam} />

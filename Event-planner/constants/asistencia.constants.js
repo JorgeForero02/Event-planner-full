@@ -31,7 +31,11 @@ const MENSAJES = {
     EVENTO_NO_DISPONIBLE: 'El evento no está disponible para registro de asistencia.',
     EVENTO_NO_DISPONIBLE_CODIGO: 'El evento no está disponible.',
     FECHA_FUERA_RANGO: 'No es posible registrar asistencia fuera de las fechas del evento.',
-    SIN_PERMISO_VER_ASISTENCIAS: 'No tienes permiso para ver las asistencias de este evento.'
+    SIN_PERMISO_VER_ASISTENCIAS: 'No tienes permiso para ver las asistencias de este evento.',
+    ASISTENCIA_BLOQUEADA_POR_ORGANIZADOR: 'El organizador ya registró tu asistencia. No puedes modificarla.',
+    ASISTENCIA_MANUAL_REGISTRADA: 'Asistencia registrada manualmente de forma exitosa.',
+    ESTADO_MANUAL_INVALIDO: "El estado debe ser 'Presente' o 'Ausente'.",
+    SIN_PERMISO_REGISTRO_MANUAL: 'No tienes permiso para registrar asistencia en este evento.'
 };
 
 module.exports = {

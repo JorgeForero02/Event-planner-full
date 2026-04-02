@@ -26,6 +26,31 @@ const Auditoria = sequelize.define('Auditoria', {
   accion: {
     type: DataTypes.STRING(100),
     allowNull: true
+  },
+  id_admin: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    comment: 'ID del usuario que realizó la acción'
+  },
+  entidad_afectada: {
+    type: DataTypes.STRING(100),
+    allowNull: true,
+    comment: 'Tipo de entidad afectada (usuario, empresa, rol, etc.)'
+  },
+  datos_anteriores: {
+    type: DataTypes.JSON,
+    allowNull: true,
+    comment: 'Estado de la entidad antes de la operación'
+  },
+  datos_nuevos: {
+    type: DataTypes.JSON,
+    allowNull: true,
+    comment: 'Estado de la entidad después de la operación'
+  },
+  ip_address: {
+    type: DataTypes.STRING(45),
+    allowNull: true,
+    comment: 'Dirección IP desde donde se realizó la operación'
   }
 }, {
   tableName: 'Auditoria',

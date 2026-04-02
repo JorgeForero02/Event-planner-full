@@ -8,6 +8,7 @@ import AfiliacionesPendientes from './components/sections/AfiliacionesPendientes
 import AfiliacionesAprobadas from './components/sections/AfiliacionesAprobadasSection';
 import AfiliacionesRechazadas from './components/sections/AfiliacionesRechazadasSection';
 import AdminDashboard from './components/dashboard/AdminDashboard';
+import AuditoriaSection from './components/sections/AuditoriaSection';
 import { cn } from '../../lib/utils';
 
 const Admin = () => {
@@ -41,6 +42,9 @@ const Admin = () => {
             <Route path="afiliaciones-aprobadas" element={<AfiliacionesAprobadas />} />
             <Route path="afiliaciones-rechazadas" element={<AfiliacionesRechazadas />} />
             
+            {/* Ruta para /admin/auditoria */}
+            <Route path="auditoria" element={<AuditoriaSection />} />
+
             {/* Ruta de fallback */}
             <Route path="*" element={<Navigate to="dashboard" replace />} />
           </Routes>

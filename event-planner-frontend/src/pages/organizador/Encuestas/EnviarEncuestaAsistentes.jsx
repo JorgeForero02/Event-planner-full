@@ -190,7 +190,7 @@ const EnviarEncuestaAsistentes = ({ encuesta, eventoId, onCerrar, onEnvioExitoso
                         {mostrarConfirmacion && (
                             <div className="confirmacion-overlay">
                                 <div className="confirmacion-content">
-                                    <h3>⚠️ Confirmar envío</h3>
+                                    <h3>Confirmar envío</h3>
                                     <p>
                                         ¿Estás seguro de enviar la encuesta a <strong>{asistentes.length}</strong> asistentes?
                                     </p>

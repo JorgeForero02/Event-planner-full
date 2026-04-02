@@ -389,6 +389,27 @@ export const useEncuestasManager = () => {
         }
     };
 
+    const habilitarParaPonente = async (encuestaId, actividadId) => {
+        try {
+            setCargando(true);
+            const response = await fetch(`${API_URL}/encuestas/${encuestaId}/habilitar-ponente`, {
+                method: 'PATCH',
+                headers: getHeaders(),
+                body: JSON.stringify({ actividad_id: actividadId })
+            });
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || `Error al habilitar: ${response.status}`);
+            }
+            mostrarMensaje('success', 'Encuesta habilitada para el ponente correctamente');
+            cargarEncuestas(eventoSeleccionado.id);
+        } catch (error) {
+            mostrarMensaje('error', error.message || 'Error al habilitar la encuesta para ponente.');
+        } finally {
+            setCargando(false);
+        }
+    };
+
     const abrirEnvioEncuesta = (encuesta) => {
         setEncuestaSeleccionada(encuesta);
         setMostrarEnvioEncuesta(true);
@@ -448,6 +469,7 @@ export const useEncuestasManager = () => {
         cerrarFormulario,
         eliminarEncuesta,
         activarEncuesta,
+        habilitarParaPonente,
         abrirEnvioEncuesta,
         cerrarEnvioEncuesta,
         handleEnvioExitoso,

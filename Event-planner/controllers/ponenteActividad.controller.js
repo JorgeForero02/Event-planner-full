@@ -149,8 +149,14 @@ class PonenteActividadController {
     async obtenerPorPonente(req, res) {
         try {
             const { ponenteId } = req.params;
+            const { evento_id, fecha_inicio, fecha_fin, estado } = req.query;
+            const filtros = {};
+            if (evento_id) filtros.evento_id = evento_id;
+            if (fecha_inicio) filtros.fecha_inicio = fecha_inicio;
+            if (fecha_fin) filtros.fecha_fin = fecha_fin;
+            if (estado) filtros.estado = estado;
 
-            const resultado = await PonenteActividadService.obtenerPorPonente(ponenteId);
+            const resultado = await PonenteActividadService.obtenerPorPonente(ponenteId, filtros);
 
             if (!resultado.exito) {
                 return res.status(404).json({

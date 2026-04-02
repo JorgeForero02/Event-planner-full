@@ -110,6 +110,73 @@ class NotificacionService {
         return responsablesUnicos;
     }
 
+    async crearNotificacionMensajeManual({ evento, destinatarios, asunto, mensaje }, transaction = null) {
+        try {
+            const tipoNotificacion = await TipoNotificacion.findOne({
+                where: { nombre: 'mensaje_manual_organizador' }
+            });
+
+            const notificaciones = [];
+            for (const usuario of destinatarios) {
+                const notif = await this.crear({
+                    id_TipoNotificacion: tipoNotificacion?.id || 1,
+                    titulo: asunto,
+                    contenido: mensaje,
+                    entidad_tipo: TIPOS_ENTIDAD.EVENTO,
+                    entidad_id: evento.id,
+                    id_destinatario: usuario.id,
+                    id_evento: evento.id,
+                    datos_adicionales: {
+                        id_evento: evento.id,
+                        nombre_evento: evento.titulo,
+                        asunto
+                    }
+                }, transaction);
+                notificaciones.push(notif);
+            }
+            return notificaciones;
+        } catch (error) {
+            console.error('Error al crear notificaciones de mensaje manual:', error);
+            return [];
+        }
+    }
+
+    async crearNotificacionCancelacionInscripcion({ inscripcion, evento, nombreAsistente }, transaction = null) {
+        try {
+            const tipoNotificacion = await TipoNotificacion.findOne({
+                where: { nombre: 'cancelacion_inscripcion' }
+            });
+
+            const responsables = await this.obtenerResponsablesEvento(evento.id);
+            const notificaciones = [];
+
+            for (const responsable of responsables) {
+                const notif = await this.crear({
+                    id_TipoNotificacion: tipoNotificacion?.id || 1,
+                    titulo: `Cancelación de inscripción en: ${evento.titulo}`,
+                    contenido: `El asistente "${nombreAsistente}" ha cancelado su inscripción (código: ${inscripcion.codigo ?? inscripcion.id}) en el evento "${evento.titulo}".`,
+                    entidad_tipo: TIPOS_ENTIDAD.EVENTO,
+                    entidad_id: evento.id,
+                    id_destinatario: responsable.id,
+                    id_evento: evento.id,
+                    datos_adicionales: {
+                        id_inscripcion: inscripcion.id,
+                        codigo_inscripcion: inscripcion.codigo ?? null,
+                        nombre_asistente: nombreAsistente,
+                        id_evento: evento.id,
+                        nombre_evento: evento.titulo
+                    }
+                }, transaction);
+                notificaciones.push(notif);
+            }
+
+            return notificaciones;
+        } catch (error) {
+            console.error('Error al crear notificación de cancelación de inscripción:', error);
+            return [];
+        }
+    }
+
     async crearNotificacionBienvenidaOrganizador(usuario, empresa, transaction = null) {
         try {
             const tipoNotificacion = await TipoNotificacion.findOne({

@@ -274,7 +274,7 @@ const Empresa = () => {
 
   const handleCloseModal = () => {
     setShowSuccessModal(false);
-    navigate('/asistente');
+    navigate('/gerente');
   };
 
   const handleCancel = () => {
@@ -290,7 +290,6 @@ const Empresa = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <div className="flex items-center gap-2 text-sm font-medium text-slate-600 mb-4 pb-2 border-b border-slate-200">
-              <span>📋</span>
               <span>Información Básica de la Empresa</span>
             </div>
 
@@ -329,7 +328,6 @@ const Empresa = () => {
 
           <div>
             <div className="flex items-center gap-2 text-sm font-medium text-slate-600 mb-4 pb-2 border-b border-slate-200">
-              <span>📍</span>
               <span>Información de Contacto</span>
             </div>
 
@@ -470,7 +468,6 @@ const Empresa = () => {
 
           <div className="space-y-3">
             <div className="flex items-start gap-3">
-              <span className="text-lg">📧</span>
               <div className="text-sm">
                 <p className="font-medium">Confirmación Enviada</p>
                 <p className="text-slate-500">Se ha enviado un correo electrónico con los detalles completos del registro.</p>
@@ -478,7 +475,6 @@ const Empresa = () => {
             </div>
 
             <div className="flex items-start gap-3">
-              <span className="text-lg">⏳</span>
               <div className="text-sm">
                 <p className="font-medium">Solicitud Pendiente</p>
                 <p className="text-slate-500">Tu afiliación está en proceso de revisión por parte del administrador.</p>
@@ -487,7 +483,7 @@ const Empresa = () => {
 
             <div className="rounded-md bg-slate-50 border border-slate-200 p-3 text-sm">
               <p>
-                <strong>📬 ¿Qué sigue ahora?</strong>{' '}
+                <strong>¿Qué sigue ahora?</strong>{' '}
                 Recibirás una notificación por correo electrónico cuando tu solicitud sea procesada y aprobada.
               </p>
             </div>

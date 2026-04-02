@@ -1,4 +1,5 @@
-const { Empresa, Usuario, AdministradorEmpresa, Asistente, Pais, Ciudad, sequelize } = require('../models');
+const { Empresa, Usuario, AdministradorEmpresa, Asistente, Pais, Ciudad, Evento, Actividad, Inscripcion, Asistencia, PresupuestoItem, Encuesta, RespuestaEncuesta, sequelize } = require('../models');
+const { Op } = require('sequelize');
 const { MENSAJES, ESTADOS, ROLES } = require('../constants/empresa.constants');
 
 class EmpresaService {
@@ -226,6 +227,162 @@ class EmpresaService {
             empresa,
             creador,
             mensaje
+        };
+    }
+
+    async reporteDesempenho(empresaId, filtros = {}) {
+        const empresa = await Empresa.findByPk(empresaId);
+        if (!empresa) {
+            return { exito: false, mensaje: 'Empresa no encontrada', codigoEstado: 404 };
+        }
+
+        const whereEvento = { id_empresa: empresaId };
+        if (filtros.fechaInicio) whereEvento.fecha_inicio = { [Op.gte]: filtros.fechaInicio };
+        if (filtros.fechaFin) whereEvento.fecha_fin = { [Op.lte]: filtros.fechaFin };
+        if (filtros.estado !== undefined) whereEvento.estado = filtros.estado;
+
+        const eventos = await Evento.findAll({
+            where: whereEvento,
+            attributes: ['id', 'titulo', 'estado', 'modalidad', 'fecha_inicio', 'fecha_fin', 'cupos'],
+            order: [['fecha_inicio', 'DESC']]
+        });
+
+        const eventoIds = eventos.map(e => e.id);
+
+        const [
+            totalInscripciones,
+            totalConfirmadas,
+            totalAsistencias,
+            totalEncuestasEnviadas,
+            totalEncuestasCompletadas,
+            totalActividades
+        ] = eventoIds.length > 0 ? await Promise.all([
+            Inscripcion.count({ where: { id_evento: { [Op.in]: eventoIds } } }),
+            Inscripcion.count({ where: { id_evento: { [Op.in]: eventoIds }, estado: 'Confirmada' } }),
+            Asistencia.count({
+                include: [{ model: Inscripcion, as: 'inscripcionInfo', required: true, where: { id_evento: { [Op.in]: eventoIds } } }]
+            }),
+            RespuestaEncuesta.count({
+                include: [{ model: Encuesta, as: 'encuesta', required: true, where: { id_evento: { [Op.in]: eventoIds } } }]
+            }),
+            RespuestaEncuesta.count({
+                where: { estado: 'completada' },
+                include: [{ model: Encuesta, as: 'encuesta', required: true, where: { id_evento: { [Op.in]: eventoIds } } }]
+            }),
+            Actividad.count({ where: { id_evento: { [Op.in]: eventoIds } } })
+        ]) : [0, 0, 0, 0, 0, 0];
+
+        const presupuestoItems = eventoIds.length > 0
+            ? await PresupuestoItem.findAll({ where: { id_evento: { [Op.in]: eventoIds } } })
+            : [];
+
+        const totalIngresos = presupuestoItems
+            .filter(i => i.tipo === 'ingreso')
+            .reduce((acc, i) => acc + parseFloat(i.monto), 0);
+        const totalGastos = presupuestoItems
+            .filter(i => i.tipo === 'gasto')
+            .reduce((acc, i) => acc + parseFloat(i.monto), 0);
+
+        return {
+            exito: true,
+            reporte: {
+                empresa: { id: empresa.id, nombre: empresa.nombre, nit: empresa.nit },
+                total_eventos: eventos.length,
+                eventos_por_estado: {
+                    programados: eventos.filter(e => e.estado === 0).length,
+                    activos: eventos.filter(e => e.estado === 1).length,
+                    finalizados: eventos.filter(e => e.estado === 2).length,
+                    cancelados: eventos.filter(e => e.estado === 3).length
+                },
+                total_actividades: totalActividades,
+                inscripciones: {
+                    total: totalInscripciones,
+                    confirmadas: totalConfirmadas,
+                    asistencias: totalAsistencias,
+                    tasa_asistencia: totalConfirmadas > 0
+                        ? Math.round((totalAsistencias / totalConfirmadas) * 100)
+                        : 0
+                },
+                encuestas: {
+                    total_enviadas: totalEncuestasEnviadas,
+                    total_completadas: totalEncuestasCompletadas,
+                    tasa_respuesta: totalEncuestasEnviadas > 0
+                        ? Math.round((totalEncuestasCompletadas / totalEncuestasEnviadas) * 100)
+                        : 0
+                },
+                presupuesto: {
+                    total_ingresos: totalIngresos.toFixed(2),
+                    total_gastos: totalGastos.toFixed(2),
+                    balance: (totalIngresos - totalGastos).toFixed(2)
+                },
+                eventos
+            }
+        };
+    }
+
+    async obtenerEstadisticasOcupacion(empresaId) {
+        const { Lugar, LugarActividad, Actividad, Inscripcion } = require('../models');
+
+        const empresa = await Empresa.findByPk(empresaId);
+        if (!empresa) {
+            return { exito: false, mensaje: 'Empresa no encontrada', codigoEstado: 404 };
+        }
+
+        const lugares = await Lugar.findAll({
+            where: { id_empresa: empresaId },
+            attributes: ['id', 'nombre', 'capacidad']
+        });
+
+        const resultado = [];
+
+        for (const lugar of lugares) {
+            const asignaciones = await LugarActividad.findAll({
+                where: { id_lugar: lugar.id },
+                include: [{
+                    model: Actividad,
+                    as: 'actividad',
+                    attributes: ['id_actividad', 'id_evento']
+                }]
+            });
+
+            const eventoIds = [...new Set(asignaciones
+                .filter(a => a.actividad)
+                .map(a => a.actividad.id_evento))];
+
+            let ocupacionesEvento = [];
+            for (const eventoId of eventoIds) {
+                const inscritos = await Inscripcion.count({
+                    where: { id_evento: eventoId, estado: 'Confirmada' }
+                });
+                if (lugar.capacidad && lugar.capacidad > 0) {
+                    ocupacionesEvento.push(Math.min(100, Math.round((inscritos / lugar.capacidad) * 100)));
+                }
+            }
+
+            const ocupacionPromedio = ocupacionesEvento.length > 0
+                ? Math.round(ocupacionesEvento.reduce((a, b) => a + b, 0) / ocupacionesEvento.length)
+                : 0;
+
+            resultado.push({
+                id: lugar.id,
+                nombre: lugar.nombre,
+                capacidad: lugar.capacidad,
+                eventos_realizados: eventoIds.length,
+                ocupacion_promedio: ocupacionPromedio
+            });
+        }
+
+        const ocupacionGlobal = resultado.length > 0
+            ? Math.round(resultado.reduce((a, b) => a + b.ocupacion_promedio, 0) / resultado.length)
+            : 0;
+
+        return {
+            exito: true,
+            data: {
+                empresa: { id: empresa.id, nombre: empresa.nombre },
+                ocupacion_global_promedio: ocupacionGlobal,
+                salas: resultado
+            }
         };
     }
 

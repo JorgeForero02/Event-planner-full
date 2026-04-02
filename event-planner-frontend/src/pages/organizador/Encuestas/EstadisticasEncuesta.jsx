@@ -124,9 +124,9 @@ const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
             URL.revokeObjectURL(url);
 
             setMostrarMenuExportar(false);
-            alert('✅ CSV exportado correctamente');
+            alert('CSV exportado correctamente');
         } catch (err) {
-            alert('❌ Error al exportar CSV: ' + err.message);
+            alert('Error al exportar CSV: ' + err.message);
         } finally {
             setExportando(false);
         }
@@ -193,9 +193,9 @@ const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
             XLSX.writeFile(wb, `estadisticas_${encuesta.titulo.replace(/[^a-z0-9]/gi, '_')}_${Date.now()}.xlsx`);
 
             setMostrarMenuExportar(false);
-            alert('✅ Excel exportado correctamente');
+            alert('Excel exportado correctamente');
         } catch (err) {
-            alert('❌ Error al exportar Excel: ' + err.message);
+            alert('Error al exportar Excel: ' + err.message);
         } finally {
             setExportando(false);
         }
@@ -266,10 +266,10 @@ const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
             doc.save(`estadisticas_${encuesta.titulo.replace(/[^a-z0-9]/gi, '_')}.pdf`);
 
             setMostrarMenuExportar(false);
-            alert('✅ PDF descargado');
+            alert('PDF descargado');
 
         } catch (err) {
-            alert('❌ Error: ' + err.message);
+            alert('Error: ' + err.message);
         } finally {
             setExportando(false);
         }
@@ -295,7 +295,7 @@ const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
             <Dialog open={true} onOpenChange={(open) => !open && onCerrar()}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>⚠️ Error</DialogTitle>
+                        <DialogTitle>Error</DialogTitle>
                     </DialogHeader>
                     <div className="error-message">
                         <p>{error}</p>
@@ -316,7 +316,7 @@ const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
         <Dialog open={true} onOpenChange={(open) => !open && !exportando && onCerrar()}>
             <DialogContent className="max-w-3xl">
                 <DialogHeader>
-                    <DialogTitle>📊 Estadísticas Detalladas</DialogTitle>
+                    <DialogTitle>Estadísticas Detalladas</DialogTitle>
                 </DialogHeader>
                 <div className="modal-content">
                     <div className="exportar-dropdown">
@@ -325,7 +325,7 @@ const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
                             onClick={() => setMostrarMenuExportar(!mostrarMenuExportar)}
                             disabled={exportando}
                         >
-                            {exportando ? '⏳ Exportando...' : '📥 Exportar'}
+                            {exportando ? 'Exportando...' : 'Exportar'}
                         </button>
 
                         {mostrarMenuExportar && (
@@ -335,21 +335,21 @@ const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
                                     onClick={exportarCSV}
                                     disabled={exportando}
                                 >
-                                    📄 Exportar a CSV
+                                    Exportar a CSV
                                 </button>
                                 <button
                                     className="opcion-exportar"
                                     onClick={exportarExcel}
                                     disabled={exportando}
                                 >
-                                    📊 Exportar a Excel
+                                    Exportar a Excel
                                 </button>
                                 <button
                                     className="opcion-exportar"
                                     onClick={exportarPDF}
                                     disabled={exportando}
                                 >
-                                    📑 Exportar a PDF
+                                    Exportar a PDF
                                 </button>
                             </div>
                         )}
@@ -400,28 +400,28 @@ const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
                     {/* Estadísticas generales */}
                     <div className="estadisticas-grid-modal">
                         <div className="stat-card-modal">
-                            <div className="stat-icon-modal">📊</div>
+                            <div className="stat-icon-modal stat-enviadas"></div>
                             <div className="stat-content-modal">
                                 <h3>{estadisticas.total_enviadas}</h3>
                                 <p>Total Enviadas</p>
                             </div>
                         </div>
                         <div className="stat-card-modal completadas">
-                            <div className="stat-icon-modal">✅</div>
+                            <div className="stat-icon-modal stat-completadas"></div>
                             <div className="stat-content-modal">
                                 <h3>{estadisticas.total_completadas}</h3>
                                 <p>Completadas</p>
                             </div>
                         </div>
                         <div className="stat-card-modal pendientes">
-                            <div className="stat-icon-modal">⏳</div>
+                            <div className="stat-icon-modal stat-pendientes"></div>
                             <div className="stat-content-modal">
                                 <h3>{estadisticas.total_pendientes}</h3>
                                 <p>Pendientes</p>
                             </div>
                         </div>
                         <div className="stat-card-modal tasa">
-                            <div className="stat-icon-modal">📈</div>
+                            <div className="stat-icon-modal stat-tasa"></div>
                             <div className="stat-content-modal">
                                 <h3>{estadisticas.tasa_respuesta}</h3>
                                 <p>Tasa de Respuesta</p>
@@ -459,7 +459,7 @@ const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
                                 rel="noopener noreferrer"
                                 className="btn-link-estadisticas"
                             >
-                                📝 Ver Formulario
+                                Ver Formulario
                             </a>
                             <a
                                 href={encuesta.url_respuestas || encuesta.url_google_form}
@@ -467,7 +467,7 @@ const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
                                 rel="noopener noreferrer"
                                 className="btn-link-estadisticas"
                             >
-                                📊 Ver Respuestas en Google
+                                Ver Respuestas en Google
                             </a>
                         </div>
                     </div>

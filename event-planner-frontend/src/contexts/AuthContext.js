@@ -4,25 +4,38 @@ import { getRedirectPath } from '../utils/roleUtils';
 
 const AuthContext = createContext();
 
+const extractEmpresa = (user) => {
+    if (!user) return null;
+    const rolData = user.rolData ?? user.rol_data ?? {};
+    const id = rolData.id_empresa ?? rolData.empresa?.id ?? user.id_empresa ?? null;
+    const nombre = rolData.empresa?.nombre ?? user.empresa?.nombre ?? null;
+    if (!id) return null;
+    return { id, nombre };
+};
+
 const authReducer = (state, action) => {
     switch (action.type) {
         case 'INIT_START':
             return { ...state, loading: true, error: null };
         case 'LOGIN_START':
             return { ...state, loading: true, error: null };
-        case 'LOGIN_SUCCESS':
+        case 'LOGIN_SUCCESS': {
+            const empresa = extractEmpresa(action.payload.user);
             return {
                 ...state,
                 user: action.payload.user,
+                empresa,
                 isAuthenticated: true,
                 loading: false,
                 error: null,
                 initialized: true
             };
+        }
         case 'LOGIN_FAILURE':
             return {
                 ...state,
                 user: null,
+                empresa: null,
                 isAuthenticated: false,
                 loading: false,
                 error: action.payload,
@@ -32,6 +45,7 @@ const authReducer = (state, action) => {
             return {
                 ...state,
                 user: null,
+                empresa: null,
                 isAuthenticated: false,
                 loading: false,
                 error: null,
@@ -53,6 +67,7 @@ const authReducer = (state, action) => {
 
 const initialState = {
     user: null,
+    empresa: null,
     isAuthenticated: false,
     loading: false,
     error: null,

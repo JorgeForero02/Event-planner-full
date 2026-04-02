@@ -31,7 +31,9 @@ const MENSAJES_VALIDACION = {
     ESTADO_INVALIDO: 'Estado no válido.',
     // [BACKEND-FIX] B5: Mensajes faltantes para validación de estado
     EVENTO_CANCELADO: 'No se puede modificar un evento cancelado.',
-    EVENTO_FINALIZADO: 'No se puede modificar un evento finalizado.'
+    EVENTO_FINALIZADO: 'No se puede modificar un evento finalizado.',
+    FECHA_LIMITE_CANCELACION_REQUERIDA: 'La fecha límite de cancelación es obligatoria para publicar el evento.',
+    FECHA_LIMITE_CANCELACION_INVALIDA: 'La fecha límite de cancelación debe ser anterior o igual a la fecha de inicio del evento.'
 };
 
 module.exports = {

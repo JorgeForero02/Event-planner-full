@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { gerenteService } from '../../../services/gerenteService';
+import { API_URL } from '../../../config/apiConfig';
 
 export const useGerenteDashboard = () => {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ export const useGerenteDashboard = () => {
       totalEmpleados: 0,
       totalEventos: 0
     },
+    empresa: null,
     loading: true,
     error: null
   });
@@ -34,8 +36,11 @@ export const useGerenteDashboard = () => {
       const user = JSON.parse(userData);
       setState(prev => ({ ...prev, user }));
 
-      await loadTeam(user);
-      await loadStats(user);
+      await Promise.all([
+        loadTeam(user),
+        loadStats(user),
+        loadEmpresa(user)
+      ]);
 
       setState(prev => ({ ...prev, loading: false }));
 
@@ -65,6 +70,23 @@ export const useGerenteDashboard = () => {
     } catch (error) {
       console.error('Error cargando equipo:', error);
       setState(prev => ({ ...prev, equipo: [] }));
+    }
+  };
+
+  const loadEmpresa = async (user) => {
+    try {
+      const id = user?.rolData?.id_empresa;
+      if (!id) return;
+      const token = localStorage.getItem('access_token');
+      const res = await fetch(`${API_URL}/empresas/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) {
+        setState(prev => ({ ...prev, empresa: data.data }));
+      }
+    } catch (error) {
+      console.error('Error cargando empresa:', error);
     }
   };
 

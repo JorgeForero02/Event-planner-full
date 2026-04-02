@@ -2,12 +2,13 @@
 .layout-container {
     display: flex;
     min-height: 100vh;
-    background-color: #F2E6CF;
+    background-color: #f9fafb;
 }
 
 .main-content {
     flex: 1;
     padding: 2rem;
+    margin-left: 280px;
     transition: all 0.3s ease;
 }
 

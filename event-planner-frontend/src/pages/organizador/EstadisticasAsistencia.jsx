@@ -21,6 +21,7 @@ export default function EstadisticasAsistencia() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [generatingPDF, setGeneratingPDF] = useState(false);
+    const [exportingCSV, setExportingCSV] = useState(false);
 
     const statsRef = useRef();
     const chartsRef = useRef();
@@ -52,36 +53,52 @@ export default function EstadisticasAsistencia() {
         setError(null);
 
         try {
+            const token = localStorage.getItem('access_token') || localStorage.getItem('token');
+            const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
+
+            let reporteData = null;
+            try {
+                const reporteRes = await fetch(`${API_URL}/eventos/${idEvento}/reporte`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (reporteRes.ok) {
+                    const json = await reporteRes.json();
+                    reporteData = json.data || json;
+                }
+            } catch { /* fallback to inscripciones */ }
+
             const response = await asistenciaService.obtenerAsistenciasEvento(idEvento);
             const info = response.data || {};
             const lista = info.inscripciones || [];
 
-            const totalInscritos = lista.length;
-            const confirmados = lista.filter(i =>
-                i.estado?.toLowerCase() === 'confirmado' ||
-                i.estado?.toLowerCase() === 'confirmada'
-            ).length;
+            const totalInscritos = reporteData?.total_inscritos ?? lista.length;
+            const confirmados = reporteData?.confirmados ??
+                lista.filter(i =>
+                    i.estado?.toLowerCase() === 'confirmado' ||
+                    i.estado?.toLowerCase() === 'confirmada'
+                ).length;
 
-            const cancelaciones = lista.filter(i =>
-                i.estado?.toLowerCase() === 'cancelado' ||
-                i.estado?.toLowerCase() === 'ausente'
-            ).length;
+            const cancelaciones = reporteData?.cancelaciones ??
+                lista.filter(i =>
+                    i.estado?.toLowerCase() === 'cancelado' ||
+                    i.estado?.toLowerCase() === 'ausente'
+                ).length;
 
-            const porcentajeAsistencia = totalInscritos > 0
-                ? ((confirmados / totalInscritos) * 100).toFixed(1)
-                : 0;
+            const porcentajeAsistencia = reporteData?.porcentaje_asistencia ??
+                (totalInscritos > 0 ? ((confirmados / totalInscritos) * 100).toFixed(1) : 0);
 
             const distribucion = [
                 { name: 'Asistentes', value: confirmados, color: '#10b981' },
                 { name: 'Cancelaciones', value: cancelaciones, color: '#ef4444' }
             ];
 
-            const asistenciaPorActividad = [
-                { nombre: 'Conferencia Principal', asistentes: confirmados, inscritos: totalInscritos },
-                { nombre: 'Taller Sesión 1', asistentes: Math.floor(confirmados * 0.8), inscritos: Math.floor(totalInscritos * 0.85) },
-                { nombre: 'Workshop Avanzado', asistentes: Math.floor(confirmados * 0.6), inscritos: Math.floor(totalInscritos * 0.7) },
-                { nombre: 'Networking', asistentes: Math.floor(confirmados * 0.9), inscritos: Math.floor(totalInscritos * 0.95) }
-            ];
+            const asistenciaPorActividad = Array.isArray(reporteData?.actividades) && reporteData.actividades.length > 0
+                ? reporteData.actividades.map(a => ({
+                    nombre: a.titulo || a.nombre,
+                    asistentes: a.asistentes ?? a.confirmados ?? 0,
+                    inscritos: a.inscritos ?? a.total ?? 0
+                }))
+                : [];
 
             setEstadisticas({
                 totalInscritos,
@@ -96,6 +113,33 @@ export default function EstadisticasAsistencia() {
             setError('Error al cargar estadísticas.');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleExportarCSVReporte = async () => {
+        if (!selectedEventoId) return;
+        setExportingCSV(true);
+        try {
+            const token = localStorage.getItem('access_token') || localStorage.getItem('token');
+            const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
+            const response = await fetch(`${API_URL}/eventos/${selectedEventoId}/reporte/exportar-csv`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (!response.ok) throw new Error('Error al exportar');
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            const nombre = eventoSeleccionado?.titulo || eventoSeleccionado?.nombre || selectedEventoId;
+            link.setAttribute('download', `reporte_${nombre.replace(/\s+/g, '_')}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch {
+            setError('Error al exportar el CSV del reporte.');
+        } finally {
+            setExportingCSV(false);
         }
     };
 
@@ -217,7 +261,7 @@ export default function EstadisticasAsistencia() {
             <div className="main-content">
 
                 <div className="page-header-stats">
-                    <h1 className="page-title-stats">📊 Reportes y Estadísticas</h1>
+                    <h1 className="page-title-stats">Reportes y Estadísticas</h1>
                     <p className="page-subtitle-stats">Visualiza métricas y análisis de asistencia</p>
                 </div>
 
@@ -256,7 +300,7 @@ export default function EstadisticasAsistencia() {
 
                             <div className="evento-meta">
                                 <span className="evento-fecha">
-                                    📅 {eventoSeleccionado.fecha_inicio || 'Fecha no disponible'}
+                                    {eventoSeleccionado.fecha_inicio || 'Fecha no disponible'}
                                 </span>
 
                                 {eventoSeleccionado.modalidad && (
@@ -267,13 +311,23 @@ export default function EstadisticasAsistencia() {
                             </div>
                         </div>
 
-                        <button 
-                            className="btn-export-report" 
-                            onClick={generarPDF}
-                            disabled={generatingPDF || estadisticas.totalInscritos === 0}
-                        >
-                            {generatingPDF ? '⏳ Generando PDF...' : '📄 Exportar Reporte PDF'}
-                        </button>
+                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                            <button
+                                className="btn-export-report"
+                                onClick={handleExportarCSVReporte}
+                                disabled={exportingCSV || estadisticas.totalInscritos === 0}
+                                style={{ backgroundColor: '#0f766e', display: 'flex', alignItems: 'center', gap: '6px' }}
+                            >
+                                {exportingCSV ? 'Exportando...' : 'Exportar CSV'}
+                            </button>
+                            <button 
+                                className="btn-export-report" 
+                                onClick={generarPDF}
+                                disabled={generatingPDF || estadisticas.totalInscritos === 0}
+                            >
+                                {generatingPDF ? 'Generando PDF...' : 'Exportar Reporte PDF'}
+                            </button>
+                        </div>
                     </div>
                 )}
 
@@ -313,7 +367,7 @@ export default function EstadisticasAsistencia() {
 
                 <div className="charts-grid" ref={chartsRef}>
                     <div className="chart-card">
-                        <h3 className="chart-title">📊 Asistencia por Actividad</h3>
+                        <h3 className="chart-title">Asistencia por Actividad</h3>
                         <ResponsiveContainer width="100%" height={300}>
                             <BarChart data={estadisticas.asistenciaPorActividad}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
@@ -328,7 +382,7 @@ export default function EstadisticasAsistencia() {
                     </div>
 
                     <div className="chart-card">
-                        <h3 className="chart-title">🥧 Distribución General</h3>
+                        <h3 className="chart-title">Distribución General</h3>
                         <ResponsiveContainer width="100%" height={300}>
                             <PieChart>
                                 <Pie

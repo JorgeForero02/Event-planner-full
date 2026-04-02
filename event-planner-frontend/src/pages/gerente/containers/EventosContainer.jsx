@@ -1,4 +1,6 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Plus } from 'lucide-react';
 import { useEvents } from '../hooks/useEvents';
 import GerenteSidebar from '../../../layouts/Sidebar/sidebarGerente/GerenteSidebar';
 import Header from '../../../layouts/Header/header';
@@ -11,6 +13,7 @@ import NotificationSystem from '../components/shared/NotificationSystem';
 import LoadingState from '../components/shared/LoadingState';
 
 const EventosContainer = () => {
+    const navigate = useNavigate();
     const {
         eventos,
         eventosFiltrados,
@@ -60,6 +63,11 @@ const EventosContainer = () => {
                     <PageHeader
                         title="Eventos"
                         subtitle={`Total: ${eventos.length} eventos`}
+                        actionButton={{
+                            label: 'Crear Evento',
+                            icon: <Plus size={16} />,
+                            onClick: () => navigate('/gerente/eventos/crear'),
+                        }}
                     />
 
                     <EventFilters

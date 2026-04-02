@@ -6,7 +6,8 @@ import {
   Users, 
   Menu as MenuIcon,
   ChevronDown,
-  LogOut
+  LogOut,
+  ClipboardList
 } from 'lucide-react';
 import logoIcon from '../../assets/evento-remove.png';
 
@@ -18,7 +19,8 @@ const Menu = ({ onToggle, onSectionChange }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [expandedMenus, setExpandedMenus] = useState({
     seguridad: false, 
-    afiliaciones: false
+    afiliaciones: false,
+    solicitudes: false
   });
 
   const menuItems = [
@@ -48,6 +50,12 @@ const Menu = ({ onToggle, onSectionChange }) => {
         { id: 'afiliaciones-aprobadas', label: 'Afiliaciones Aprobadas' },
         { id: 'afiliaciones-rechazadas', label: 'Afiliaciones Rechazadas' }
       ]
+    },
+    {
+      id: 'auditoria',
+      label: 'Auditoría',
+      icon: ClipboardList,
+      hasSubmenu: false
     }
   ];
 

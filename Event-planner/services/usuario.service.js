@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const { Op } = require('sequelize');
 const { Usuario, Administrador, Asistente, Ponente, AdministradorEmpresa, Empresa } = require('../models');
 const { MENSAJES } = require('../constants/usuario.constants');
 
@@ -46,7 +47,7 @@ class UsuarioService {
             include: [{
                 model: Empresa,
                 as: 'empresa',
-                attributes: ['id', 'nombre', 'nit']
+                attributes: ['id', 'nombre', 'nit', 'estado']
             }]
         });
         if (adminEmpresa) {
@@ -269,12 +270,21 @@ class UsuarioService {
         };
     }
 
-    async obtenerTodosCompletos() {
+    async obtenerTodosCompletos(filtros = {}) {
+        const where = {};
+
+        if (filtros.nombre) where.nombre = { [Op.like]: `%${filtros.nombre}%` };
+        if (filtros.correo) where.correo = { [Op.like]: `%${filtros.correo}%` };
+        if (filtros.estado !== undefined && filtros.estado !== '') {
+            where.activo = filtros.estado === 'activo' ? 1 : 0;
+        }
+
         const usuarios = await Usuario.findAll({
+            where,
             attributes: ['id', 'nombre', 'cedula', 'telefono', 'correo', 'activo']
         });
 
-        return await Promise.all(
+        const resultados = await Promise.all(
             usuarios.map(async (usuario) => {
                 const rol = await this.buscarRolCompletoUsuario(usuario.id);
                 return {
@@ -283,6 +293,12 @@ class UsuarioService {
                 };
             })
         );
+
+        if (filtros.rol) {
+            return resultados.filter(u => u.rol === filtros.rol);
+        }
+
+        return resultados;
     }
 
     async cambiarContrasena(id, contraseñaActual, contraseñaNueva) {

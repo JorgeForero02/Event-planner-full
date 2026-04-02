@@ -8,8 +8,10 @@ const { MENSAJES } = require('../constants/inscripcion.constants');
 class InscripcionController {
     async obtenerEventosDisponibles(req, res, next) {
         try {
-            const { modalidad } = req.query;
-            const eventos = await InscripcionService.obtenerEventosDisponibles(modalidad);
+            const { modalidad, empresa, palabras_clave, fecha_inicio, fecha_fin } = req.query;
+            const eventos = await InscripcionService.obtenerEventosDisponibles({
+                modalidad, empresa, palabras_clave, fecha_inicio, fecha_fin
+            });
 
             return ApiResponse.success(res, eventos, MENSAJES.EVENTOS_DISPONIBLES_OBTENIDOS);
         } catch (error) {
@@ -131,6 +133,21 @@ class InscripcionController {
         }
     }
 
+    async obtenerInscritosPorEvento(req, res, next) {
+        try {
+            const { eventoId } = req.params;
+            const resultado = await InscripcionService.obtenerInscritosPorEvento(parseInt(eventoId));
+
+            if (!resultado.exito) {
+                return ApiResponse.error(res, resultado.mensaje, resultado.codigoEstado);
+            }
+
+            return ApiResponse.success(res, resultado, 'Inscritos obtenidos');
+        } catch (error) {
+            next(error);
+        }
+    }
+
     async confirmarInscripcion(req, res, next) {
         const transaction = await InscripcionService.crearTransaccion();
 
@@ -160,6 +177,53 @@ class InscripcionController {
       `);
         } catch (error) {
             await transaction.rollback();
+            next(error);
+        }
+    }
+
+    async exportarInscritosCSV(req, res, next) {
+        try {
+            const { eventoId } = req.params;
+            const { Inscripcion, Asistente, Usuario, Evento } = require('../models');
+
+            const evento = await Evento.findByPk(eventoId, { attributes: ['id', 'titulo'] });
+            if (!evento) {
+                return res.status(404).json({ success: false, message: 'Evento no encontrado' });
+            }
+
+            const inscripciones = await Inscripcion.findAll({
+                where: { id_evento: eventoId },
+                include: [{
+                    model: Asistente,
+                    as: 'asistente',
+                    include: [{ model: Usuario, as: 'usuario', attributes: ['nombre', 'apellidos', 'correo', 'numeroDocumento'] }]
+                }],
+                order: [['id', 'ASC']]
+            });
+
+            const escapar = (v) => `"${String(v ?? '').replace(/"/g, '""')}`;
+            const filas = [
+                ['Nombre', 'Apellidos', 'Correo', 'Documento', 'Código Inscripción', 'Estado', 'Fecha Inscripción'].join(',')
+            ];
+            for (const ins of inscripciones) {
+                const u = ins.asistente?.usuario;
+                filas.push([
+                    escapar(u?.nombre ?? ''),
+                    escapar(u?.apellidos ?? ''),
+                    escapar(u?.correo ?? ''),
+                    escapar(u?.numeroDocumento ?? ''),
+                    escapar(ins.codigo ?? ''),
+                    escapar(ins.estado ?? ''),
+                    escapar(ins.fecha_inscripcion ?? ins.createdAt ?? '')
+                ].join(','));
+            }
+
+            const nombreEvento = evento.titulo?.replace(/[^a-zA-Z0-9]/g, '_') ?? 'evento';
+            res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+            res.setHeader('Content-Disposition', `attachment; filename="inscritos_${nombreEvento}.csv"`);
+            return res.send('\uFEFF' + filas.join('\n'));
+        } catch (error) {
+            console.error('Error al exportar inscritos CSV:', error);
             next(error);
         }
     }

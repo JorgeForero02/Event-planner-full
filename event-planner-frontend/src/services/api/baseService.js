@@ -62,6 +62,8 @@ export class BaseService {
           const message = this.getErrorMessage(parsed) || `HTTP ${response.status}: ${response.statusText}`;
           const err = new Error(message);
           err.status = response.status;
+          err.data = parsed;
+          err.eventos = parsed?.eventos ?? parsed?.data?.eventos ?? null;
           throw err;
         }
 

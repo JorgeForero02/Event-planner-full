@@ -10,7 +10,6 @@ import {
     Clock,
     MapPin,
     Eye,
-    X,
 } from 'lucide-react';
 import {
     obtenerEventoPorId,
@@ -96,21 +95,20 @@ const GestionarAgendaPage = () => {
         setActividadesPorFecha(agrupadas);
     };
 
+    const puedeEliminar = (actividad) => {
+        const estado = (actividad.estado ?? '').toLowerCase();
+        return estado !== 'en_curso' && estado !== 'en curso' && estado !== 'finalizada' && estado !== 'finalizado';
+    };
+
     const handleEliminar = async (actividadId) => {
-        if (!window.confirm('¿Estás seguro de eliminar esta actividad?')) return;
+        if (!window.confirm('¿Estás seguro de eliminar esta actividad? Esta acción no se puede deshacer.')) return;
 
         try {
-            console.log('Eliminando actividad con ID:', actividadId);
-            const resultado = await eliminarActividad(actividadId);
-            console.log('Resultado de eliminación:', resultado);
-
+            await eliminarActividad(actividadId);
             await cargarDatos();
         } catch (error) {
-            console.error('Error completo:', error);
-            console.error('Error response:', error.response);
-            console.error('Error data:', error.response?.data);
-            console.error('Error status:', error.response?.status);
-            alert(`Error al eliminar: ${error.response?.data?.message || error.message}`);
+            const msg = error.response?.data?.message || error.message || 'Error al eliminar la actividad';
+            window.alert(msg);
         }
     };
 
@@ -264,9 +262,10 @@ const GestionarAgendaPage = () => {
                                             Editar
                                         </button>
                                         <button
-                                            onClick={() => handleEliminar(actividad.id_actividad)}
-                                            className="btn-accion btn-eliminar-accion"
-                                            title="Eliminar"
+                                            onClick={() => puedeEliminar(actividad) && handleEliminar(actividad.id_actividad)}
+                                            className={`btn-accion btn-eliminar-accion ${!puedeEliminar(actividad) ? 'opacity-40 cursor-not-allowed' : ''}`}
+                                            title={!puedeEliminar(actividad) ? 'No se puede eliminar una actividad en curso o finalizada' : 'Eliminar'}
+                                            disabled={!puedeEliminar(actividad)}
                                         >
                                             <Trash2 size={16} />
                                             Eliminar

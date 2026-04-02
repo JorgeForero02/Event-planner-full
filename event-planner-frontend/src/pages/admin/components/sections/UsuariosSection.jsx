@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../../../components/ui/table";
 import { useAuth } from '../../../../contexts/AuthContext';
 
@@ -12,13 +12,17 @@ const ROLES_DEFAULT = [
 ];
 
 const UsuariosSection = () => {
-    const { user } = useAuth();
+    useAuth();
 
     const [usuarios, setUsuarios] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterBy, setFilterBy] = useState('todas');
+    const [filterEstado, setFilterEstado] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const isFirstRenderFilters = useRef(true);
+    const USERS_PER_PAGE = 10;
 
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showViewModal, setShowViewModal] = useState(false);
@@ -56,12 +60,14 @@ const UsuariosSection = () => {
 
     useEffect(() => {
         fetchUsuarios();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
         if (showCreateModal || showEditModal) {
             fetchEmpresas();
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [showCreateModal, showEditModal]);
 
     useEffect(() => {
@@ -78,6 +84,19 @@ const UsuariosSection = () => {
         }
     }, [usuarios, selectedUsuario]);
 
+    useEffect(() => {
+        if (isFirstRenderFilters.current) {
+            isFirstRenderFilters.current = false;
+            return;
+        }
+        const timer = setTimeout(() => {
+            setCurrentPage(1);
+            fetchUsuarios();
+        }, 400);
+        return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchTerm, filterBy, filterEstado]);
+
     const showNotification = (type, message, duration = 4000) => {
         setNotification({ type, message });
         setTimeout(() => setNotification(null), duration);
@@ -93,7 +112,12 @@ const UsuariosSection = () => {
         setLoading(true);
         try {
             const token = getToken();
-            const response = await fetch(`${API_URL}/gestion-usuarios`, {
+            const params = new URLSearchParams();
+            if (searchTerm.trim()) params.append('nombre', searchTerm.trim());
+            if (filterBy !== 'todas') params.append('rol', filterBy);
+            if (filterEstado) params.append('estado', filterEstado);
+            const query = params.toString();
+            const response = await fetch(`${API_URL}/gestion-usuarios${query ? `?${query}` : ''}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -178,19 +202,7 @@ const UsuariosSection = () => {
         }
     };
 
-    const getFilteredUsers = () => {
-        let filtered = usuarios.filter(user =>
-            user.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            user.cedula?.includes(searchTerm)
-        );
-
-        if (filterBy !== 'todas') {
-            filtered = filtered.filter(user => user.rol?.toLowerCase() === filterBy.toLowerCase());
-        }
-
-        return filtered;
-    };
+    const getFilteredUsers = () => usuarios;
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -605,6 +617,12 @@ const UsuariosSection = () => {
     })();
 
     const filteredUsers = getFilteredUsers();
+    const totalPages = Math.max(1, Math.ceil(filteredUsers.length / USERS_PER_PAGE));
+    const paginatedUsers = filteredUsers.slice((currentPage - 1) * USERS_PER_PAGE, currentPage * USERS_PER_PAGE);
+
+    const handlePageChange = (page) => {
+        if (page >= 1 && page <= totalPages) setCurrentPage(page);
+    };
 
     const renderTableRows = () => {
         if (filteredUsers.length === 0) {
@@ -617,7 +635,7 @@ const UsuariosSection = () => {
             );
         }
 
-        return filteredUsers.map((usuario) => (
+        return paginatedUsers.map((usuario) => (
             <TableRow key={usuario.id}>
                 <TableCell>
                     <div className="font-medium text-slate-900">
@@ -743,7 +761,7 @@ const UsuariosSection = () => {
                                 placeholder="Buscar por nombre..."
                                 className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-600 focus:bg-white transition-colors"
                                 value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
                             />
                         </div>
                         <div className="flex items-center gap-2 relative">
@@ -752,13 +770,29 @@ const UsuariosSection = () => {
                                 id="filter-select"
                                 className="appearance-none pl-3 pr-8 py-2 border border-slate-200 rounded-lg text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-brand-600 min-w-[140px] cursor-pointer"
                                 value={filterBy}
-                                onChange={(e) => setFilterBy(e.target.value)}
+                                onChange={(e) => { setFilterBy(e.target.value); setCurrentPage(1); }}
                             >
                                 <option value="todas">Mostrar todas</option>
                                 <option value="gerente">Gerente</option>
                                 <option value="ponente">Ponente</option>
                                 <option value="organizador">Organizador</option>
                                 <option value="asistente">Asistente</option>
+                            </select>
+                            <svg className="absolute right-2 pointer-events-none text-slate-400" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                            </svg>
+                        </div>
+                        <div className="flex items-center gap-2 relative">
+                            <label htmlFor="estado-select" className="text-sm text-slate-500 whitespace-nowrap">Estado:</label>
+                            <select
+                                id="estado-select"
+                                className="appearance-none pl-3 pr-8 py-2 border border-slate-200 rounded-lg text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-brand-600 min-w-[130px] cursor-pointer"
+                                value={filterEstado}
+                                onChange={(e) => { setFilterEstado(e.target.value); setCurrentPage(1); }}
+                            >
+                                <option value="">Todos</option>
+                                <option value="activo">Activo</option>
+                                <option value="inactivo">Inactivo</option>
                             </select>
                             <svg className="absolute right-2 pointer-events-none text-slate-400" width="16" height="16" viewBox="0 0 16 16" fill="none">
                                 <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
@@ -783,6 +817,58 @@ const UsuariosSection = () => {
                             {renderTableRows()}
                         </TableBody>
                     </Table>
+
+                    <div className="flex items-center justify-between px-4 py-3 border-t border-slate-200 text-sm text-slate-600">
+                            <div className="flex items-center gap-3">
+                                <span>
+                                    {filteredUsers.length === 0
+                                        ? 'Sin resultados'
+                                        : `Mostrando ${Math.min((currentPage - 1) * USERS_PER_PAGE + 1, filteredUsers.length)}–${Math.min(currentPage * USERS_PER_PAGE, filteredUsers.length)} de ${filteredUsers.length} usuarios`
+                                    }
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                                <button
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage === 1}
+                                    className="px-2 py-1 rounded hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    ‹ Anterior
+                                </button>
+                                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                                    .filter(p => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
+                                    .reduce((acc, p, idx, arr) => {
+                                        if (idx > 0 && p - arr[idx - 1] > 1) acc.push('...');
+                                        acc.push(p);
+                                        return acc;
+                                    }, [])
+                                    .map((item, idx) =>
+                                        item === '...' ? (
+                                            <span key={`ellipsis-${idx}`} className="px-1">…</span>
+                                        ) : (
+                                            <button
+                                                key={item}
+                                                onClick={() => handlePageChange(item)}
+                                                className={`w-8 h-8 rounded text-sm font-medium transition-colors ${
+                                                    item === currentPage
+                                                        ? 'bg-brand-600 text-white'
+                                                        : 'hover:bg-slate-100 text-slate-700'
+                                                }`}
+                                            >
+                                                {item}
+                                            </button>
+                                        )
+                                    )
+                                }
+                                <button
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage === totalPages}
+                                    className="px-2 py-1 rounded hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    Siguiente ›
+                                </button>
+                            </div>
+                        </div>
                 </div>
             </div>
 
@@ -1066,16 +1152,20 @@ const UsuariosSection = () => {
 
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium text-slate-700">Rol Asignado *</label>
-                                    <input
-                                        type="text"
-                                        value={selectedUsuario.rol ? selectedUsuario.rol.charAt(0).toUpperCase() + selectedUsuario.rol.slice(1) : 'N/A'}
-                                        disabled
-                                        readOnly
-                                        className="w-full h-9 px-3 rounded-md border border-slate-200 bg-slate-50 text-sm text-slate-600 cursor-not-allowed capitalize"
-                                    />
-                                    <small className="text-xs text-slate-500 italic">
-                                        No se puede cambiar el rol asignado al usuario
-                                    </small>
+                                    <select
+                                        name="rol"
+                                        value={formData.rol}
+                                        onChange={handleInputChange}
+                                        required
+                                        className="w-full h-9 px-3 rounded-md border border-slate-200 bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-600 transition"
+                                    >
+                                        <option value="">Seleccionar rol...</option>
+                                        {rolesDelSistema.map(r => (
+                                            <option key={r.id} value={r.tipo}>
+                                                {r.nombre}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
 
                                 {formData.rol === 'ponente' && (

@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../../../../components/ui/card';
 import { Button } from '../../../../components/ui/button';
 import { RefreshCw, AlertCircle, Building2, Clock, CheckCircle2, XCircle } from 'lucide-react';
-import { cn } from '../../../../lib/utils';
+
 import KpiCard from '../../../../components/ui/KpiCard';
 
 const AffiliationMetrics = ({

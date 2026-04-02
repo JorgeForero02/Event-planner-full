@@ -3,36 +3,52 @@ import { Badge } from './badge';
 
 export const STATUS_MAP = {
   // Event states
-  publicado:         { variant: 'published',   label: 'Publicado' },
-  activo:            { variant: 'success',      label: 'Activo' },
-  cancelado:         { variant: 'cancelled',    label: 'Cancelado' },
-  finalizado:        { variant: 'finished',     label: 'Finalizado' },
-  borrador:          { variant: 'draft',        label: 'Borrador' },
+  publicado:         { variant: 'published',    label: 'Publicado' },
+  activo:            { variant: 'success',       label: 'Activo' },
+  activa:            { variant: 'success',       label: 'Activa' },
+  cancelado:         { variant: 'cancelled',     label: 'Cancelado' },
+  cancelada:         { variant: 'cancelled',     label: 'Cancelada' },
+  finalizado:        { variant: 'finished',      label: 'Finalizado' },
+  finalizada:        { variant: 'finished',      label: 'Finalizada' },
+  borrador:          { variant: 'draft',         label: 'Borrador' },
+  en_curso:          { variant: 'info',          label: 'En Curso' },
+  'en curso':        { variant: 'info',          label: 'En Curso' },
+
+  // Approval states
+  aprobado:          { variant: 'success',       label: 'Aprobado' },
+  aprobada:          { variant: 'success',       label: 'Aprobada' },
+  rechazado:         { variant: 'destructive',   label: 'Rechazado' },
+  rechazada:         { variant: 'destructive',   label: 'Rechazada' },
+  pendiente:         { variant: 'warning',       label: 'Pendiente' },
+  inactivo:          { variant: 'destructive',   label: 'Inactivo' },
+  inactiva:          { variant: 'destructive',   label: 'Inactiva' },
 
   // Survey / response states
-  activa:            { variant: 'success',      label: 'Activa' },
-  completada:        { variant: 'success',      label: 'Completada' },
-  pendiente:         { variant: 'warning',      label: 'Pendiente' },
-  cerrada:           { variant: 'info',         label: 'Cerrada' },
-  expirada:          { variant: 'destructive',  label: 'Expirada' },
-  'no enviada':      { variant: 'secondary',    label: 'No enviada' },
+  completada:        { variant: 'success',       label: 'Completada' },
+  completado:        { variant: 'success',       label: 'Completado' },
+  cerrada:           { variant: 'info',          label: 'Cerrada' },
+  expirada:          { variant: 'destructive',   label: 'Expirada' },
+  'no enviada':      { variant: 'secondary',     label: 'No enviada' },
 
-  // Attendance states
-  confirmado:        { variant: 'success',      label: 'Confirmado' },
-  confirmada:        { variant: 'success',      label: 'Confirmada' },
-  ausente:           { variant: 'destructive',  label: 'Ausente' },
+  // Inscription / Attendance states
+  inscrito:          { variant: 'success',       label: 'Inscrito' },
+  inscrita:          { variant: 'success',       label: 'Inscrita' },
+  confirmado:        { variant: 'success',       label: 'Confirmado' },
+  confirmada:        { variant: 'success',       label: 'Confirmada' },
+  ausente:           { variant: 'destructive',   label: 'Ausente' },
+  'no asistio':      { variant: 'destructive',   label: 'No asistió' },
 
   // Activity invitation states
-  aceptado:          { variant: 'success',      label: 'Aceptado' },
-  rechazado:         { variant: 'destructive',  label: 'Rechazado' },
-  solicitud_cambio:  { variant: 'info',         label: 'Solicitud Cambio' },
-  solicitudcambio:   { variant: 'info',         label: 'Solicitud Cambio' },
+  aceptado:          { variant: 'success',       label: 'Aceptado' },
+  aceptada:          { variant: 'success',       label: 'Aceptada' },
+  solicitud_cambio:  { variant: 'info',          label: 'Solicitud Cambio' },
+  solicitudcambio:   { variant: 'info',          label: 'Solicitud Cambio' },
 
   // Location / Place states
-  habilitada:        { variant: 'success',      label: 'Habilitada' },
-  deshabilitada:     { variant: 'secondary',    label: 'Deshabilitada' },
-  habilitado:        { variant: 'success',      label: 'Habilitado' },
-  deshabilitado:     { variant: 'secondary',    label: 'Deshabilitado' },
+  habilitada:        { variant: 'success',       label: 'Habilitada' },
+  deshabilitada:     { variant: 'secondary',     label: 'Deshabilitada' },
+  habilitado:        { variant: 'success',       label: 'Habilitado' },
+  deshabilitado:     { variant: 'secondary',     label: 'Deshabilitado' },
 };
 
 const StatusBadge = ({ status, label, className }) => {

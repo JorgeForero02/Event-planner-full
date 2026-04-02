@@ -38,7 +38,8 @@ class ActividadController {
                 await transaction.rollback();
                 return res.status(CODIGOS_HTTP.CONFLICT).json({
                     success: false,
-                    message: errorSolapamiento
+                    message: errorSolapamiento.mensaje,
+                    conflicto: errorSolapamiento.actividadConflicto || null
                 });
             }
 
@@ -180,7 +181,8 @@ class ActividadController {
                 await transaction.rollback();
                 return res.status(CODIGOS_HTTP.CONFLICT).json({
                     success: false,
-                    message: errorSolapamiento
+                    message: errorSolapamiento.mensaje,
+                    conflicto: errorSolapamiento.actividadConflicto || null
                 });
             }
 
@@ -270,9 +272,12 @@ class ActividadController {
                 await transaction.rollback();
             }
             console.error('Error al eliminar actividad:', error);
-            return res.status(CODIGOS_HTTP.ERROR_INTERNO).json({
+            const codigoEstado = error.codigoEstado || CODIGOS_HTTP.ERROR_INTERNO;
+            return res.status(codigoEstado).json({
                 success: false,
-                message: MENSAJES_RESPUESTA.ERROR_ELIMINAR
+                message: codigoEstado === CODIGOS_HTTP.ERROR_INTERNO
+                    ? MENSAJES_RESPUESTA.ERROR_ELIMINAR
+                    : error.message
             });
         }
     }

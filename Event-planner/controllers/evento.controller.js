@@ -24,6 +24,22 @@ class EventoController {
                 });
             }
 
+            const errSala = await EventoValidator.validarDisponibilidadSala(
+                req.body.lugar_id, req.body.fecha_inicio, req.body.fecha_fin
+            );
+            if (errSala) {
+                await transaction.rollback();
+                return res.status(409).json({ success: false, message: errSala.mensaje });
+            }
+
+            const errCapacidad = await EventoValidator.validarCapacidadEvento(
+                req.body.lugar_id, req.body.cupos
+            );
+            if (errCapacidad) {
+                await transaction.rollback();
+                return res.status(400).json({ success: false, message: errCapacidad.mensaje });
+            }
+
             const resultado = await EventoService.crear({
                 ...req.body,
                 id_empresa: empresaId,
@@ -168,6 +184,27 @@ class EventoController {
                 });
             }
 
+            const lugarIdActualizado = req.body.lugar_id !== undefined ? req.body.lugar_id : eventoActualizado.lugar_id;
+            const fechaInicioEfectiva = req.body.fecha_inicio || eventoActualizado.fecha_inicio;
+            const fechaFinEfectiva = req.body.fecha_fin || eventoActualizado.fecha_fin;
+
+            const errSalaUpd = await EventoValidator.validarDisponibilidadSala(
+                lugarIdActualizado, fechaInicioEfectiva, fechaFinEfectiva, eventoActualizado.id
+            );
+            if (errSalaUpd) {
+                await transaction.rollback();
+                return res.status(409).json({ success: false, message: errSalaUpd.mensaje });
+            }
+
+            const cuposEfectivos = req.body.cupos !== undefined ? req.body.cupos : eventoActualizado.cupos;
+            const errCapacidadUpd = await EventoValidator.validarCapacidadEvento(
+                lugarIdActualizado, cuposEfectivos
+            );
+            if (errCapacidadUpd) {
+                await transaction.rollback();
+                return res.status(400).json({ success: false, message: errCapacidadUpd.mensaje });
+            }
+
             const actualizaciones = EventoService.construirActualizaciones(req.body);
 
             await eventoActualizado.update(actualizaciones, { transaction });
@@ -208,6 +245,110 @@ class EventoController {
             return res.json({ success: true, data: reporte });
         } catch (error) {
             console.error('Error al obtener reporte:', error);
+            return res.status(500).json({ success: false, message: MENSAJES.ERROR_OBTENER });
+        }
+    }
+
+    // Grupo F — Mensaje manual del Organizador Líder a todos los inscritos
+    async enviarNotificacionManual(req, res) {
+        try {
+            const { eventoId } = req.params;
+            const { asunto, mensaje } = req.body;
+            const usuario = req.usuario;
+
+            if (!asunto || !mensaje) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'asunto y mensaje son requeridos'
+                });
+            }
+
+            const evento = req.evento || await EventoService.obtenerEventoById(eventoId);
+            if (!evento) {
+                return res.status(404).json({ success: false, message: MENSAJES.NO_ENCONTRADO_O_SIN_PERMISO });
+            }
+
+            const inscritos = await EventoService.obtenerInscritosConfirmados(eventoId);
+
+            if (inscritos.length === 0) {
+                return res.json({
+                    success: true,
+                    message: 'No hay inscritos activos para notificar',
+                    data: { total_destinatarios: 0, emails_enviados: 0 }
+                });
+            }
+
+            await NotificacionService.crearNotificacionMensajeManual({
+                evento,
+                destinatarios: inscritos,
+                asunto,
+                mensaje
+            });
+
+            const resultadosEmail = await Promise.allSettled(
+                inscritos.map(u =>
+                    EmailService.enviarMensajePersonalizado(u.correo, u.nombre, evento.titulo, asunto, mensaje)
+                )
+            );
+
+            const emailsEnviados = resultadosEmail.filter(r => r.status === 'fulfilled').length;
+            const emailsFallidos = resultadosEmail.length - emailsEnviados;
+
+            await AuditoriaService.registrar({
+                mensaje: `Organizador envió mensaje manual a ${inscritos.length} inscritos del evento "${evento.titulo}". Asunto: ${asunto}`,
+                tipo: 'POST',
+                accion: 'notificacion_manual_organizador',
+                usuario: { id: usuario.id, nombre: usuario.nombre }
+            });
+
+            return res.json({
+                success: true,
+                message: 'Mensaje enviado a los inscritos',
+                data: {
+                    total_destinatarios: inscritos.length,
+                    emails_enviados: emailsEnviados,
+                    emails_fallidos: emailsFallidos
+                }
+            });
+        } catch (error) {
+            console.error('Error al enviar notificación manual:', error);
+            return res.status(500).json({ success: false, message: MENSAJES.ERROR_OBTENER });
+        }
+    }
+
+    // RF80 — Exportar reporte de evento como CSV
+    async exportarReporteCSV(req, res) {
+        try {
+            const { eventoId } = req.params;
+            const reporte = await EventoService.obtenerReporte(eventoId);
+
+            if (!reporte) {
+                return res.status(404).json({ success: false, message: MENSAJES.NO_ENCONTRADO_O_SIN_PERMISO });
+            }
+
+            const escapar = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+
+            const filas = [
+                ['ID Evento', 'Título', 'Total Inscritos', 'Total Asistencias', 'Tasa Asistencia (%)',
+                    'Encuestas Enviadas', 'Encuestas Respondidas', 'Tasa Respuesta (%)'].join(','),
+                [
+                    reporte.id_evento,
+                    escapar(reporte.titulo),
+                    reporte.total_inscritos,
+                    reporte.total_asistencias,
+                    reporte.tasa_asistencia,
+                    reporte.encuestas_enviadas,
+                    reporte.encuestas_respondidas,
+                    reporte.tasa_respuesta
+                ].join(',')
+            ];
+
+            const nombreEvento = reporte.titulo?.replace(/[^a-zA-Z0-9]/g, '_') ?? 'evento';
+            res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+            res.setHeader('Content-Disposition', `attachment; filename="reporte_${nombreEvento}.csv"`);
+            return res.send('\uFEFF' + filas.join('\n'));
+        } catch (error) {
+            console.error('Error al exportar reporte de evento CSV:', error);
             return res.status(500).json({ success: false, message: MENSAJES.ERROR_OBTENER });
         }
     }

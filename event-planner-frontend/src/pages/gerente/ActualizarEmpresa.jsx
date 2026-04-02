@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2, MapPin, Info, RefreshCw, ArrowLeft } from 'lucide-react';
-import GerenteSidebar from '../gerente/GerenteSidebar';
+import GerenteSidebar from '../../layouts/Sidebar/sidebarGerente/GerenteSidebar';
 import empresaService from '../../components/empresaService';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog';
 import { Input } from '../../components/ui/input';
@@ -16,7 +16,6 @@ const ActualizarEmpresa = () => {
     const [showCancelModal, setShowCancelModal] = useState(false);
     const [modalMessage, setModalMessage] = useState('');
     const [cancelModalMessage, setCancelModalMessage] = useState('');
-    const [user, setUser] = useState(null);
     const [empresaOriginal, setEmpresaOriginal] = useState(null);
     const [formData, setFormData] = useState({
         nombreEmpresa: '',
@@ -46,9 +45,6 @@ const ActualizarEmpresa = () => {
             return;
         }
 
-        const parsedUser = JSON.parse(userData);
-        setUser(parsedUser);
-
         // Cargar datos de la empresa asociada al gerente
         cargarEmpresa();
     }, [navigate]);
@@ -63,10 +59,6 @@ const ActualizarEmpresa = () => {
 
             const empresaData = respuesta?.data?.[0];
             if (!empresaData) throw new Error('No se encontraron datos de la empresa.');
-
-            // Obtener nombres de ciudad y país
-            let ciudadNombre = '';
-            let paisNombre = '';
 
             if (empresaData.id_ciudad) {
                 const ciudad = await empresaService.obtenerCiudadPorId(empresaData.id_ciudad);

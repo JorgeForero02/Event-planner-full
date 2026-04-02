@@ -244,7 +244,11 @@ class LugarController {
             const resultado = await LugarService.toggleEstado(lugarId, transaction);
             if (!resultado.exito) {
                 await transaction.rollback();
-                return res.status(resultado.codigoEstado || 400).json({ success: false, message: resultado.mensaje });
+                return res.status(resultado.codigoEstado || 400).json({
+                    success: false,
+                    message: resultado.mensaje,
+                    eventosBloqueantes: resultado.eventosBloqueantes || []
+                });
             }
 
             await AuditoriaService.registrar({

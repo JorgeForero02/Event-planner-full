@@ -233,15 +233,36 @@ const CrearActividadPage = () => {
             navigate(`/organizador/eventos/${eventoId}/agenda`);
 
         } catch (error) {
-            console.error('Error completo:', error);
-            setErrorSubmit(error.response?.data?.message || 'Error al crear la actividad');
+            const data = error.response?.data;
+            if (data?.conflicto) {
+                const c = data.conflicto;
+                const horaInicio = c.hora_inicio?.slice(0, 5) ?? '';
+                const horaFin    = c.hora_fin?.slice(0, 5) ?? '';
+                setErrorSubmit(
+                    `Conflicto de sala: la sala ya está ocupada por "${c.titulo}"${horaInicio ? ` de ${horaInicio} a ${horaFin}` : ''}. ` +
+                    `Selecciona un horario diferente o elige otra sala.`
+                );
+            } else {
+                setErrorSubmit(data?.message || 'Error al crear la actividad. Verifica los datos e intenta nuevamente.');
+            }
         } finally {
             setGuardando(false);
         }
     };
 
 
-    if (loading) return <p>Cargando...</p>;
+    if (loading) return (
+        <div className="crear-actividad-page">
+            <Sidebar />
+            <div className="actividad-container">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', animation: 'pulse 1.5s ease-in-out infinite' }}>
+                    {[1, 2, 3, 4].map(i => (
+                        <div key={i} style={{ height: '56px', borderRadius: '8px', backgroundColor: '#e2e8f0' }} />
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
 
     const mostrarCampoLugar = formData.tipo === 'presencial' || formData.tipo === 'hibrida';
     const mostrarCampoLink = formData.tipo === 'virtual' || formData.tipo === 'hibrida';

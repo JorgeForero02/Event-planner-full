@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useToast } from '../../contexts/ToastContext';
 import styles from './asistentePanel.module.css';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../components/ui/dialog';
 import Sidebar from '../../layouts/Sidebar/sidebarAsistente/sidebar';
@@ -17,8 +19,18 @@ import { useInscriptions } from './hooks/useInscriptions';
 import { formatFecha, formatHora, formatFechaCompleta } from './utils/dateUtils';
 import { getEventStatus, validarFormularioInscripcion } from './utils/eventUtils';
 
+const PATH_TO_VIEW = {
+    '/asistente/eventos':       'eventos',
+    '/asistente/agenda':        'agenda',
+    '/asistente/encuestas':     'encuestas',
+    '/asistente/inscripciones': 'misInscripciones',
+    '/asistente/dashboard':     'dashboard',
+};
+
 const AsistentePanel = () => {
-    const [vistaActual, setVistaActual] = useState('dashboard');
+    const location = useLocation();
+    const navigate = useNavigate();
+    const vistaActual = PATH_TO_VIEW[location.pathname] ?? 'dashboard';
     const [selectedEvento, setSelectedEvento] = useState(null);
     const [selectedInscripcion, setSelectedInscripcion] = useState(null);
     const [selectedActividad, setSelectedActividad] = useState('');
@@ -27,7 +39,7 @@ const AsistentePanel = () => {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [modalType, setModalType] = useState('details');
     const [attendanceModalOpen, setAttendanceModalOpen] = useState(false);
-    const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+    const toast = useToast();
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [inscribiendo, setInscribiendo] = useState(false);
     const [, setCargandoDetalles] = useState(false);
@@ -135,20 +147,11 @@ const AsistentePanel = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [vistaActual, misInscripciones]);
 
-    const handleSidebarToggle = (isCollapsed) => {
-        setSidebarCollapsed(isCollapsed);
-    };
-
-    const handleNavigation = (view) => {
-        setVistaActual(view);
-    };
-
     const showSnackbar = (message, severity = 'success') => {
-        setSnackbar({ open: true, message, severity });
-    };
-
-    const closeSnackbar = () => {
-        setSnackbar(prev => ({ ...prev, open: false }));
+        if (severity === 'error') toast.error(message);
+        else if (severity === 'warning') toast.warning(message);
+        else if (severity === 'info') toast.info(message);
+        else toast.success(message);
     };
 
     const handleViewDetails = async (evento) => {
@@ -316,8 +319,8 @@ const AsistentePanel = () => {
                     <Dashboard
                         misInscripciones={misInscripciones}
                         eventosDisponibles={eventos}
-                        onViewEvents={() => setVistaActual('eventos')}
-                        onViewInscriptions={() => setVistaActual('misInscripciones')}
+                        onViewEvents={() => navigate('/asistente/eventos')}
+                        onViewInscriptions={() => navigate('/asistente/inscripciones')}
                     />
                 );
 
@@ -365,7 +368,7 @@ const AsistentePanel = () => {
 
                                 <button
                                     className={`${styles.tabButton} ${vistaActual === 'misInscripciones' ? styles.tabButtonActive : ''}`}
-                                    onClick={() => setVistaActual('misInscripciones')}
+                                    onClick={() => navigate('/asistente/inscripciones')}
                                 >
                                     Mis Inscripciones
                                 </button>
@@ -440,7 +443,7 @@ const AsistentePanel = () => {
                         puedeCancelar={puedeCancelar}
                         formatFecha={formatFecha}
                         formatHora={formatHora}
-                        onViewEvents={() => setVistaActual('eventos')}
+                        onViewEvents={() => navigate('/asistente/eventos')}
                     />
                 );
 
@@ -465,7 +468,7 @@ const AsistentePanel = () => {
                                 {misInscripciones.length === 0 && (
                                     <button
                                         className={styles.btnShowAll}
-                                        onClick={() => setVistaActual('eventos')}
+                                        onClick={() => navigate('/asistente/eventos')}
                                     >
                                         Ver eventos disponibles
                                     </button>
@@ -488,9 +491,7 @@ const AsistentePanel = () => {
     return (
         <div className={styles.asistenteContainer}>
             <Sidebar
-                onToggle={handleSidebarToggle}
-                onNavigate={handleNavigation}
-                currentView={vistaActual}
+                onToggle={(collapsed) => setSidebarCollapsed(collapsed)}
             />
 
             <div className={`${styles.mainPanel} ${sidebarCollapsed ? styles.mainPanelExpanded : ''}`}>
@@ -545,14 +546,6 @@ const AsistentePanel = () => {
                 />
             )}
 
-            {snackbar.open && (
-                <div className={`${styles.snackbar} ${styles[snackbar.severity]}`}>
-                    <span>{snackbar.message}</span>
-                    <button onClick={closeSnackbar} className={styles.snackbarClose}>
-                        ×
-                    </button>
-                </div>
-            )}
         </div>
     );
 };

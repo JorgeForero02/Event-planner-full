@@ -14,6 +14,7 @@ const {
     sequelize
 } = require('../models');
 const { MENSAJES, ESTADOS } = require('../constants/inscripcion.constants');
+const NotificacionService = require('./notificacion.service');
 
 class InscripcionService {
     crearTransaccion() {
@@ -30,13 +31,21 @@ class InscripcionService {
         return formatter.format(new Date());
     }
 
-    async obtenerEventosDisponibles(modalidad) {
+    async obtenerEventosDisponibles({ modalidad, empresa, palabras_clave, fecha_inicio, fecha_fin } = {}) {
         const whereClause = { estado: 1 };
         if (modalidad) whereClause.modalidad = modalidad;
+        if (empresa) whereClause.id_empresa = empresa;
+        if (palabras_clave) {
+            whereClause[Op.or] = [
+                { titulo: { [Op.like]: `%${palabras_clave}%` } },
+                { descripcion: { [Op.like]: `%${palabras_clave}%` } }
+            ];
+        }
+        if (fecha_inicio) whereClause.fecha_inicio = { [Op.gte]: fecha_inicio };
 
-        whereClause.fecha_fin = {
-            [Op.gte]: this._obtenerFechaHoy()
-        };
+        const fechaFinConditions = { [Op.gte]: this._obtenerFechaHoy() };
+        if (fecha_fin) fechaFinConditions[Op.lte] = fecha_fin;
+        whereClause.fecha_fin = fechaFinConditions;
 
         const eventos = await Evento.findAll({
             where: whereClause,
@@ -162,6 +171,29 @@ class InscripcionService {
             }],
             order: [['fecha', 'DESC']]
         });
+    }
+
+    async obtenerInscritosPorEvento(eventoId) {
+        const evento = await Evento.findByPk(eventoId);
+        if (!evento) {
+            return { exito: false, mensaje: 'Evento no encontrado', codigoEstado: 404 };
+        }
+
+        const inscripciones = await Inscripcion.findAll({
+            where: { id_evento: eventoId },
+            include: [{
+                model: Asistente,
+                as: 'asistente',
+                include: [{
+                    model: Usuario,
+                    as: 'usuario',
+                    attributes: ['id', 'nombre', 'correo', 'cedula', 'telefono']
+                }]
+            }],
+            order: [['fecha', 'DESC']]
+        });
+
+        return { exito: true, evento, inscripciones };
     }
 
     async inscribirEquipo(eventoId, cedulas, gerente, transaction) {
@@ -335,11 +367,27 @@ class InscripcionService {
         }
 
         const fechaHoy = this._obtenerFechaHoy();
-        if (fechaHoy >= inscripcion.evento.fecha_inicio) {
+        const fechaLimite = inscripcion.evento.fecha_limite_cancelacion;
+        if (fechaLimite) {
+            if (fechaHoy > fechaLimite) {
+                return { exito: false, mensaje: MENSAJES.PLAZO_CANCELACION_VENCIDO, codigoEstado: 400 };
+            }
+        } else if (fechaHoy >= inscripcion.evento.fecha_inicio) {
             return { exito: false, mensaje: MENSAJES.EVENTO_YA_INICIO, codigoEstado: 400 };
         }
 
         await inscripcion.update({ estado: ESTADOS.CANCELADA }, { transaction });
+
+        try {
+            const usuarioAsistente = await Usuario.findByPk(usuarioId, { attributes: ['nombre'] });
+            const nombreAsistente = usuarioAsistente?.nombre ?? 'Desconocido';
+            await NotificacionService.crearNotificacionCancelacionInscripcion(
+                { inscripcion, evento: inscripcion.evento, nombreAsistente },
+                transaction
+            );
+        } catch (notifError) {
+            console.error('Error al notificar cancelación de inscripción:', notifError);
+        }
 
         return { exito: true, inscripcion, evento: inscripcion.evento };
     }
