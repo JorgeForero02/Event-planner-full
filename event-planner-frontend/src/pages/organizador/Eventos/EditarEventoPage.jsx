@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import {
     Calendar,
@@ -10,7 +10,10 @@ import {
     XCircle,
     MapPin,
     Link as LinkIcon,
+    Sparkles,
+    Loader2,
 } from 'lucide-react';
+import { generarDescripcion } from '../../../services/iaService';
 import { useEvento } from '../../../components/useCrearEvento';
 import Sidebar from '../Sidebar';
 import { Dialog, DialogContent, DialogFooter } from '../../../components/ui/dialog';
@@ -52,6 +55,25 @@ const EditarEventoPage = () => {
 
     const mostrarSala = formData.modalidad === 'Presencial' || formData.modalidad === 'Híbrida';
     const mostrarUrl  = formData.modalidad === 'Virtual'    || formData.modalidad === 'Híbrida';
+
+    const [iaPanel, setIaPanel] = useState(false);
+    const [iaTono, setIaTono] = useState('formal');
+    const [iaLoading, setIaLoading] = useState(false);
+    const [iaTexto, setIaTexto] = useState('');
+    const [iaError, setIaError] = useState('');
+
+    const handleGenerarDescripcion = async () => {
+        setIaLoading(true);
+        setIaError('');
+        setIaTexto('');
+        try {
+            const texto = await generarDescripcion(id, iaTono);
+            setIaTexto(texto);
+        } catch (err) {
+            setIaError(err.message || 'Error al generar descripción');
+        }
+        setIaLoading(false);
+    };
     useEffect(() => {
         if (mostrarModalExito) {
             const timer = setTimeout(() => {
@@ -286,13 +308,73 @@ const EditarEventoPage = () => {
                         </div>
 
                         <div className="space-y-1.5">
-                            <Label htmlFor="editar-descripcion">Descripción</Label>
+                            <div className="flex items-center justify-between">
+                                <Label htmlFor="editar-descripcion">Descripción</Label>
+                                <button
+                                    type="button"
+                                    onClick={() => { setIaPanel(v => !v); setIaTexto(''); setIaError(''); }}
+                                    className="flex items-center gap-1 text-xs text-brand-600 hover:text-blue-700 font-medium transition-colors"
+                                >
+                                    <Sparkles size={13} />
+                                    Generar con IA
+                                </button>
+                            </div>
                             <Textarea
                                 id="editar-descripcion"
                                 value={formData.descripcion ?? ''}
                                 onChange={(e) => handleInputChange('descripcion', e.target.value)}
                                 rows={3}
                             />
+                            {iaPanel && (
+                                <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 space-y-2">
+                                    <p className="text-xs font-medium text-blue-800">Generar descripción automáticamente</p>
+                                    <div className="flex items-center gap-2">
+                                        <select
+                                            value={iaTono}
+                                            onChange={(e) => setIaTono(e.target.value)}
+                                            className="flex-1 h-8 rounded-md border border-input bg-white px-2 text-xs shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                        >
+                                            <option value="formal">Formal y profesional</option>
+                                            <option value="amigable">Amigable y cercano</option>
+                                            <option value="motivador">Motivador e inspirador</option>
+                                        </select>
+                                        <Button
+                                            type="button"
+                                            size="sm"
+                                            onClick={handleGenerarDescripcion}
+                                            disabled={iaLoading}
+                                            className="gap-1 h-8 text-xs"
+                                        >
+                                            {iaLoading ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                                            {iaLoading ? 'Generando...' : 'Generar'}
+                                        </Button>
+                                    </div>
+                                    {iaError && <p className="text-xs text-danger">{iaError}</p>}
+                                    {iaTexto && (
+                                        <div className="space-y-1.5">
+                                            <Textarea
+                                                value={iaTexto}
+                                                onChange={(e) => setIaTexto(e.target.value)}
+                                                rows={4}
+                                                className="text-xs bg-white"
+                                            />
+                                            <Button
+                                                type="button"
+                                                size="sm"
+                                                variant="outline"
+                                                className="w-full h-7 text-xs"
+                                                onClick={() => {
+                                                    handleInputChange('descripcion', iaTexto);
+                                                    setIaPanel(false);
+                                                    setIaTexto('');
+                                                }}
+                                            >
+                                                Insertar en descripción
+                                            </Button>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     </div>
 

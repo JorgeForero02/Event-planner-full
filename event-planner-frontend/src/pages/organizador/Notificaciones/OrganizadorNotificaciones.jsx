@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, CheckCircle, XCircle, Clock, User, Calendar, MessageSquare, Loader2, AlertCircle, Edit, Trash2, Archive } from 'lucide-react';
+import { Bell, CheckCircle, XCircle, Clock, User, Calendar, MessageSquare, Loader2, AlertCircle, Edit, Trash2, Archive, Send, Sparkles } from 'lucide-react';
 import {
     obtenerMisNotificaciones,
     obtenerDetalleNotificacion,
@@ -9,11 +9,13 @@ import {
     eliminarNotificacion
 } from '../../../components/notificacionesService';
 import { actualizarActividad } from '../../../components/eventosService';
+import { generarMensaje } from '../../../services/iaService';
+import { API_URL } from '../../../config/apiConfig';
 import './OrganizadorNotificaciones.css';
 import Sidebar from '../Sidebar';
 
 const OrganizadorNotificaciones = () => {
-    const [vistaActual, setVistaActual] = useState('pendientes'); // 'pendientes' o 'leidas'
+    const [vistaActual, setVistaActual] = useState('pendientes'); // 'pendientes', 'leidas', 'enviar'
     const [notificaciones, setNotificaciones] = useState([]);
     const [detalle, setDetalle] = useState(null);
     const [asignacion, setAsignacion] = useState(null);
@@ -26,8 +28,70 @@ const OrganizadorNotificaciones = () => {
     const [actualizandoActividad, setActualizandoActividad] = useState(false);
     const [procesando, setProcesando] = useState(false);
 
+    const [eventos, setEventos] = useState([]);
+    const [enviarEventoId, setEnviarEventoId] = useState('');
+    const [enviarTipo, setEnviarTipo] = useState('recordatorio');
+    const [enviarContexto, setEnviarContexto] = useState('');
+    const [enviarAsunto, setEnviarAsunto] = useState('');
+    const [enviarMensajeTexto, setEnviarMensajeTexto] = useState('');
+    const [enviarIaLoading, setEnviarIaLoading] = useState(false);
+    const [enviarLoading, setEnviarLoading] = useState(false);
+    const [enviarError, setEnviarError] = useState('');
+    const [enviarExito, setEnviarExito] = useState('');
+
     useEffect(() => {
-        cargarNotificaciones();
+        const token = localStorage.getItem('access_token');
+        fetch(`${API_URL}/eventos?estado=1`, { headers: { Authorization: `Bearer ${token}` } })
+            .then(r => r.json())
+            .then(d => {
+                const lista = d.data?.eventos || d.data || [];
+                setEventos(lista);
+            })
+            .catch(() => {});
+    }, []);
+
+    const handleGenerarMensajeIA = async () => {
+        if (!enviarEventoId) { setEnviarError('Selecciona un evento'); return; }
+        setEnviarIaLoading(true);
+        setEnviarError('');
+        try {
+            const texto = await generarMensaje(Number(enviarEventoId), enviarTipo, enviarContexto || undefined);
+            setEnviarMensajeTexto(texto);
+        } catch (err) {
+            setEnviarError(err.message || 'Error al generar mensaje');
+        }
+        setEnviarIaLoading(false);
+    };
+
+    const handleEnviarNotificacion = async () => {
+        if (!enviarEventoId || !enviarAsunto || !enviarMensajeTexto) {
+            setEnviarError('Completa el evento, asunto y mensaje antes de enviar');
+            return;
+        }
+        setEnviarLoading(true);
+        setEnviarError('');
+        setEnviarExito('');
+        try {
+            const token = localStorage.getItem('access_token');
+            const res = await fetch(`${API_URL}/eventos/${enviarEventoId}/notificaciones-manuales`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ asunto: enviarAsunto, mensaje: enviarMensajeTexto })
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Error al enviar');
+            setEnviarExito('Notificación enviada correctamente a todos los inscritos.');
+            setEnviarAsunto('');
+            setEnviarMensajeTexto('');
+            setEnviarContexto('');
+        } catch (err) {
+            setEnviarError(err.message || 'Error al enviar notificación');
+        }
+        setEnviarLoading(false);
+    };
+
+    useEffect(() => {
+        if (vistaActual !== 'enviar') cargarNotificaciones();
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [vistaActual]);
     const cargarNotificaciones = async () => {
@@ -239,9 +303,130 @@ const OrganizadorNotificaciones = () => {
                         <Archive className="icon-sm" />
                         Leídas
                     </button>
+                    <button
+                        className={`tab-button ${vistaActual === 'enviar' ? 'tab-active' : ''}`}
+                        onClick={() => { setVistaActual('enviar'); setEnviarError(''); setEnviarExito(''); }}
+                    >
+                        <Send className="icon-sm" />
+                        Enviar Notificación
+                    </button>
                 </div>
 
-                <div className="notificaciones-grid">
+                {vistaActual === 'enviar' && (
+                    <div className="detalle-card" style={{ marginTop: '1rem' }}>
+                        <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
+                            <Send className="icon-md" style={{ color: '#4f46e5' }} />
+                            Enviar Notificación a Inscritos
+                        </h3>
+
+                        {enviarExito && (
+                            <div style={{ background: '#f0fdf4', border: '1px solid #86efac', borderRadius: '0.5rem', padding: '0.75rem', marginBottom: '1rem', color: '#166534', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <CheckCircle className="icon-sm" style={{ color: '#16a34a' }} />
+                                {enviarExito}
+                            </div>
+                        )}
+                        {enviarError && (
+                            <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '0.5rem', padding: '0.75rem', marginBottom: '1rem', color: '#991b1b', fontSize: '0.875rem' }}>
+                                {enviarError}
+                            </div>
+                        )}
+
+                        <div className="form-group">
+                            <label className="form-label">Evento *</label>
+                            <select
+                                className="form-textarea"
+                                style={{ height: '2.25rem', padding: '0 0.75rem' }}
+                                value={enviarEventoId}
+                                onChange={(e) => setEnviarEventoId(e.target.value)}
+                            >
+                                <option value="">-- Selecciona un evento --</option>
+                                {eventos.map(ev => (
+                                    <option key={ev.id} value={ev.id}>{ev.titulo}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="form-group" style={{ marginTop: '0.75rem' }}>
+                            <label className="form-label">Tipo de mensaje</label>
+                            <select
+                                className="form-textarea"
+                                style={{ height: '2.25rem', padding: '0 0.75rem' }}
+                                value={enviarTipo}
+                                onChange={(e) => setEnviarTipo(e.target.value)}
+                            >
+                                <option value="recordatorio">Recordatorio</option>
+                                <option value="bienvenida">Bienvenida</option>
+                                <option value="modificacion">Modificación</option>
+                                <option value="cancelacion">Cancelación</option>
+                                <option value="general">General</option>
+                            </select>
+                        </div>
+
+                        <div className="form-group" style={{ marginTop: '0.75rem' }}>
+                            <label className="form-label">Contexto adicional (opcional)</label>
+                            <textarea
+                                className="form-textarea"
+                                rows="2"
+                                placeholder="Ej: El evento se realizará en el auditorio principal..."
+                                value={enviarContexto}
+                                onChange={(e) => setEnviarContexto(e.target.value)}
+                            />
+                        </div>
+
+                        <div style={{ marginTop: '0.75rem' }}>
+                            <button
+                                className="btn btn-aprobar"
+                                onClick={handleGenerarMensajeIA}
+                                disabled={enviarIaLoading || !enviarEventoId}
+                                style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                            >
+                                {enviarIaLoading
+                                    ? <Loader2 className="icon-md cargando-spinner" />
+                                    : <Sparkles className="icon-md" />}
+                                {enviarIaLoading ? 'Generando...' : 'Generar mensaje con IA'}
+                            </button>
+                        </div>
+
+                        <div className="form-group" style={{ marginTop: '1rem' }}>
+                            <label className="form-label">Asunto *</label>
+                            <input
+                                type="text"
+                                className="form-textarea"
+                                style={{ height: '2.25rem', padding: '0 0.75rem' }}
+                                placeholder="Asunto del mensaje"
+                                value={enviarAsunto}
+                                onChange={(e) => setEnviarAsunto(e.target.value)}
+                            />
+                        </div>
+
+                        <div className="form-group" style={{ marginTop: '0.75rem' }}>
+                            <label className="form-label">Mensaje *</label>
+                            <textarea
+                                className="form-textarea"
+                                rows="5"
+                                placeholder="Escribe o genera el mensaje con IA..."
+                                value={enviarMensajeTexto}
+                                onChange={(e) => setEnviarMensajeTexto(e.target.value)}
+                            />
+                        </div>
+
+                        <div style={{ marginTop: '1rem' }}>
+                            <button
+                                className="btn btn-aprobar"
+                                onClick={handleEnviarNotificacion}
+                                disabled={enviarLoading}
+                                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
+                            >
+                                {enviarLoading
+                                    ? <Loader2 className="icon-md cargando-spinner" />
+                                    : <Send className="icon-md" />}
+                                {enviarLoading ? 'Enviando...' : 'Enviar a todos los inscritos'}
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {vistaActual !== 'enviar' && <div className="notificaciones-grid">
                     {/* Lista de Notificaciones */}
                     <div className="notificaciones-list-card">
                         <h3 className="notificaciones-list-header">
@@ -482,7 +667,7 @@ const OrganizadorNotificaciones = () => {
                             </div>
                         )}
                     </div>
-                </div>
+                </div>}
             </div>
         </div>
     );

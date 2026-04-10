@@ -160,6 +160,29 @@ export const useEncuestasPonente = (ponenteIdProp) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    const crearEncuestaRapida = useCallback(async (encuestaData) => {
+        setLoading(true);
+        setError(null);
+        try {
+            const data = await fetchConAuth(`${API_BASE}/encuestas/rapida`, {
+                method: 'POST',
+                body: JSON.stringify(encuestaData)
+            });
+            if (data.success || data.exito) {
+                const nuevaEncuesta = data.data || data.encuesta;
+                setEncuestas(prev => [...prev, nuevaEncuesta]);
+                return { success: true, data: nuevaEncuesta };
+            } else {
+                throw new Error(data.message || 'Error al crear encuesta rápida');
+            }
+        } catch (error) {
+            setError(error.message);
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     const crearEncuesta = useCallback(async (encuestaData) => {
         setLoading(true);
         setError(null);
@@ -326,6 +349,7 @@ export const useEncuestasPonente = (ponenteIdProp) => {
         obtenerEncuestasPorActividad,
         obtenerTodasEncuestas,
         crearEncuesta,
+        crearEncuestaRapida,
         actualizarEncuesta,
         eliminarEncuesta,
         enviarEncuestaMasiva,

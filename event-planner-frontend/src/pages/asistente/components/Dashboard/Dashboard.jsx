@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import styles from './Dashboard.module.css';
 import Calendar from '../../../../assets/calendar.png';
 import Location from '../../../../assets/lugar.png';
 import ClockImg from '../../../../assets/clock.png';
@@ -9,6 +8,7 @@ import agendaService from '../../../../services/agendaService';
 import eventService from '../../../../services/eventService';
 import { inscriptionService } from '../../../../services/inscriptionService';
 import KpiCard from '../../../../components/ui/KpiCard';
+import { Badge } from '../../../../components/ui/badge';
 
 const Dashboard = () => {
     const [metricas, setMetricas] = useState({
@@ -122,17 +122,6 @@ const Dashboard = () => {
         return lugares.map(lugar => lugar.nombre).join(', ');
     };
 
-    // Función para obtener la clase de estado de la actividad
-    const getEstadoActividad = (actividad) => {
-        if (agendaService.estaEnCurso(actividad)) {
-            return styles.enCurso;
-        }
-        if (agendaService.esProxima(actividad)) {
-            return styles.proxima;
-        }
-        return styles.pasada;
-    };
-
     // Función para obtener el texto del estado
     const getTextoEstado = (actividad) => {
         if (agendaService.estaEnCurso(actividad)) {
@@ -146,21 +135,19 @@ const Dashboard = () => {
 
     if (cargando) {
         return (
-            <div className={styles.dashboardContainer}>
-                <div className={styles.loadingContainer}>
-                    <div className={styles.spinner}></div>
-                    <p>Cargando dashboard...</p>
-                </div>
+            <div className="flex flex-col items-center justify-center py-20 text-slate-500">
+                <div className="w-10 h-10 border-4 border-slate-200 border-l-brand-600 rounded-full animate-spin mb-4" />
+                <p>Cargando dashboard...</p>
             </div>
         );
     }
 
     return (
-        <div className={styles.dashboardContainer}>
+        <div className="p-6 space-y-6">
             {/* Header */}
-            <div className={styles.headerSection}>
-                <h1 className={styles.mainTitle}>Mi Dashboard</h1>
-                <p className={styles.subtitle}>Resumen de tus actividades y eventos</p>
+            <div className="text-center">
+                <h1 className="text-3xl font-bold text-slate-800">Mi Dashboard</h1>
+                <p className="text-slate-500 mt-1">Resumen de tus actividades y eventos</p>
             </div>
 
             {/* Métricas */}
@@ -180,66 +167,64 @@ const Dashboard = () => {
             </div>
 
             {/* Contenido Principal */}
-            <div className={styles.mainContent}>
-                {/* Columna Izquierda - Actividades Próximas */}
-                <div className={styles.leftColumn}>
-                    <div className={styles.sectionCard}>
-                        <div className={styles.sectionHeader}>
-                            <h2>Próximas Actividades</h2>
-                            <span className={styles.badge}>{proximasActividades.length}</span>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Columna Izquierda - Actividades Próximas (2/3) */}
+                <div className="lg:col-span-2 space-y-6">
+                    <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
+                        <div className="flex justify-between items-center pb-4 mb-5 border-b border-slate-100">
+                            <h2 className="text-base font-semibold text-slate-800">Próximas Actividades</h2>
+                            <Badge variant="secondary">{proximasActividades.length}</Badge>
                         </div>
 
                         {cargandoActividades ? (
-                            <div className={styles.loadingContainer}>
-                                <div className={styles.spinner}></div>
-                                <p>Cargando actividades...</p>
+                            <div className="flex flex-col items-center py-10 text-slate-400">
+                                <div className="w-8 h-8 border-4 border-slate-200 border-l-brand-600 rounded-full animate-spin mb-3" />
+                                <p className="text-sm">Cargando actividades...</p>
                             </div>
                         ) : proximasActividades.length === 0 ? (
-                            <div className={styles.emptyState}>
-                                <p>No hay actividades próximas programadas</p>
+                            <div className="text-center py-10 text-slate-400">
+                                <p className="text-sm">No hay actividades próximas programadas</p>
                             </div>
                         ) : (
-                            <div className={styles.activitiesList}>
+                            <div className="flex flex-col gap-3">
                                 {proximasActividades.map((actividad, index) => {
-                                    const estadoActividad = getEstadoActividad(actividad);
                                     const textoEstado = getTextoEstado(actividad);
                                     const lugaresTexto = obtenerLugaresTexto(actividad.lugares);
+                                    const enCurso = agendaService.estaEnCurso(actividad);
+                                    const proxima = agendaService.esProxima(actividad);
 
                                     return (
-                                        <div key={`${actividad.id_actividad}-${index}`} className={styles.activityItem}>
-                                            <div className={styles.activityHeader}>
-                                                <h4 className={styles.activityTitle}>{actividad.titulo}</h4>
-                                                <span className={`${styles.activityStatus} ${estadoActividad}`}>
+                                        <div key={`${actividad.id_actividad}-${index}`}
+                                            className="border border-slate-100 rounded-lg p-4 bg-slate-50 hover:border-brand-200 transition-colors">
+                                            <div className="flex justify-between items-start mb-3">
+                                                <h4 className="text-sm font-semibold text-slate-800 flex-1 mr-3">{actividad.titulo}</h4>
+                                                <span className={`text-xs font-semibold px-2.5 py-1 rounded-full uppercase whitespace-nowrap ${
+                                                    enCurso  ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' :
+                                                    proxima  ? 'bg-blue-50 text-blue-600 border border-blue-200' :
+                                                               'bg-slate-100 text-slate-500 border border-slate-200'
+                                                }`}>
                                                     {textoEstado}
                                                 </span>
                                             </div>
 
-                                            <div className={styles.activityDetails}>
-                                                <div className={styles.detailRow}>
-                                                    <span className={styles.detailIcon}>
-                                                        <img src={Calendar} alt="Fecha" className={styles.iconSmall} />
-                                                    </span>
+                                            <div className="flex flex-col gap-1.5 mb-3">
+                                                <div className="flex items-center gap-2 text-xs text-slate-500">
+                                                    <img src={Calendar} alt="" className="w-3.5 h-3.5 opacity-60" />
                                                     <span>{formatFecha(actividad.fecha_actividad)}</span>
                                                 </div>
-
-                                                <div className={styles.detailRow}>
-                                                    <span className={styles.detailIcon}>
-                                                        <img src={ClockImg} alt="Hora" className={styles.iconSmall} />
-                                                    </span>
+                                                <div className="flex items-center gap-2 text-xs text-slate-500">
+                                                    <img src={ClockImg} alt="" className="w-3.5 h-3.5 opacity-60" />
                                                     <span>{formatRangoHoras(actividad.hora_inicio, actividad.hora_fin)}</span>
                                                 </div>
-
-                                                <div className={styles.detailRow}>
-                                                    <span className={styles.detailIcon}>
-                                                        <img src={Location} alt="Lugar" className={styles.iconSmall} />
-                                                    </span>
+                                                <div className="flex items-center gap-2 text-xs text-slate-500">
+                                                    <img src={Location} alt="" className="w-3.5 h-3.5 opacity-60" />
                                                     <span>{lugaresTexto}</span>
                                                 </div>
                                             </div>
 
-                                            <div className={styles.eventInfo}>
-                                                <span className={styles.eventName}>{actividad.evento.titulo}</span>
-                                                <span className={styles.eventModality}>{actividad.evento.modalidad}</span>
+                                            <div className="flex justify-between items-center pt-3 border-t border-slate-100">
+                                                <span className="text-xs text-brand-600 font-medium">{actividad.evento.titulo}</span>
+                                                <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">{actividad.evento.modalidad}</span>
                                             </div>
                                         </div>
                                     );
@@ -249,38 +234,39 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                {/* Columna Derecha - Resumen de Inscripciones y Eventos */}
-                <div className={styles.rightColumn}>
-                    {/* Resumen de Inscripciones */}
-                    <div className={styles.sectionCard}>
-                        <div className={styles.sectionHeader}>
-                            <h2>Mis Inscripciones</h2>
-                            <span className={styles.badge}>{misInscripciones.length}</span>
+                {/* Columna Derecha (1/3) */}
+                <div className="space-y-6">
+                    {/* Mis Inscripciones */}
+                    <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
+                        <div className="flex justify-between items-center pb-4 mb-5 border-b border-slate-100">
+                            <h2 className="text-base font-semibold text-slate-800">Mis Inscripciones</h2>
+                            <Badge variant="secondary">{misInscripciones.length}</Badge>
                         </div>
 
                         {misInscripciones.length === 0 ? (
-                            <div className={styles.emptyState}>
-                                <p>No tienes inscripciones activas</p>
+                            <div className="text-center py-8 text-slate-400">
+                                <p className="text-sm">No tienes inscripciones activas</p>
                             </div>
                         ) : (
-                            <div className={styles.inscriptionsList}>
+                            <div className="flex flex-col gap-3">
                                 {misInscripciones.slice(0, 4).map((inscripcion) => (
-                                    <div key={inscripcion.id} className={styles.inscriptionItem}>
-                                        <div className={styles.inscriptionHeader}>
-                                            <h4>{inscripcion.evento.titulo}</h4>
-                                            <span className={`${styles.inscriptionStatus} ${inscripcion.estado === 'Confirmada' ? styles.statusConfirmed : styles.statusPending
-                                                }`}>
+                                    <div key={inscripcion.id} className="border border-slate-100 rounded-lg p-3 bg-slate-50">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h4 className="text-sm font-semibold text-slate-800 flex-1 mr-2 leading-tight">{inscripcion.evento.titulo}</h4>
+                                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full uppercase whitespace-nowrap ${
+                                                inscripcion.estado === 'Confirmada'
+                                                    ? 'bg-emerald-50 text-emerald-600 border border-emerald-200'
+                                                    : 'bg-amber-50 text-amber-600 border border-amber-200'
+                                            }`}>
                                                 {inscripcion.estado}
                                             </span>
                                         </div>
-                                        <div className={styles.inscriptionDetails}>
-                                            <span className={styles.inscriptionCode}>Código: {inscripcion.codigo}</span>
-                                            <span className={styles.inscriptionDate}>
-                                                {formatFecha(inscripcion.fecha_inscripcion)}
-                                            </span>
+                                        <div className="flex justify-between items-center text-xs text-slate-400">
+                                            <span className="font-mono">Cód: {inscripcion.codigo}</span>
+                                            <span>{formatFecha(inscripcion.fecha_inscripcion)}</span>
                                         </div>
                                         {inscripcion.asistencias && inscripcion.asistencias.length > 0 && (
-                                            <div className={styles.attendanceCount}>
+                                            <div className="mt-1 text-xs text-brand-600 font-medium">
                                                 Asistencias: {inscripcion.asistencias.length}
                                             </div>
                                         )}
@@ -290,42 +276,38 @@ const Dashboard = () => {
                         )}
                     </div>
 
-                    {/* Eventos Recientes */}
-                    <div className={styles.sectionCard}>
-                        <div className={styles.sectionHeader}>
-                            <h2>Eventos Disponibles</h2>
-                            <span className={styles.badge}>{eventosRecientes.length}</span>
+                    {/* Eventos Disponibles */}
+                    <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
+                        <div className="flex justify-between items-center pb-4 mb-5 border-b border-slate-100">
+                            <h2 className="text-base font-semibold text-slate-800">Eventos Disponibles</h2>
+                            <Badge variant="secondary">{eventosRecientes.length}</Badge>
                         </div>
 
                         {eventosRecientes.length === 0 ? (
-                            <div className={styles.emptyState}>
-                                <p>No hay eventos disponibles</p>
+                            <div className="text-center py-8 text-slate-400">
+                                <p className="text-sm">No hay eventos disponibles</p>
                             </div>
                         ) : (
-                            <div className={styles.eventsList}>
+                            <div className="flex flex-col gap-3">
                                 {eventosRecientes.map((evento) => (
-                                    <div key={evento.id} className={styles.eventItem}>
-                                        <div className={styles.eventHeader}>
-                                            <h4>{evento.titulo}</h4>
-                                            <span className={styles.eventModality}>{evento.modalidad}</span>
+                                    <div key={evento.id} className="border border-slate-100 rounded-lg p-3 bg-slate-50">
+                                        <div className="flex justify-between items-start mb-1.5">
+                                            <h4 className="text-sm font-semibold text-slate-800 flex-1 mr-2 leading-tight">{evento.titulo}</h4>
+                                            <span className="text-xs bg-blue-50 text-blue-600 border border-blue-200 px-2 py-0.5 rounded-full font-medium whitespace-nowrap">{evento.modalidad}</span>
                                         </div>
-                                        <div className={styles.eventDetails}>
-                                            <span className={styles.eventDate}>
+                                        <div className="flex justify-between items-center text-xs text-slate-400">
+                                            <span>
                                                 {formatFecha(evento.fecha_inicio)}
                                                 {evento.fecha_fin && evento.fecha_fin !== evento.fecha_inicio &&
-                                                    ` - ${formatFecha(evento.fecha_fin)}`
+                                                    ` — ${formatFecha(evento.fecha_fin)}`
                                                 }
                                             </span>
                                             {evento.cupos_disponibles > 0 && (
-                                                <span className={styles.eventCapacity}>
-                                                    {evento.cupos_disponibles} cupos disponibles
-                                                </span>
+                                                <span className="text-emerald-600 font-medium">{evento.cupos_disponibles} cupos</span>
                                             )}
                                         </div>
                                         {evento.empresa && (
-                                            <div className={styles.eventCompany}>
-                                                {evento.empresa}
-                                            </div>
+                                            <div className="mt-1 text-xs text-amber-600 font-medium italic">{evento.empresa}</div>
                                         )}
                                     </div>
                                 ))}
@@ -333,23 +315,21 @@ const Dashboard = () => {
                         )}
                     </div>
 
-                    {/* Quick Stats */}
-                    <div className={styles.sectionCard}>
-                        <div className={styles.sectionHeader}>
-                            <h2>Resumen Rápido</h2>
-                        </div>
-                        <div className={styles.quickStats}>
-                            <div className={styles.quickStat}>
-                                <span className={styles.statLabel}>Eventos Activos:</span>
-                                <span className={styles.statValue}>{metricas.eventosActivos}</span>
+                    {/* Resumen Rápido */}
+                    <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
+                        <h2 className="text-base font-semibold text-slate-800 pb-4 mb-4 border-b border-slate-100">Resumen Rápido</h2>
+                        <div className="flex flex-col divide-y divide-slate-100">
+                            <div className="flex justify-between items-center py-3">
+                                <span className="text-sm text-slate-500">Eventos Activos</span>
+                                <span className="text-sm font-bold text-slate-800">{metricas.eventosActivos}</span>
                             </div>
-                            <div className={styles.quickStat}>
-                                <span className={styles.statLabel}>Actividades Próximas:</span>
-                                <span className={styles.statValue}>{metricas.proximasActividades}</span>
+                            <div className="flex justify-between items-center py-3">
+                                <span className="text-sm text-slate-500">Actividades Próximas</span>
+                                <span className="text-sm font-bold text-slate-800">{metricas.proximasActividades}</span>
                             </div>
-                            <div className={styles.quickStat}>
-                                <span className={styles.statLabel}>Asistencias Hoy:</span>
-                                <span className={styles.statValue}>
+                            <div className="flex justify-between items-center py-3">
+                                <span className="text-sm text-slate-500">Asistencias Hoy</span>
+                                <span className="text-sm font-bold text-slate-800">
                                     {actividadesHoy.filter(act => agendaService.estaEnCurso(act)).length}
                                 </span>
                             </div>

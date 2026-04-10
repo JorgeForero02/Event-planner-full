@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Search, Info, Edit, AlertCircle, CheckCircle2, X, Loader2 } from 'lucide-react';
+import { Search, Info, Edit, AlertCircle, CheckCircle2, X, Loader2, Plus } from 'lucide-react';
 import { API_URL } from '../../../../config/apiConfig';
 import { Input } from '../../../../components/ui/input';
 import { Button } from '../../../../components/ui/button';
 import { Badge } from '../../../../components/ui/badge';
 import { Card, CardHeader, CardContent } from '../../../../components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../../../components/ui/dialog';
+import { Label } from '../../../../components/ui/label';
+import { Textarea } from '../../../../components/ui/textarea';
 import {
   Table,
   TableBody,
@@ -118,7 +121,7 @@ const useRolesState = () => {
     setToggling(null);
   };
 
-  return { roles, loading, toggling, toggleRol };
+  return { roles, loading, toggling, toggleRol, cargarRoles };
 };
 
 const useNotification = () => {
@@ -154,10 +157,56 @@ const Notification = ({ notification, onClose }) => {
   );
 };
 
+const useCrearRol = (cargarRoles) => {
+  const [open, setOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({ nombre: '', tipo: '', descripcion: '' });
+  const [errors, setErrors] = useState({});
+
+  const validate = () => {
+    const e = {};
+    if (!form.nombre.trim()) e.nombre = 'El nombre es obligatorio';
+    if (!form.tipo.trim()) e.tipo = 'El identificador es obligatorio';
+    else if (!/^[a-z_]+$/.test(form.tipo)) e.tipo = 'Solo letras minúsculas y guiones bajos';
+    return e;
+  };
+
+  const handleChange = (field, value) => {
+    setForm(f => ({ ...f, [field]: value }));
+    setErrors(e => ({ ...e, [field]: undefined }));
+  };
+
+  const handleSubmit = async (showNotification) => {
+    const e = validate();
+    if (Object.keys(e).length) { setErrors(e); return; }
+    setSaving(true);
+    try {
+      const token = getToken();
+      const res = await fetch(`${API_URL}/admin/roles`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(form)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Error al crear rol');
+      showNotification('success', data.message || 'Rol creado correctamente');
+      setOpen(false);
+      setForm({ nombre: '', tipo: '', descripcion: '' });
+      await cargarRoles();
+    } catch (err) {
+      showNotification('error', err.message || 'Error al crear rol');
+    }
+    setSaving(false);
+  };
+
+  return { open, setOpen, saving, form, errors, handleChange, handleSubmit };
+};
+
 const RolesSection = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const { roles, loading, toggling, toggleRol } = useRolesState();
+  const { roles, loading, toggling, toggleRol, cargarRoles } = useRolesState();
   const { notification, showNotification } = useNotification();
+  const crear = useCrearRol(cargarRoles);
 
   const handleToggleStatus = async (rolId) => {
     const rol = roles.find(r => r.id === rolId);
@@ -187,7 +236,7 @@ const RolesSection = () => {
 
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3">
             <div className="relative w-full sm:w-72">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
               <Input
@@ -198,6 +247,10 @@ const RolesSection = () => {
                 className="pl-9"
               />
             </div>
+            <Button onClick={() => crear.setOpen(true)} className="gap-2 shrink-0">
+              <Plus className="h-4 w-4" />
+              Crear Rol
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
@@ -274,6 +327,54 @@ const RolesSection = () => {
           <p>Los roles inactivos no estarán disponibles al crear nuevos usuarios.</p>
         </div>
       </div>
+
+      <Dialog open={crear.open} onOpenChange={crear.setOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Crear nuevo rol</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="rol-nombre">Nombre *</Label>
+              <Input
+                id="rol-nombre"
+                value={crear.form.nombre}
+                onChange={(e) => crear.handleChange('nombre', e.target.value)}
+                placeholder="Ej: Coordinador"
+              />
+              {crear.errors.nombre && <p className="text-sm text-danger">{crear.errors.nombre}</p>}
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="rol-tipo">Identificador único *</Label>
+              <Input
+                id="rol-tipo"
+                value={crear.form.tipo}
+                onChange={(e) => crear.handleChange('tipo', e.target.value.toLowerCase())}
+                placeholder="Ej: coordinador"
+              />
+              <p className="text-xs text-slate-500">Solo letras minúsculas y guiones bajos. No se puede cambiar después.</p>
+              {crear.errors.tipo && <p className="text-sm text-danger">{crear.errors.tipo}</p>}
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="rol-descripcion">Descripción</Label>
+              <Textarea
+                id="rol-descripcion"
+                value={crear.form.descripcion}
+                onChange={(e) => crear.handleChange('descripcion', e.target.value)}
+                rows={2}
+                placeholder="Describe las responsabilidades del rol..."
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => crear.setOpen(false)} disabled={crear.saving}>Cancelar</Button>
+            <Button onClick={() => crear.handleSubmit(showNotification)} disabled={crear.saving} className="gap-2">
+              {crear.saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+              {crear.saving ? 'Creando...' : 'Crear rol'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

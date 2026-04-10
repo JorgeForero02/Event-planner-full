@@ -23,6 +23,7 @@ const Notificacion = require('./Notificacion');
 const Auditoria = require('./Auditoria');
 const Encuesta = require('./Encuesta');
 const RespuestaEncuesta = require('./RespuestaEncuesta');
+const RolSistema = require('./RolSistema');
 
 Usuario.hasOne(Administrador, { foreignKey: 'id_usuario', as: 'administrador' });
 Administrador.belongsTo(Usuario, { foreignKey: 'id_usuario', as: 'usuario' });
@@ -201,7 +202,8 @@ const db = {
   Notificacion,
   Auditoria,
   Encuesta,
-  RespuestaEncuesta
+  RespuestaEncuesta,
+  RolSistema
 };
 
 module.exports = db;

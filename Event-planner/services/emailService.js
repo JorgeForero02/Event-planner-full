@@ -519,6 +519,50 @@ const EmailService = {
             console.error('Error enviando encuesta:', error);
             throw error;
         }
+    },
+
+    enviarNotificacionCambioEvento: async (destinatario, nombreUsuario, nombreEvento, camposModificados) => {
+        const listaCambios = camposModificados && camposModificados.length > 0
+            ? `<p><strong>Cambios realizados en:</strong> ${camposModificados.join(', ')}</p>`
+            : '';
+        try {
+            await resend.emails.send({
+                from: process.env.EMAIL_USER,
+                to: destinatario,
+                subject: `Actualización en el evento: ${nombreEvento}`,
+                html: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                        <h2>Hola ${nombreUsuario},</h2>
+                        <p>Te informamos que el evento <strong>${nombreEvento}</strong> en el que estás inscrito ha sido actualizado.</p>
+                        ${listaCambios}
+                        <p>Puedes consultar los detalles actualizados en la plataforma.</p>
+                        <p style="color: #888; font-size: 13px;">Atentamente,<br>El equipo de Event Planner</p>
+                    </div>
+                `
+            });
+        } catch (error) {
+            console.error('Error enviando notificación de cambio de evento a', destinatario, ':', error);
+        }
+    },
+
+    enviarNotificacionCambioAgenda: async (destinatario, nombreUsuario, nombreEvento, nombreActividad) => {
+        try {
+            await resend.emails.send({
+                from: process.env.EMAIL_USER,
+                to: destinatario,
+                subject: `Cambio en la agenda del evento: ${nombreEvento}`,
+                html: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                        <h2>Hola ${nombreUsuario},</h2>
+                        <p>La actividad <strong>${nombreActividad}</strong> del evento <strong>${nombreEvento}</strong> ha sido modificada.</p>
+                        <p>Puedes consultar la agenda actualizada en la plataforma.</p>
+                        <p style="color: #888; font-size: 13px;">Atentamente,<br>El equipo de Event Planner</p>
+                    </div>
+                `
+            });
+        } catch (error) {
+            console.error('Error enviando notificación de cambio de agenda a', destinatario, ':', error);
+        }
     }
 };
 

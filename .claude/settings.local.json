@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(node -e \"require\\('@anthropic-ai/sdk'\\); console.log\\('ok'\\)\")",
+      "Bash(node -e ':*)",
+      "Bash(node -e \"const r = require\\('./routes/index'\\); console.log\\('loaded, stack:', r.stack.length\\);\")",
+      "Bash(npm test:*)",
+      "Bash(npx jest:*)",
+      "Bash(node -e \"require\\('openai'\\); console.log\\('ok'\\)\")",
+      "Bash(node -e \"const fs = require\\('fs'\\); const files = ['src/services/iaService.js','src/components/ChatbotWidget.jsx','src/App.js']; files.forEach\\(f => { try { fs.readFileSync\\(f\\); console.log\\('OK:', f\\); } catch\\(e\\) { console.log\\('MISSING:', f\\); } }\\);\")",
+      "Bash(xargs grep:*)"
+    ]
+  }
+}

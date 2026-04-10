@@ -3,6 +3,9 @@ const ActividadValidator = require('../validators/actividad.validator');
 const PermisosService = require('../services/permisos.service');
 const AuditoriaService = require('../services/auditoriaService');
 const notificacionService = require('../services/notificacion.service');
+const EmailService = require('../services/emailService');
+const { Inscripcion, Asistente, PonenteActividad, Ponente, Usuario } = require('../models');
+const { Op } = require('sequelize');
 const { CODIGOS_HTTP, MENSAJES_RESPUESTA } = require('../constants/actividad.constants');
 
 class ActividadController {
@@ -206,8 +209,45 @@ class ActividadController {
                 transaction
             );
 
-            await notificacionService.crearNotificacionActualizacionEvento(actividadActualizada, transaction);
-        
+            try {
+                const [inscripciones, ponentesActividad] = await Promise.all([
+                    Inscripcion.findAll({
+                        where: { id_evento: actividadAnt.id_evento, estado: { [Op.in]: ['Confirmada', 'Pendiente'] } },
+                        include: [{ model: Asistente, as: 'asistente', include: [{ model: Usuario, as: 'usuario', attributes: ['id', 'nombre', 'correo'] }] }]
+                    }),
+                    PonenteActividad.findAll({
+                        where: { id_actividad: actividadId, estado: 'aceptado' },
+                        include: [{ model: Ponente, as: 'ponente', include: [{ model: Usuario, as: 'usuario', attributes: ['id', 'nombre', 'correo'] }] }]
+                    })
+                ]);
+
+                const participantes = inscripciones.map(i => i.asistente.usuario.toJSON());
+                const ponentes = ponentesActividad.map(pa => ({ ...pa.ponente.toJSON(), id_usuario: pa.ponente.usuario.id }));
+
+                await notificacionService.crearNotificacionActualizacionActividad({
+                    actividad: actividadActualizada.toJSON(),
+                    evento: evento.toJSON(),
+                    ponentes,
+                    participantes
+                }, transaction);
+
+                const todosDestinatarios = [
+                    ...participantes,
+                    ...ponentes.map(p => p.usuario || { nombre: p.nombre, correo: p.correo })
+                ];
+                for (const dest of todosDestinatarios) {
+                    if (dest.correo) {
+                        EmailService.enviarNotificacionCambioAgenda(
+                            dest.correo,
+                            dest.nombre,
+                            evento.titulo,
+                            actividadActualizada.titulo
+                        );
+                    }
+                }
+            } catch (notifError) {
+                console.error('Error al crear notificaciones de actualización de actividad:', notifError);
+            }
 
             await transaction.commit();
 

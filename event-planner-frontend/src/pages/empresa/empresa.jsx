@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import HeaderAfiliar from '../../layouts/Header/headerAfiliar/headerAfiliar';
+import Sidebar from '../../layouts/Sidebar/sidebarAsistente/sidebar';
+import Header from '../../layouts/Header/header';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
@@ -28,6 +29,7 @@ const Empresa = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     fetchPaises();
@@ -282,9 +284,17 @@ const Empresa = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <HeaderAfiliar />
-      <div className="max-w-2xl mx-auto mt-8 mb-8 bg-white rounded-xl shadow-sm border border-slate-200 p-8">
+    <div className="min-h-screen bg-slate-50 flex">
+      <Sidebar onToggle={(collapsed) => setSidebarCollapsed(collapsed)} />
+
+      <div
+        className="flex flex-col flex-1 min-h-screen transition-all duration-300"
+        style={{ marginLeft: sidebarCollapsed ? '80px' : '250px' }}
+      >
+        <Header />
+
+        <div className="flex-1 overflow-y-auto p-8">
+        <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-sm border border-slate-200 p-8">
         <h2 className="text-xl font-semibold text-slate-800 mb-6">Solicitud de Afiliación de Empresa</h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -457,6 +467,8 @@ const Empresa = () => {
             </Button>
           </div>
         </form>
+        </div>
+        </div>
       </div>
 
       <Dialog open={showSuccessModal} onOpenChange={(open) => !open && handleCloseModal()}>

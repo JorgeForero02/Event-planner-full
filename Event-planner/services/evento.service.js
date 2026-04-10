@@ -3,6 +3,7 @@ const { ESTADOS, MODALIDADES } = require('../constants/evento.constants');
 const { Op } = require('sequelize');
 const notificacionService = require('./notificacion.service');
 const EncuestaService = require('./encuesta.service');
+const EmailService = require('./emailService');
 
 class EventoService {
 
@@ -145,6 +146,22 @@ class EventoService {
                     participantes,
                     ponentes
                 }, transaction);
+
+                const camposModificados = Object.keys(cambiosRealizados);
+                const todosDestinatarios = [
+                    ...participantes,
+                    ...ponentes.map(p => p.usuario || { id: p.id_usuario, nombre: p.nombre, correo: p.correo })
+                ];
+                for (const destinatario of todosDestinatarios) {
+                    if (destinatario.correo) {
+                        EmailService.enviarNotificacionCambioEvento(
+                            destinatario.correo,
+                            destinatario.nombre,
+                            evento.titulo,
+                            camposModificados
+                        );
+                    }
+                }
             } catch (error) {
                 console.error('Error al crear notificaciones de actualización:', error);
             }

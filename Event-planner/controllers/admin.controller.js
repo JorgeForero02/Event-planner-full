@@ -9,12 +9,28 @@ const {
     Evento,
     Encuesta,
     RespuestaEncuesta,
+    RolSistema,
     sequelize
 } = require('../models');
 const { Op } = require('sequelize');
 const AuditoriaService = require('../services/auditoriaService');
 
-const _rolesEstado = { gerente: true, organizador: true, ponente: true, asistente: true };
+const ROLES_SISTEMA_DEFAULT = [
+    { tipo: 'gerente', nombre: 'Gerente', descripcion: 'Gestiona la empresa, ubicaciones y lugares.' },
+    { tipo: 'organizador', nombre: 'Organizador', descripcion: 'Crea y gestiona eventos de la empresa.' },
+    { tipo: 'ponente', nombre: 'Ponente', descripcion: 'Experto invitado asignado a actividades del evento.' },
+    { tipo: 'asistente', nombre: 'Asistente', descripcion: 'Usuario final que se inscribe y participa en eventos.' }
+];
+
+async function _inicializarRolesSiNecesario() {
+    try {
+        const count = await RolSistema.count();
+        if (count === 0) {
+            await RolSistema.bulkCreate(ROLES_SISTEMA_DEFAULT);
+        }
+    } catch (_) {
+    }
+}
 
 class AdminController {
     // RF10/RF13 — Dashboard stats del administrador
@@ -93,7 +109,10 @@ class AdminController {
 
     async listarRoles(req, res) {
         try {
-            const [cntGerentes, cntOrganizadores, cntPonentes, cntAsistentes] = await Promise.all([
+            await _inicializarRolesSiNecesario();
+
+            const [rolesDB, cntGerentes, cntOrganizadores, cntPonentes, cntAsistentes] = await Promise.all([
+                RolSistema.findAll({ order: [['id', 'ASC']] }),
                 AdministradorEmpresa.count({
                     where: { es_Gerente: 1 },
                     include: [{ model: Usuario, as: 'usuario', where: { activo: 1 }, attributes: [] }]
@@ -110,12 +129,21 @@ class AdminController {
                 })
             ]);
 
-            const roles = [
-                { tipo: 'gerente', nombre: 'Gerente', activo: _rolesEstado.gerente, usuarios_activos: cntGerentes },
-                { tipo: 'organizador', nombre: 'Organizador', activo: _rolesEstado.organizador, usuarios_activos: cntOrganizadores },
-                { tipo: 'ponente', nombre: 'Ponente', activo: _rolesEstado.ponente, usuarios_activos: cntPonentes },
-                { tipo: 'asistente', nombre: 'Asistente', activo: _rolesEstado.asistente, usuarios_activos: cntAsistentes }
-            ];
+            const usuariosPorRol = {
+                gerente: cntGerentes,
+                organizador: cntOrganizadores,
+                ponente: cntPonentes,
+                asistente: cntAsistentes
+            };
+
+            const roles = rolesDB.map(r => ({
+                id: r.id,
+                tipo: r.tipo,
+                nombre: r.nombre,
+                descripcion: r.descripcion,
+                activo: r.activo === 1,
+                usuarios_activos: usuariosPorRol[r.tipo] ?? 0
+            }));
 
             return res.json({ success: true, data: roles });
         } catch (error) {
@@ -124,18 +152,52 @@ class AdminController {
         }
     }
 
+    async crearRol(req, res) {
+        try {
+            const { tipo, nombre, descripcion } = req.body;
+            const usuario = req.usuario;
+
+            if (!tipo || !nombre) {
+                return res.status(400).json({ success: false, message: 'Los campos tipo y nombre son obligatorios' });
+            }
+
+            const existe = await RolSistema.findOne({ where: { tipo } });
+            if (existe) {
+                return res.status(409).json({ success: false, message: `Ya existe un rol con el tipo "${tipo}"` });
+            }
+
+            const rol = await RolSistema.create({ tipo, nombre, descripcion: descripcion || null, activo: 1 });
+
+            await AuditoriaService.registrar({
+                mensaje: `Nuevo rol creado: "${nombre}" (${tipo})`,
+                tipo: 'POST',
+                accion: 'crear_rol',
+                usuario: { id: usuario.id, nombre: usuario.nombre }
+            });
+
+            return res.status(201).json({ success: true, message: 'Rol creado exitosamente', data: rol });
+        } catch (error) {
+            console.error('Error al crear rol:', error);
+            return res.status(500).json({ success: false, message: 'Error al crear el rol' });
+        }
+    }
+
     async toggleRolEstado(req, res) {
         try {
+            await _inicializarRolesSiNecesario();
+
             const { tipo } = req.params;
             const { activo } = req.body;
             const usuario = req.usuario;
 
-            const tiposValidos = ['gerente', 'organizador', 'ponente', 'asistente'];
-            if (!tiposValidos.includes(tipo)) {
-                return res.status(400).json({ success: false, message: 'Tipo de rol inválido' });
+            const rol = await RolSistema.findOne({ where: { tipo } });
+            if (!rol) {
+                return res.status(404).json({ success: false, message: 'Rol no encontrado' });
             }
 
-            if (activo === false || activo === 0) {
+            const nuevoEstado = activo === true || activo === 1;
+
+            if (!nuevoEstado) {
                 let usuariosActivos = 0;
                 if (tipo === 'gerente') {
                     usuariosActivos = await AdministradorEmpresa.count({
@@ -160,16 +222,16 @@ class AdminController {
                 if (usuariosActivos > 0) {
                     return res.status(409).json({
                         success: false,
-                        message: `No se puede deshabilitar el rol "${tipo}": tiene ${usuariosActivos} usuario(s) activo(s) asignado(s). Reasigne o desactive esos usuarios primero.`,
+                        message: `No se puede deshabilitar el rol "${tipo}": tiene ${usuariosActivos} usuario(s) activo(s). Reasigne o desactive esos usuarios primero.`,
                         usuarios_activos: usuariosActivos
                     });
                 }
             }
 
-            _rolesEstado[tipo] = activo === true || activo === 1;
+            await rol.update({ activo: nuevoEstado ? 1 : 0 });
 
             await AuditoriaService.registrar({
-                mensaje: `Rol "${tipo}" ${_rolesEstado[tipo] ? 'habilitado' : 'deshabilitado'} por el administrador`,
+                mensaje: `Rol "${tipo}" ${nuevoEstado ? 'habilitado' : 'deshabilitado'} por el administrador`,
                 tipo: 'PATCH',
                 accion: 'toggle_rol_estado',
                 usuario: { id: usuario.id, nombre: usuario.nombre }
@@ -177,8 +239,8 @@ class AdminController {
 
             return res.json({
                 success: true,
-                message: `Rol "${tipo}" ${_rolesEstado[tipo] ? 'habilitado' : 'deshabilitado'} exitosamente`,
-                data: { tipo, activo: _rolesEstado[tipo] }
+                message: `Rol "${tipo}" ${nuevoEstado ? 'habilitado' : 'deshabilitado'} exitosamente`,
+                data: { tipo, activo: nuevoEstado }
             });
         } catch (error) {
             console.error('Error al cambiar estado de rol:', error);

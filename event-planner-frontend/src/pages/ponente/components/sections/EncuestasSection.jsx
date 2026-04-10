@@ -5,6 +5,10 @@ import EncuestaCard from '../ui/EncuestaCard';
 import CrearEncuestaModal from '../ui/CrearEncuestaModal';
 import EditarEncuestaModal from '../ui/EditarEncuestaModal';
 import EstadisticasModal from '../ui/EstadisticasModal';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../../../components/ui/dialog';
+import { Input } from '../../../../components/ui/input';
+import { Label } from '../../../../components/ui/label';
+import { Button } from '../../../../components/ui/button';
 
 const EncuestasSection = ({ eventos = [], ponenteId }) => {
     const [selectedEvento, setSelectedEvento] = useState('');
@@ -19,6 +23,11 @@ const EncuestasSection = ({ eventos = [], ponenteId }) => {
     // eslint-disable-next-line no-unused-vars
     const [isRefreshing, setIsRefreshing] = useState(false);
 
+    const [showRapidaModal, setShowRapidaModal] = useState(false);
+    const [rapidaForm, setRapidaForm] = useState({ titulo: '', url_google_form: '', id_actividad: '' });
+    const [rapidaErrors, setRapidaErrors] = useState({});
+    const [rapidaSaving, setRapidaSaving] = useState(false);
+
     const {
         encuestas,
         loading,
@@ -26,6 +35,7 @@ const EncuestasSection = ({ eventos = [], ponenteId }) => {
         obtenerEncuestasPorEvento,
         obtenerEncuestasPorActividad,
         crearEncuesta,
+        crearEncuestaRapida,
         actualizarEncuesta,
         eliminarEncuesta,
         enviarEncuestaMasiva,
@@ -130,6 +140,40 @@ const EncuestasSection = ({ eventos = [], ponenteId }) => {
             return;
         }
         setShowCrearModal(true);
+    };
+
+    const handleCrearRapida = () => {
+        if (!selectedActividad) {
+            mostrarAlerta('error', 'Selecciona una actividad para crear una encuesta rápida');
+            return;
+        }
+        setRapidaForm({ titulo: '', url_google_form: '', id_actividad: selectedActividad });
+        setRapidaErrors({});
+        setShowRapidaModal(true);
+    };
+
+    const handleConfirmarRapida = async () => {
+        const errors = {};
+        if (!rapidaForm.titulo.trim()) errors.titulo = 'El título es obligatorio';
+        if (!rapidaForm.url_google_form.trim()) errors.url_google_form = 'La URL es obligatoria';
+        if (Object.keys(errors).length) { setRapidaErrors(errors); return; }
+        setRapidaSaving(true);
+        try {
+            const res = await crearEncuestaRapida({
+                titulo: rapidaForm.titulo,
+                url_google_form: rapidaForm.url_google_form,
+                id_actividad: parseInt(rapidaForm.id_actividad),
+                id_evento: parseInt(selectedEvento)
+            });
+            if (res.success) {
+                mostrarAlerta('success', 'Encuesta rápida creada y activada');
+                setShowRapidaModal(false);
+                await cargarEncuestas();
+            }
+        } catch (err) {
+            mostrarAlerta('error', err.message || 'Error al crear encuesta rápida');
+        }
+        setRapidaSaving(false);
     };
 
     const handleConfirmarCreacion = async (encuestaData) => {
@@ -453,6 +497,15 @@ const EncuestasSection = ({ eventos = [], ponenteId }) => {
                             <span className={styles.statNumber}>+</span>
                             <span className={styles.statLabel}>Crear Encuesta</span>
                         </button>
+                        <button
+                            className={`${styles.statCard} ${styles.btnCrear}`}
+                            onClick={handleCrearRapida}
+                            title="Crea y activa una encuesta instantáneamente para tu actividad"
+                            style={{ borderColor: '#059669', color: '#059669' }}
+                        >
+                            <span className={styles.statNumber}>⚡</span>
+                            <span className={styles.statLabel}>Encuesta Rápida</span>
+                        </button>
                     </div>
 
                     <div className={styles.encuestasGrid}>
@@ -494,6 +547,43 @@ const EncuestasSection = ({ eventos = [], ponenteId }) => {
                     onClose={() => setShowEstadisticasModal(false)}
                 />
             )}
+
+            <Dialog open={showRapidaModal} onOpenChange={(o) => !rapidaSaving && setShowRapidaModal(o)}>
+                <DialogContent className="max-w-sm">
+                    <DialogHeader>
+                        <DialogTitle>Encuesta Rápida</DialogTitle>
+                    </DialogHeader>
+                    <p className="text-sm text-slate-500">La encuesta se creará y activará instantáneamente para la actividad seleccionada.</p>
+                    <div className="space-y-4 py-2">
+                        <div className="space-y-1.5">
+                            <Label htmlFor="rapida-titulo">Título *</Label>
+                            <Input
+                                id="rapida-titulo"
+                                value={rapidaForm.titulo}
+                                onChange={(e) => setRapidaForm(f => ({ ...f, titulo: e.target.value }))}
+                                placeholder="Ej: Feedback de la sesión"
+                            />
+                            {rapidaErrors.titulo && <p className="text-sm text-danger">{rapidaErrors.titulo}</p>}
+                        </div>
+                        <div className="space-y-1.5">
+                            <Label htmlFor="rapida-url">URL de Google Forms *</Label>
+                            <Input
+                                id="rapida-url"
+                                value={rapidaForm.url_google_form}
+                                onChange={(e) => setRapidaForm(f => ({ ...f, url_google_form: e.target.value }))}
+                                placeholder="https://docs.google.com/forms/..."
+                            />
+                            {rapidaErrors.url_google_form && <p className="text-sm text-danger">{rapidaErrors.url_google_form}</p>}
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setShowRapidaModal(false)} disabled={rapidaSaving}>Cancelar</Button>
+                        <Button onClick={handleConfirmarRapida} disabled={rapidaSaving}>
+                            {rapidaSaving ? 'Creando...' : 'Crear y Activar'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

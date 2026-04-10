@@ -30,39 +30,60 @@ class NotificacionService {
         }
     }
 
-    async crearNotificacionActualizacionEvento(actividadActualizada, transaction = null) {
-        const tipoNotificacion = await TipoNotificacion.findOne({
-            where: { nombre: 'actualizacion_actividad' }
-        });
+    async crearNotificacionActualizacionActividad({ actividad, evento, ponentes, participantes }, transaction = null) {
+        try {
+            const tipoNotificacion = await TipoNotificacion.findOne({
+                where: { nombre: 'actualizacion_actividad' }
+            });
 
-        const notificaciones = [];
-        const nombreEvento = actividadActualizada.evento.titulo;
-        const nombreActividad = actividadActualizada.titulo;
+            const notificaciones = [];
+            const tipoId = tipoNotificacion?.id || 1;
+            const nombreEvento = evento.titulo;
+            const nombreActividad = actividad.titulo;
 
-        const cambios = actividadActualizada.cambios || {};
-        const camposModificados = Object.keys(cambios);
-        const descripcionCambios = camposModificados.length > 0
-            ? `Campos actualizados: ${camposModificados.join(', ')}`
-            : 'Se han realizado actualizaciones en la actividad';
-        for (const ponente of actividadActualizada.ponentes) {
-            const notif = await this.crear({
-                id_TipoNotificacion: tipoNotificacion?.id || 1,
-                titulo: `Actualización en Actividad: ${nombreActividad}`,
-                contenido: `La actividad "${nombreActividad}" del evento "${nombreEvento}" en la que estás asignado ha sido actualizada. ${descripcionCambios}.`,
-                entidad_tipo: TIPOS_ENTIDAD.ACTIVIDAD,
-                entidad_id: actividadActualizada.id_actividad,
-                id_destinatario: ponente.id_usuario,
-                id_evento: actividadActualizada.id_evento,
-                datos_adicionales: {
-                    id_actividad: actividadActualizada.id_actividad,
-                    nombre_actividad: nombreActividad,
-                    id_evento: actividadActualizada.id_evento,
-                    nombre_evento: nombreEvento,
-                }
-            }, transaction);
-            notificaciones.push(notif);
+            for (const ponente of (ponentes || [])) {
+                const notif = await this.crear({
+                    id_TipoNotificacion: tipoId,
+                    titulo: `Actualización en Actividad: ${nombreActividad}`,
+                    contenido: `La actividad "${nombreActividad}" del evento "${nombreEvento}" en la que estás asignado ha sido actualizada.`,
+                    entidad_tipo: TIPOS_ENTIDAD.ACTIVIDAD,
+                    entidad_id: actividad.id_actividad,
+                    id_destinatario: ponente.id_usuario,
+                    id_evento: evento.id,
+                    datos_adicionales: {
+                        id_actividad: actividad.id_actividad,
+                        nombre_actividad: nombreActividad,
+                        id_evento: evento.id,
+                        nombre_evento: nombreEvento
+                    }
+                }, transaction);
+                notificaciones.push(notif);
+            }
+
+            for (const usuario of (participantes || [])) {
+                const notif = await this.crear({
+                    id_TipoNotificacion: tipoId,
+                    titulo: `Cambio en agenda del evento: ${nombreEvento}`,
+                    contenido: `La actividad "${nombreActividad}" del evento "${nombreEvento}" en el que estás inscrito ha sido modificada.`,
+                    entidad_tipo: TIPOS_ENTIDAD.ACTIVIDAD,
+                    entidad_id: actividad.id_actividad,
+                    id_destinatario: usuario.id,
+                    id_evento: evento.id,
+                    datos_adicionales: {
+                        id_actividad: actividad.id_actividad,
+                        nombre_actividad: nombreActividad,
+                        id_evento: evento.id,
+                        nombre_evento: nombreEvento
+                    }
+                }, transaction);
+                notificaciones.push(notif);
+            }
+
+            return notificaciones;
+        } catch (error) {
+            console.error('Error al crear notificaciones de actualización de actividad:', error);
+            return [];
         }
-        return notificaciones;
     }
 
     async obtenerResponsablesEvento(eventoId) {

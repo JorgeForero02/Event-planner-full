@@ -25,6 +25,7 @@ jest.mock('../../constants/evento.constants', () => ({
 }));
 jest.mock('../../services/notificacion.service', () => ({}));
 jest.mock('../../services/encuesta.service', () => ({}));
+jest.mock('../../services/emailService', () => ({}));
 
 const EventoService = require('../../services/evento.service');
 

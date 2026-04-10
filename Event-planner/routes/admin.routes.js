@@ -10,6 +10,7 @@ router.get('/dashboard/exportar-csv', auth, isAdministrador, AdminController.exp
 
 // B4: Gestión de roles del sistema
 router.get('/roles', auth, isAdministrador, AdminController.listarRoles);
+router.post('/roles', auth, isAdministrador, AdminController.crearRol);
 router.patch('/roles/:tipo/toggle-estado', auth, isAdministrador, AdminController.toggleRolEstado);
 
 // Solicitudes de actualización de empresa — para el admin

@@ -32,6 +32,7 @@ import OrganizerDashboard from './pages/organizador/OrganizerDashboard';
 import PonenteDashboard from './pages/ponente/containers/PonenteDashboard';
 import CatalogoEventos from './pages/public/CatalogoEventos';
 import SolicitudesActualizacionPage from './pages/gerente/SolicitudesActualizacionPage';
+import ChatbotWidget from './components/ChatbotWidget';
 import ReporteDesempenhoPage from './pages/gerente/ReporteDesempenhoPage';
 import PresupuestoItemsPage from './pages/organizador/Eventos/PresupuestoItemsPage';
 
@@ -380,6 +381,7 @@ function App() {
           />
         </Routes>
       </BrowserRouter>
+      <ChatbotWidget />
       </ToastProvider>
     </AuthProvider>
   );

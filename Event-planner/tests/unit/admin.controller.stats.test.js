@@ -11,12 +11,15 @@ jest.mock('../../models', () => ({
     Inscripcion: { count: jest.fn() },
     Asistencia: { count: jest.fn() },
     Evento: { count: jest.fn() },
+    Encuesta: { count: jest.fn() },
+    RespuestaEncuesta: { count: jest.fn() },
+    RolSistema: { count: jest.fn(), findAll: jest.fn(), bulkCreate: jest.fn() },
     sequelize: {}
 }));
 
 const {
     Usuario, Administrador, AdministradorEmpresa, Ponente, Asistente,
-    Inscripcion, Asistencia, Evento
+    Inscripcion, Asistencia, Evento, Encuesta, RespuestaEncuesta
 } = require('../../models');
 const controller = require('../../controllers/admin.controller');
 
@@ -31,12 +34,18 @@ function setupDefaultMocks({ inscripciones = 10, asistencias = 8 } = {}) {
     Usuario.count.mockResolvedValue(50);
     Administrador.count.mockResolvedValue(2);
     AdministradorEmpresa.count
-        .mockResolvedValueOnce(5)   // es_Gerente: 1
-        .mockResolvedValueOnce(8);  // es_Gerente: 0
+        .mockResolvedValueOnce(5)
+        .mockResolvedValueOnce(8);
     Ponente.count.mockResolvedValue(15);
     Asistente.count.mockResolvedValue(20);
-    Evento.count.mockResolvedValue(7);
+    Evento.count
+        .mockResolvedValueOnce(7)
+        .mockResolvedValueOnce(3);
     Inscripcion.count.mockResolvedValue(inscripciones);
+    RespuestaEncuesta.count
+        .mockResolvedValueOnce(30)
+        .mockResolvedValueOnce(20);
+    Encuesta.count.mockResolvedValue(5);
     Asistencia.count.mockResolvedValue(asistencias);
 }
 
