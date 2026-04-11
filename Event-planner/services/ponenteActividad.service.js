@@ -172,7 +172,7 @@ class PonenteActividadService {
 
         await asignacion.update({
             estado: 'solicitud_cambio',
-            notas: justificacion
+            notas: JSON.stringify({ justificacion, cambios_solicitados })
         }, { transaction });
 
         await NotificacionService.crearNotificacionSolicitudCambio({
@@ -211,11 +211,41 @@ class PonenteActividadService {
 
         const nuevoEstado = aprobada ? 'aceptado' : 'rechazado';
 
+        // Extraer cambios_solicitados del campo notas (guardados como JSON al solicitar)
+        let cambiosAplicar = null;
+        if (aprobada && asignacion.notas) {
+            try {
+                const notasData = JSON.parse(asignacion.notas);
+                if (notasData.cambios_solicitados) {
+                    cambiosAplicar = notasData.cambios_solicitados;
+                }
+            } catch (e) {
+                // notas en formato antiguo (texto plano), no hay cambios que aplicar
+            }
+        }
+
         await asignacion.update({
             estado: nuevoEstado,
             fecha_respuesta: new Date(),
             notas: comentarios || asignacion.notas
         }, { transaction });
+
+        // Aplicar los cambios a la Actividad si la solicitud fue aprobada
+        if (aprobada && cambiosAplicar) {
+            const camposActividad = {};
+            if (cambiosAplicar.titulo) camposActividad.titulo = cambiosAplicar.titulo;
+            if (cambiosAplicar.descripcion) camposActividad.descripcion = cambiosAplicar.descripcion;
+            if (cambiosAplicar.fecha_actividad) camposActividad.fecha_actividad = cambiosAplicar.fecha_actividad;
+            if (cambiosAplicar.hora_inicio) camposActividad.hora_inicio = cambiosAplicar.hora_inicio;
+            if (cambiosAplicar.hora_fin) camposActividad.hora_fin = cambiosAplicar.hora_fin;
+
+            if (Object.keys(camposActividad).length > 0) {
+                await Actividad.update(camposActividad, {
+                    where: { id_actividad: asignacion.id_actividad },
+                    transaction
+                });
+            }
+        }
 
         await NotificacionService.crearNotificacionRespuestaSolicitud({
             asignacion,

@@ -49,7 +49,8 @@ export const useEventosActividadesAceptadas = () => {
 
                 return estadoNormalizado === 'aceptado' ||
                     estadoNormalizado === 'aceptada' ||
-                    estadoNormalizado.includes('acept');
+                    estadoNormalizado.includes('acept') ||
+                    estadoNormalizado === 'solicitud_cambio';
             });
 
             if (actividadesAceptadas.length === 0) {

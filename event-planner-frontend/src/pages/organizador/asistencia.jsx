@@ -73,6 +73,10 @@ export default function GestionAsistentes() {
                     .join('')
                     .toUpperCase() || '—';
 
+                // El estado de asistencia viene del registro más reciente (ordenado DESC por fecha)
+                const ultimaAsistencia = inscripcion.asistencias?.[0];
+                const estadoAsistencia = ultimaAsistencia?.estado || null;
+
                 return {
                     id: String(inscripcion.id || inscripcion._id || inscripcion.codigo || idx + 1),
                     codigo: inscripcion.codigo || '—',
@@ -80,7 +84,8 @@ export default function GestionAsistentes() {
                     email: email,
                     cedula: usuario.cedula || '—',
                     fechaRegistro: inscripcion.fecha || inscripcion.fecha_registro || inscripcion.createdAt || '—',
-                    estado: inscripcion.estado || 'Pendiente',
+                    estado: estadoAsistencia,
+                    estadoInscripcion: inscripcion.estado || 'Pendiente',
                     iniciales: iniciales,
                     color: inscripcion.color || generarColorAleatorio()
                 };
@@ -117,7 +122,11 @@ export default function GestionAsistentes() {
         }
 
         if (filtroEstado !== 'todos') {
-            filtered = filtered.filter(a => a.estado.toLowerCase() === filtroEstado.toLowerCase());
+            if (filtroEstado === 'sin_registro') {
+                filtered = filtered.filter(a => !a.estado);
+            } else {
+                filtered = filtered.filter(a => (a.estado || '').toLowerCase() === filtroEstado.toLowerCase());
+            }
         }
 
         setFilteredAsistentes(filtered);
@@ -127,9 +136,9 @@ export default function GestionAsistentes() {
     const [exportingCSV, setExportingCSV] = useState(false);
 
     const totalInscritos = asistentes.length;
-    const confirmados = asistentes.filter(a => a.estado.toLowerCase() === 'confirmado' || a.estado.toLowerCase() === 'confirmada').length;
-    const pendientes = asistentes.filter(a => a.estado.toLowerCase() === 'pendiente').length;
-    const ausentes = asistentes.filter(a => a.estado.toLowerCase() === 'ausente').length;
+    const presentes = asistentes.filter(a => a.estado === 'Presente').length;
+    const sinRegistro = asistentes.filter(a => !a.estado).length;
+    const ausentes = asistentes.filter(a => a.estado === 'Ausente').length;
 
     const actualizarAsistencia = async (idAsistencia, nuevoEstado) => {
         setLoadingAsistencia(prev => ({ ...prev, [idAsistencia]: nuevoEstado }));
@@ -191,30 +200,33 @@ export default function GestionAsistentes() {
         { key: 'fechaRegistro', label: 'Fecha Registro' },
         {
             key: 'estado',
-            label: 'Estado',
-            render: (val) => <StatusBadge status={val} />,
+            label: 'Asistencia',
+            render: (val) => val
+                ? <StatusBadge status={val} />
+                : <span className="text-xs text-slate-400 italic">Sin registro</span>,
         },
         {
             key: 'acciones',
-            label: 'Asistencia',
+            label: 'Marcar',
             render: (_, row) => {
                 const isLoading = loadingAsistencia[row.id];
+                const esConfirmada = (row.estadoInscripcion || '').toLowerCase() === 'confirmada';
                 return (
                     <div className="flex items-center gap-1.5">
                         <button
                             onClick={() => actualizarAsistencia(row.id, 'Presente')}
-                            disabled={!!isLoading}
-                            title="Marcar Asistió"
-                            className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 disabled:opacity-50 transition-colors"
+                            disabled={!!isLoading || !esConfirmada}
+                            title={!esConfirmada ? 'Solo inscripciones confirmadas' : 'Marcar Asistió'}
+                            className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
                             <UserCheck size={13} />
                             {isLoading === 'Presente' ? '...' : 'Asistió'}
                         </button>
                         <button
                             onClick={() => actualizarAsistencia(row.id, 'Ausente')}
-                            disabled={!!isLoading}
-                            title="Marcar No asistió"
-                            className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 disabled:opacity-50 transition-colors"
+                            disabled={!!isLoading || !esConfirmada}
+                            title={!esConfirmada ? 'Solo inscripciones confirmadas' : 'Marcar No asistió'}
+                            className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
                             <UserX size={13} />
                             {isLoading === 'Ausente' ? '...' : 'No asistió'}
@@ -291,12 +303,12 @@ export default function GestionAsistentes() {
                         <p className="text-2xl font-bold text-brand-600">{totalInscritos}</p>
                     </div>
                     <div className="bg-white rounded-xl border border-slate-200 shadow-card p-5">
-                        <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">Confirmados</p>
-                        <p className="text-2xl font-bold text-success">{confirmados}</p>
+                        <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">Presentes</p>
+                        <p className="text-2xl font-bold text-success">{presentes}</p>
                     </div>
                     <div className="bg-white rounded-xl border border-slate-200 shadow-card p-5">
-                        <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">Pendientes</p>
-                        <p className="text-2xl font-bold text-warning">{pendientes}</p>
+                        <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">Sin Registro</p>
+                        <p className="text-2xl font-bold text-warning">{sinRegistro}</p>
                     </div>
                     <div className="bg-white rounded-xl border border-slate-200 shadow-card p-5">
                         <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">Ausentes</p>
@@ -321,10 +333,9 @@ export default function GestionAsistentes() {
                         className="rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-brand-600/30 focus:border-brand-600 transition-colors"
                     >
                         <option value="todos">Todos los estados</option>
-                        <option value="confirmado">Confirmado</option>
-                        <option value="confirmada">Confirmada</option>
-                        <option value="pendiente">Pendiente</option>
-                        <option value="ausente">Ausente</option>
+                        <option value="Presente">Presente</option>
+                        <option value="Ausente">Ausente</option>
+                        <option value="sin_registro">Sin registro</option>
                     </select>
                     <Button
                         variant="outline"

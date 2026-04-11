@@ -31,6 +31,7 @@ export const STATUS_MAP = {
   inscrita:          { variant: 'success',       label: 'Inscrita' },
   confirmado:        { variant: 'success',       label: 'Confirmado' },
   confirmada:        { variant: 'success',       label: 'Confirmada' },
+  presente:          { variant: 'success',       label: 'Presente' },
   ausente:           { variant: 'destructive',   label: 'Ausente' },
   'no asistio':      { variant: 'destructive',   label: 'No asistió' },
 

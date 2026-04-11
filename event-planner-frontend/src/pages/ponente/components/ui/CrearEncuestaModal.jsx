@@ -54,7 +54,7 @@ const CrearEncuestaModal = ({
     const actividadesFiltradas = useMemo(() => {
         if (!formData.id_evento) return [];
 
-        const eventoSeleccionado = eventos.find(e => e.id === formData.id_evento);
+        const eventoSeleccionado = eventos.find(e => e.id === parseInt(formData.id_evento));
 
         if (!eventoSeleccionado || !eventoSeleccionado.actividades || eventoSeleccionado.actividades.length === 0) {
             return [];
@@ -212,12 +212,12 @@ const CrearEncuestaModal = ({
     };
 
     const getEventoSeleccionado = () => {
-        return eventos.find(e => e.id === formData.id_evento);
+        return eventos.find(e => e.id === parseInt(formData.id_evento));
     };
 
     const getActividadSeleccionada = () => {
         if (!formData.id_actividad) return null;
-        return actividadesFiltradas.find(a => a.id_actividad === formData.id_actividad);
+        return actividadesFiltradas.find(a => a.id_actividad === parseInt(formData.id_actividad));
     };
 
     return (
