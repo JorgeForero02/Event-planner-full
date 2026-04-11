@@ -69,7 +69,6 @@ const AuditoriaSection = () => {
         <p style={{ margin: 0, color: '#6b7280', fontSize: '0.875rem' }}>Historial completo de operaciones del sistema con filtros avanzados.</p>
       </div>
 
-      {/* Filtros */}
       <form onSubmit={handleBuscar} style={{ backgroundColor: 'white', borderRadius: '10px', padding: '1.25rem', border: '1px solid #e2e8f0', marginBottom: '1.5rem' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '0.75rem', marginBottom: '0.75rem' }}>
           <div>

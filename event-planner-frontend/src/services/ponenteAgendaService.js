@@ -33,7 +33,6 @@ export const ponenteAgendaService = {
             };
 
         } catch (error) {
-            console.error('Error en obtenerAgendaPonente:', error);
             throw error;
         }
     },
@@ -88,7 +87,6 @@ export const ponenteAgendaService = {
                             }
                         }
                     } catch (fallbackError) {
-                        console.error('Error durante fallback de id de ponente:', fallbackError);
                     }
 
                     if (isPonenteNotFound) {
@@ -118,7 +116,6 @@ export const ponenteAgendaService = {
             const actividadesFormateadas = this.formatearActividadesPonente(result.data || []);
             return actividadesFormateadas;
         } catch (error) {
-            console.error('Error en obtenerActividadesPonente:', error);
             return [];
         }
     },
@@ -136,7 +133,6 @@ export const ponenteAgendaService = {
 
             return Array.from(eventosMap.values());
         } catch (error) {
-            console.error('Error en obtenerEventosPonente:', error);
             throw error;
         }
     },
@@ -159,7 +155,6 @@ export const ponenteAgendaService = {
 
             return actividadesEvento;
         } catch (error) {
-            console.error('Error en obtenerAgendaPorEvento:', error);
             throw error;
         }
     },
@@ -185,8 +180,7 @@ export const ponenteAgendaService = {
                 ubicacion: asignacion.actividad?.ubicacion,
                 materiales: asignacion.actividad?.materiales,
                 url: asignacion.actividad?.url,
-                // AÑADIR ESTO:
-                lugares: asignacion.actividad?.lugares || []  // ← ¡ESTO ES LO QUE FALTA!
+                lugares: asignacion.actividad?.lugares || []
             },
 
             evento: {
@@ -210,13 +204,6 @@ export const ponenteAgendaService = {
                     motivo_rechazo: motivoRechazo
                 };
 
-            console.log('Enviando respuesta de invitación:', {
-                ponenteId,
-                actividadId,
-                payload,
-                endpoint: `${API_BASE}/ponente-actividad/${ponenteId}/${actividadId}/responder-invitacion`
-            });
-
             const response = await fetch(
                 `${API_BASE}/ponente-actividad/${ponenteId}/${actividadId}/responder-invitacion`,
                 {
@@ -229,22 +216,17 @@ export const ponenteAgendaService = {
                 }
             );
 
-            // Obtener el texto de la respuesta primero
             const responseText = await response.text();
-            console.log('Respuesta cruda del servidor:', responseText);
 
             let result;
             try {
                 result = JSON.parse(responseText);
             } catch (parseError) {
-                console.error('Error parseando JSON:', parseError);
                 throw new Error(`Error ${response.status}: No se pudo procesar la respuesta del servidor`);
             }
 
             if (!response.ok) {
-                // El backend devolvió un error, usar el mensaje específico
                 const errorMessage = result.message || result.error || `Error ${response.status}: ${response.statusText}`;
-                console.error('Error del servidor:', errorMessage);
                 throw new Error(errorMessage);
             }
 
@@ -252,10 +234,8 @@ export const ponenteAgendaService = {
                 throw new Error(result.message || 'Error al responder invitación');
             }
 
-            console.log('Respuesta exitosa:', result);
             return result.data;
         } catch (error) {
-            console.error('Error en responderInvitacion:', error);
             throw error;
         }
     },
@@ -277,15 +257,12 @@ export const ponenteAgendaService = {
                 }
             );
 
-            // Obtener el texto de la respuesta primero
             const responseText = await response.text();
-            console.log('Respuesta cruda solicitar cambios:', responseText);
 
             let result;
             try {
                 result = JSON.parse(responseText);
             } catch (parseError) {
-                console.error('Error parseando JSON:', parseError);
                 throw new Error(`Error ${response.status}: No se pudo procesar la respuesta del servidor`);
             }
 
@@ -300,7 +277,6 @@ export const ponenteAgendaService = {
 
             return result.data;
         } catch (error) {
-            console.error('Error en solicitarCambios:', error);
             throw error;
         }
     },
@@ -329,7 +305,6 @@ export const ponenteAgendaService = {
 
             return agrupadas;
         } catch (error) {
-            console.error('Error en obtenerActividadesPorEstado:', error);
             throw error;
         }
     },
@@ -359,7 +334,6 @@ export const ponenteAgendaService = {
                 eventos: [...new Set(Object.values(actividades).flat().map(a => a.evento?.id))].length
             };
         } catch (error) {
-            console.error('Error en obtenerEstadisticasPonente:', error);
             throw error;
         }
     }

@@ -132,7 +132,6 @@ export const agendaService = {
                     break;
 
                 default:
-                    // Si no hay filtro o no es reconocido, devolver todas las actividades
                     actividadesFiltradas = todasActividades;
                     break;
             }

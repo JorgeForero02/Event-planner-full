@@ -38,7 +38,6 @@ export const useRole = () => {
             };
         }
 
-        // ... configuraciones para otros roles
         return {
             dashboardSections: ['dashboard'],
             allowedRoutes: ['/dashboard'],

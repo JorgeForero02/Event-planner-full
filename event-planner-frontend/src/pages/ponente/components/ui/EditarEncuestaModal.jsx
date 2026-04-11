@@ -13,7 +13,6 @@ const EditarEncuestaModal = ({
     const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false);
     const [datosEditados, setDatosEditados] = useState(null);
 
-    // Campos permitidos para edición según la documentación
     const camposEditables = [
         'titulo',
         'tipo_encuesta',
@@ -27,7 +26,6 @@ const EditarEncuestaModal = ({
         'descripcion'
     ];
 
-    // Filtrar solo los campos editables de la encuesta
     const getDatosEditables = () => {
         if (!encuesta) return {};
 
@@ -38,20 +36,17 @@ const EditarEncuestaModal = ({
             }
         });
 
-        // Agregar IDs de evento y actividad si existen
         if (encuesta.id_evento) datos.id_evento = encuesta.id_evento;
         if (encuesta.id_actividad) datos.id_actividad = encuesta.id_actividad;
 
         return datos;
     };
 
-    // Validar si se pueden editar ciertos campos según el estado
     // eslint-disable-next-line no-unused-vars
-    const getCamposEditablesSegunEstado = () => {
+    const _getCamposEditablesSegunEstado = () => {
         const camposDisponibles = [...camposEditables];
 
         if (encuesta?.estado === 'cerrada') {
-            // Si está cerrada, algunos campos no se pueden editar
             return camposDisponibles.filter(campo =>
                 !['estado', 'fecha_inicio', 'fecha_fin'].includes(campo)
             );
@@ -62,7 +57,6 @@ const EditarEncuestaModal = ({
 
     const handleConfirmarEdicion = async (datos) => {
         try {
-            // Solo enviar los campos que han cambiado
             const cambios = {};
             Object.keys(datos).forEach(key => {
                 if (datos[key] !== encuesta[key]) {
@@ -71,12 +65,10 @@ const EditarEncuestaModal = ({
             });
 
             if (Object.keys(cambios).length === 0) {
-                // No hay cambios
                 onClose();
                 return;
             }
 
-            // Si se intenta cambiar de estado a "cerrada", mostrar confirmación
             if (cambios.estado === 'cerrada' && encuesta.estado !== 'cerrada') {
                 setDatosEditados(cambios);
                 setMostrarConfirmacion(true);
@@ -89,7 +81,6 @@ const EditarEncuestaModal = ({
             }
             return resultado;
         } catch (error) {
-            console.error('Error en edición:', error);
             return false;
         }
     };
@@ -103,7 +94,6 @@ const EditarEncuestaModal = ({
             }
             return resultado;
         } catch (error) {
-            console.error('Error al cerrar encuesta:', error);
             setMostrarConfirmacion(false);
             return false;
         }

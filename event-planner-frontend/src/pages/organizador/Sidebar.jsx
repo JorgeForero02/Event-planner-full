@@ -33,7 +33,6 @@ const Sidebar = ({ onSectionChange }) => {
         if (onSectionChange) onSectionChange(sectionId);
     };
 
-    /* ── Footer slot: cambiar contraseña ─────────────────────────────── */
     const footerSlot = (isCollapsed) => (
         <button
             onClick={openPasswordModal}
@@ -51,7 +50,7 @@ const Sidebar = ({ onSectionChange }) => {
 
     return (
         <>
-            {/* ── Mobile toggle button ─────────────────────────────── */}
+
             <button
                 onClick={toggleSidebar}
                 aria-label="Toggle sidebar"
@@ -60,7 +59,6 @@ const Sidebar = ({ onSectionChange }) => {
                 {isOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
 
-            {/* ── SharedSidebar ─────────────────────────────────────── */}
             <SharedSidebar
                 title="Panel de Organizador"
                 items={menuItems}
@@ -74,7 +72,6 @@ const Sidebar = ({ onSectionChange }) => {
                 expandedWidth="w-[280px]"
             />
 
-            {/* ── Modal: cambiar contraseña ─────────────────────────── */}
             {showPasswordModal && (
                 <div
                     className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
@@ -87,7 +84,7 @@ const Sidebar = ({ onSectionChange }) => {
                         <h2 className="text-xl font-bold text-slate-900 mb-5">Cambiar Contraseña</h2>
 
                         <div className="space-y-4">
-                            {/* Correo (disabled) */}
+
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-1">
                                     Correo electrónico
@@ -100,7 +97,6 @@ const Sidebar = ({ onSectionChange }) => {
                                 />
                             </div>
 
-                            {/* Nueva contraseña */}
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-1">
                                     Nueva contraseña
@@ -124,7 +120,6 @@ const Sidebar = ({ onSectionChange }) => {
                                 </div>
                             </div>
 
-                            {/* Confirmar contraseña */}
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-1">
                                     Confirmar contraseña
@@ -149,7 +144,6 @@ const Sidebar = ({ onSectionChange }) => {
                             </div>
                         </div>
 
-                        {/* Alertas */}
                         {passwordError && (
                             <div className="mt-4 rounded-lg bg-rose-50 border border-rose-200 px-3 py-2 text-sm text-rose-800">
                                 {passwordError}
@@ -161,7 +155,6 @@ const Sidebar = ({ onSectionChange }) => {
                             </div>
                         )}
 
-                        {/* Acciones */}
                         <div className="flex gap-3 justify-end mt-6">
                             <Button
                                 variant="outline"

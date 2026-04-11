@@ -15,7 +15,6 @@ export const isAuthenticated = () => {
 };
 
 export class AuthService extends BaseService {
-  // Intenta parsear la respuesta: JSON cuando corresponda, si no retorna texto crudo
   async login(email, password, selectedRole) {
     try {
       const payload = { correo: email, contraseña: password };
@@ -63,7 +62,6 @@ export class AuthService extends BaseService {
       };
 
     } catch (error) {
-      console.error('Error durante el inicio de sesión:', error);
       return {
         success: false,
         error: error.message
@@ -84,7 +82,6 @@ export class AuthService extends BaseService {
       const data = await this.parseResponse(response);
 
       if (!response.ok) {
-        // Si la respuesta no es JSON, parseResponse devuelve { __rawText }
         const message = this.getErrorMessage(data);
         throw new Error(message);
       }
@@ -95,7 +92,6 @@ export class AuthService extends BaseService {
       };
 
     } catch (error) {
-      console.error('Error durante el registro:', error);
       return {
         success: false,
         error: error.message
@@ -106,7 +102,6 @@ export class AuthService extends BaseService {
   async promoverGerente(id_usuario, id_empresa) {
     try {
       const token = localStorage.getItem('access_token');
-      console.debug('authService.promoverGerente called with', { id_usuario, id_empresa, tokenExists: !!token });
 
       const response = await fetch(`${this.baseURL}/auth/promover-gerente`, {
         method: 'POST',
@@ -121,14 +116,11 @@ export class AuthService extends BaseService {
 
       if (!response.ok) {
         const message = this.getErrorMessage(data);
-        console.warn('promoverGerente response not ok', { status: response.status, message, data });
         return { success: false, status: response.status, message, data };
       }
 
-      console.debug('promoverGerente succeeded', data);
       return { success: true, data: data.data };
     } catch (error) {
-      console.error('Error promoviendo a gerente:', error);
       return { success: false, status: 500, message: error.message };
     }
   }
@@ -141,7 +133,6 @@ export class AuthService extends BaseService {
   }
 
   getErrorMessage(data) {
-    // Delegate to BaseService implementation
     return super.getErrorMessage(data);
   }
 }

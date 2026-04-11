@@ -3,29 +3,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { ChevronDown, Menu as MenuIcon, LogOut } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
-/**
- * SharedSidebar — sidebar unificado para los 5 roles.
- *
- * Props:
- *  title         string          — texto en el header (cuando no hay userInfo)
- *  headerIcon    Component|null  — icono Lucide opcional junto al título
- *  items         array           — items de navegación (ver formato abajo)
- *  mode          'router'|'view' — 'router' usa useLocation; 'view' usa currentView
- *  currentView   string          — vista activa en mode='view'
- *  onNavigate    fn(id)          — callback de navegación en mode='view'
- *  onToggle      fn(collapsed)   — notifica al layout cuando colapsa
- *  onLogout      fn              — manejador de cierre de sesión
- *  userInfo      {name, email}   — muestra avatar + nombre en el header
- *  footerSlot    fn(isCollapsed) — render-prop para botones extra en el footer
- *  mobileOpen    bool|undefined  — controla visibilidad móvil (undefined = siempre visible)
- *  expandedWidth string          — clase de ancho expandido (default 'w-64')
- *
- * Formato de item:
- *  { id, label, Icon, path?, altPaths?, view?, submenu?: [{ id, label, path?, view? }] }
- *
- * Formato de footerSlot:
- *  (isCollapsed) => <JSX />
- */
 const SharedSidebar = ({
   title,
   headerIcon: HeaderIcon = null,
@@ -44,7 +21,6 @@ const SharedSidebar = ({
   const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  /* ── Active detection ─────────────────────────────────────────────── */
   const isItemActive = (item) => {
     if (mode !== 'router' || !item.path) return false;
     if (location.pathname === item.path) return true;
@@ -66,7 +42,6 @@ const SharedSidebar = ({
   const hasActiveSubmenu = (item) =>
     item.submenu?.some((sub) => isSubActive(sub)) ?? false;
 
-  /* ── Submenu expansion ────────────────────────────────────────────── */
   const computeExpanded = () => {
     const init = {};
     items.forEach((item) => {
@@ -83,10 +58,9 @@ const SharedSidebar = ({
       if (item.submenu && hasActiveSubmenu(item)) next[item.id] = true;
     });
     setExpandedMenus((prev) => ({ ...prev, ...next }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname, currentView]);
 
-  /* ── Collapse ─────────────────────────────────────────────────────── */
   const toggleCollapse = () => {
     const next = !isCollapsed;
     setIsCollapsed(next);
@@ -94,7 +68,6 @@ const SharedSidebar = ({
     if (onToggle) onToggle(next);
   };
 
-  /* ── Click handlers ───────────────────────────────────────────────── */
   const handleItemClick = (item) => {
     if (item.submenu) {
       if (!isCollapsed)
@@ -116,10 +89,8 @@ const SharedSidebar = ({
     }
   };
 
-  /* ── Mobile control ───────────────────────────────────────────────── */
   const isMobileControlled = mobileOpen !== undefined;
 
-  /* ── Render ───────────────────────────────────────────────────────── */
   return (
     <aside
       className={cn(
@@ -133,7 +104,7 @@ const SharedSidebar = ({
           : 'translate-x-0'
       )}
     >
-      {/* ── Header ──────────────────────────────────────────────────── */}
+
       <div
         className={cn(
           'flex items-center px-3 py-4 border-b border-sidebar-border shrink-0',
@@ -176,7 +147,6 @@ const SharedSidebar = ({
         </button>
       </div>
 
-      {/* ── Navigation ──────────────────────────────────────────────── */}
       <nav className="flex-1 overflow-y-auto py-3 space-y-0.5 px-2">
         {items.map((item) => {
           const Icon = item.Icon ?? item.icon;
@@ -242,7 +212,6 @@ const SharedSidebar = ({
         })}
       </nav>
 
-      {/* ── Footer ──────────────────────────────────────────────────── */}
       <div className="px-2 py-3 border-t border-sidebar-border shrink-0 space-y-0.5">
         {typeof footerSlot === 'function' ? footerSlot(isCollapsed) : footerSlot}
         <button

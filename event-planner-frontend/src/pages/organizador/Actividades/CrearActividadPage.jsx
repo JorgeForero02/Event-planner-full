@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import {
     Calendar,
     ArrowLeft,
@@ -23,6 +23,7 @@ import {
 } from '../../../components/eventosService';
 import './CrearActividadPage.css';
 import Sidebar from '../Sidebar';
+import GerenteSidebar from '../../../layouts/Sidebar/sidebarGerente/GerenteSidebar';
 import axios from "axios";
 
 const CrearActividadPage = () => {
@@ -30,6 +31,8 @@ const CrearActividadPage = () => {
 
     const navigate = useNavigate();
     const { eventoId } = useParams();
+    const location = useLocation();
+    const basePath = location.pathname.startsWith('/gerente') ? '/gerente' : '/organizador';
 
     const [evento, setEvento] = useState(null);
     const [empresa, setEmpresa] = useState(null);
@@ -77,10 +80,7 @@ const CrearActividadPage = () => {
                 const ponentesData = await obtenerPonentes();
                 setPonentes(ponentesData.data || []);
 
-                console.log(ponentesData)
-
-            } catch (error) {
-                console.error('Error cargando datos:', error);
+            } catch {
             } finally {
                 setLoading(false);
             }
@@ -103,8 +103,7 @@ const CrearActividadPage = () => {
                     : [];
                 setLugares(filtrados);
                 setFormData(prev => ({ ...prev, id_lugares: [] }));
-            } catch (error) {
-                console.error('Error cargando lugares:', error);
+            } catch {
                 setLugares([]);
                 setFormData(prev => ({ ...prev, id_lugares: [] }));
             }
@@ -168,7 +167,6 @@ const CrearActividadPage = () => {
         }
 
         if (fecha_actividad && evento) {
-            // Comparar las fechas sin conversión de zona horaria
             const fechaInicio = evento.fecha_inicio.split('T')[0];
             const fechaFin = evento.fecha_fin.split('T')[0];
 
@@ -205,9 +203,6 @@ const CrearActividadPage = () => {
                 presupuesto: formData.presupuesto ? parseFloat(formData.presupuesto) : 0
             };
 
-            console.log('Datos a enviar:', datosEnviar);
-
-            // Crear actividad y obtener ID
             const actividadCreada = await crearActividad(eventoId, datosEnviar);
 
             const idActividadCreada =
@@ -215,8 +210,6 @@ const CrearActividadPage = () => {
                 actividadCreada.data?.id ||
                 actividadCreada.id_actividad ||
                 actividadCreada.id;
-
-            console.log("ID actividad creada:", idActividadCreada);
 
             if (formData.ponente && idActividadCreada) {
                 await axios.post(
@@ -230,7 +223,7 @@ const CrearActividadPage = () => {
                 );
             }
 
-            navigate(`/organizador/eventos/${eventoId}/agenda`);
+            navigate(`${basePath}/eventos/${eventoId}/agenda`);
 
         } catch (error) {
             const data = error.response?.data;
@@ -250,10 +243,9 @@ const CrearActividadPage = () => {
         }
     };
 
-
     if (loading) return (
         <div className="crear-actividad-page">
-            <Sidebar />
+            {basePath === '/gerente' ? <GerenteSidebar /> : <Sidebar />}
             <div className="actividad-container">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', animation: 'pulse 1.5s ease-in-out infinite' }}>
                     {[1, 2, 3, 4].map(i => (
@@ -272,7 +264,7 @@ const CrearActividadPage = () => {
 
     return (
         <div className="crear-actividad-page">
-            <Sidebar />
+            {basePath === '/gerente' ? <GerenteSidebar /> : <Sidebar />}
             <div className="actividad-container">
                 <div className="page-header-actividad">
                     <Calendar size={28} className="header-icon-actividad" />
@@ -345,7 +337,6 @@ const CrearActividadPage = () => {
                                     </option>
                                 ))}
                             </select>
-
 
                         </div>
 
@@ -542,7 +533,7 @@ const CrearActividadPage = () => {
                     <div className="form-actions-actividad">
                         <button
                             type="button"
-                            onClick={() => navigate(`/organizador/eventos/${eventoId}/agenda`)}
+                            onClick={() => navigate(`${basePath}/eventos/${eventoId}/agenda`)}
                             className="btn-cancelar-actividad"
                             disabled={guardando}
                         >

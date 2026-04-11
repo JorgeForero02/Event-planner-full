@@ -48,7 +48,6 @@ export const useLocations = () => {
         fetchEmpresaUsuario()
       ]);
     } catch (error) {
-      console.error('Error cargando datos:', error);
       showNotification('error', 'Error', 'Error al cargar los datos iniciales');
     } finally {
       setState(prev => ({ ...prev, loading: false }));
@@ -64,7 +63,6 @@ export const useLocations = () => {
         await fetchUbicacionesByEmpresa(empresa.id);
       }
     } catch (error) {
-      console.error('Error al obtener empresa:', error);
       throw error;
     }
   };
@@ -74,7 +72,6 @@ export const useLocations = () => {
       const ubicaciones = await locationsAPI.getUbicacionesByEmpresa(empresaId);
       setState(prev => ({ ...prev, ubicaciones }));
     } catch (error) {
-      console.error('Error al obtener ubicaciones:', error);
       throw error;
     }
   };
@@ -84,7 +81,6 @@ export const useLocations = () => {
       const ciudades = await locationsAPI.getCiudades();
       setState(prev => ({ ...prev, ciudades }));
     } catch (error) {
-      console.error('Error al obtener ciudades:', error);
       throw error;
     }
   };

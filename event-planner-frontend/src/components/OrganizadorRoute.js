@@ -1,8 +1,7 @@
-// [FRONTEND-SYNC] F2: Guard de ruta para organizador
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { isOrganizador } from '../utils/roleUtils';
+import { isOrganizador, getRedirectPath } from '../utils/roleUtils';
 
 const OrganizadorRoute = ({ children }) => {
   const { isAuthenticated, user, initialized } = useAuth();
@@ -20,7 +19,7 @@ const OrganizadorRoute = ({ children }) => {
   }
 
   if (!isOrganizador(user)) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={getRedirectPath(user)} replace />;
   }
 
   return children;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import axios from "axios";
 import {
     Calendar,
@@ -25,12 +25,15 @@ import {
 } from '../../../components/eventosService';
 import './CrearActividadPage.css';
 import Sidebar from '../Sidebar';
+import GerenteSidebar from '../../../layouts/Sidebar/sidebarGerente/GerenteSidebar';
 
 const EditarActividadPage = () => {
     const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
     const navigate = useNavigate();
     const { idActividad } = useParams();
+    const location = useLocation();
+    const basePath = location.pathname.startsWith('/gerente') ? '/gerente' : '/organizador';
 
     const [evento, setEvento] = useState(null);
     const [empresa, setEmpresa] = useState(null);
@@ -127,8 +130,7 @@ const EditarActividadPage = () => {
                 link_virtual: actividadActual.link_virtual || actividadActual.url || '',
             });
 
-        } catch (error) {
-            console.error("Error al cargar actividad:", error);
+        } catch {
         } finally {
             setLoading(false);
         }
@@ -142,8 +144,7 @@ const EditarActividadPage = () => {
             try {
                 const data = await obtenerPonentes();
                 setPonentes(data.data || []);
-            } catch (error) {
-                console.error("Error obteniendo ponentes:", error);
+            } catch {
             }
         };
 
@@ -156,16 +157,13 @@ const EditarActividadPage = () => {
                 const response = await obtenerPonenteAsignado(idActividad);
                 if (response.success && response.data.length > 0) {
                     const asignacion = response.data[0];
-                    console.log("ponente asignado", asignacion)
-
                     setFormData((prev) => ({
                         ...prev,
                         ponente: asignacion.id_ponente
                     }));
                 }
 
-            } catch (error) {
-                console.error("Error cargando ponente asignado:", error);
+            } catch {
             }
         };
 
@@ -187,8 +185,7 @@ const EditarActividadPage = () => {
                     ? data.data.filter(l => String(l.id_ubicacion) === String(ubicacionSeleccionada))
                     : [];
                 setLugares(filtrados);
-            } catch (error) {
-                console.error('Error cargando lugares:', error);
+            } catch {
                 setLugares([]);
             }
         };
@@ -283,8 +280,6 @@ const EditarActividadPage = () => {
                 presupuesto: formData.presupuesto ? parseFloat(formData.presupuesto) : 0,
             };
 
-            console.log('Datos a actualizar:', datosEnviar);
-
             await actualizarActividad(idActividad, datosEnviar);
 
             if (formData.ponente) {
@@ -299,14 +294,12 @@ const EditarActividadPage = () => {
                         getHeaders()
                     );
 
-                } catch (error) {
-                    console.error("Error al enviar invitación al ponente:", error);
+                } catch {
                 }
             }
 
-            navigate(`/organizador/eventos/${eventoId}/agenda`);
+            navigate(`${basePath}/eventos/${eventoId}/agenda`);
         } catch (error) {
-            console.error("Error al actualizar actividad:", error);
             const data = error.response?.data;
             let mensaje = data?.message || 'Error al actualizar la actividad';
             if (data?.conflicto) {
@@ -335,7 +328,7 @@ const EditarActividadPage = () => {
 
     return (
         <div className="crear-actividad-page">
-            <Sidebar />
+            {basePath === '/gerente' ? <GerenteSidebar /> : <Sidebar />}
             <div className="actividad-container">
                 <div className="page-header-actividad">
                     <Calendar size={28} className="header-icon-actividad" />
@@ -602,7 +595,7 @@ const EditarActividadPage = () => {
                     <div className="form-actions-actividad">
                         <button
                             type="button"
-                            onClick={() => navigate(`/organizador/eventos/${eventoId}/agenda`)}
+                            onClick={() => navigate(`${basePath}/eventos/${eventoId}/agenda`)}
                             className="btn-cancelar-actividad"
                             disabled={guardando}
                         >

@@ -4,31 +4,22 @@ import { safeRender } from '../../utils/objectUtils';
 
 const EventModal = ({ evento, onClose, formatFecha, formatFechaCompleta }) => {
 
-    // Debug para verificar toda la información del evento
     React.useEffect(() => {
-        console.log('📊 Debug EventModal Ponente - Información completa:', evento);
 
-        // Debug específico para identificar campos problemáticos
         if (evento) {
             Object.keys(evento).forEach(key => {
                 const value = evento[key];
                 if (value && typeof value === 'object') {
-                    console.log(`⚠️ Campo problemático: ${key}`, {
-                        tipo: typeof value,
-                        valor: value,
-                        esArray: Array.isArray(value)
-                    });
                 }
             });
         }
     }, [evento]);
 
-    // ✅ Función para formatear el número de cupos
     const formatearCupos = (valor) => {
         return safeRender(valor, 'No disponible');
     };
 
-    // ✅ Función para calcular porcentaje de disponibilidad
+    // eslint-disable-next-line no-unused-vars
     const calcularPorcentajeDisponibilidad = () => {
         const cupoTotal = Number(safeRender(evento.cupo_total, 0));
         const cuposDisponibles = Number(safeRender(evento.cupos_disponibles, 0));
@@ -37,10 +28,6 @@ const EventModal = ({ evento, onClose, formatFecha, formatFechaCompleta }) => {
         return Math.round((cuposDisponibles / cupoTotal) * 100);
     };
 
-    // eslint-disable-next-line no-unused-vars
-    const porcentajeDisponible = calcularPorcentajeDisponibilidad();
-
-    // Función para obtener el organizador de forma segura
     const obtenerOrganizadorSeguro = () => {
         const organizador = safeRender(evento.organizador);
         const creador = safeRender(evento.creador);
@@ -49,11 +36,12 @@ const EventModal = ({ evento, onClose, formatFecha, formatFechaCompleta }) => {
             creador !== 'No disponible' ? creador : 'No especificado';
     };
 
-    // Función para obtener el correo del organizador de forma segura
     const obtenerCorreoOrganizadorSeguro = () => {
         const correo = safeRender(evento.correo_organizador);
         return correo !== 'No disponible' ? correo : null;
     };
+
+    if (!evento) return null;
 
     return (
         <div className={styles.modalBody}>

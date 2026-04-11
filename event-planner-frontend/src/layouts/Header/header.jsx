@@ -36,7 +36,7 @@ const Header = ({ isMenuCollapsed }) => {
 
   return (
     <header className="sticky top-0 z-[100] h-14 bg-white border-b border-slate-200 flex items-center justify-between px-5 shrink-0">
-      {/* Left — brand logo / logout */}
+
       <button
         className="flex items-center gap-2 text-brand-600 hover:text-brand-700 transition-colors"
         onClick={handleLogoClick}
@@ -47,7 +47,6 @@ const Header = ({ isMenuCollapsed }) => {
         <span className="font-bold text-sm hidden sm:inline tracking-tight">Event Planner</span>
       </button>
 
-      {/* Right — notifications + user info + avatar */}
       <div className="flex items-center gap-3">
         <NotificacionesDropdown notificationsIcon={notificationsIcon} />
 

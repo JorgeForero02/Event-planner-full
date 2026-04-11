@@ -9,7 +9,10 @@
       "Bash(npx jest:*)",
       "Bash(node -e \"require\\('openai'\\); console.log\\('ok'\\)\")",
       "Bash(node -e \"const fs = require\\('fs'\\); const files = ['src/services/iaService.js','src/components/ChatbotWidget.jsx','src/App.js']; files.forEach\\(f => { try { fs.readFileSync\\(f\\); console.log\\('OK:', f\\); } catch\\(e\\) { console.log\\('MISSING:', f\\); } }\\);\")",
-      "Bash(xargs grep:*)"
+      "Bash(xargs grep:*)",
+      "Bash(find C:\\\\Users\\\\gogam\\\\Desktop\\\\Universidad\\\\Event-planner full\\\\event-planner-frontend\\\\src:*)",
+      "Bash(node:*)",
+      "Bash(npm run:*)"
     ]
   }
 }

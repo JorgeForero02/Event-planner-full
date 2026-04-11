@@ -17,7 +17,7 @@ const DeleteConfirmationModal = ({
                 className="bg-white rounded-2xl shadow-modal w-full max-w-md p-6 space-y-5 animate-slide-up"
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Header */}
+
                 <div className="flex items-center justify-between">
                     <h2 className="text-base font-semibold text-slate-800">Confirmar Eliminación</h2>
                     <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
@@ -25,7 +25,6 @@ const DeleteConfirmationModal = ({
                     </button>
                 </div>
 
-                {/* Warning */}
                 <div className="flex flex-col items-center gap-3 py-4 text-center">
                     <div className="w-14 h-14 rounded-full bg-rose-100 flex items-center justify-center">
                         <Trash2 size={26} className="text-rose-600" />
@@ -37,7 +36,6 @@ const DeleteConfirmationModal = ({
                     <p className="text-xs text-rose-600 font-medium">Esta acción no se puede deshacer.</p>
                 </div>
 
-                {/* Actions */}
                 <div className="flex items-center justify-end gap-3">
                     <button
                         type="button"

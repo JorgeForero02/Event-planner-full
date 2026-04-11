@@ -18,7 +18,6 @@ class EventsAPI extends BaseService {
 
             return response;
         } catch (error) {
-            console.error('Error en obtenerEventos:', error);
             throw new Error(error.message || 'Error al cargar los eventos');
         }
     }
@@ -28,13 +27,11 @@ class EventsAPI extends BaseService {
             const response = await this.fetch('/inscripciones/eventos-disponibles');
 
             if (!response.success) {
-                // [FRONTEND-FIX] F5: Propagar error en lugar de enmascarar como éxito
                 throw new Error(response.message || 'Error al obtener eventos disponibles');
             }
 
             return response;
         } catch (error) {
-            console.error('Error en obtenerEventosDisponibles:', error);
             throw error;
         }
     }
@@ -44,7 +41,6 @@ class EventsAPI extends BaseService {
             const response = await this.fetch(`/eventos?id_empresa=${empresaId}`);
             return response.data || [];
         } catch (error) {
-            console.error('Error fetching events by empresa:', error);
             return [];
         }
     }

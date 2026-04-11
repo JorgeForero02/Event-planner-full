@@ -85,7 +85,6 @@ const ListaEncuestas = ({
                                 <span className="stat-label">respuestas</span>
                             </div>
 
-                            {/* Primera fila: 3 botones */}
                             <button
                                 className="btn-accion btn-estadisticas"
                                 onClick={() => onVerEstadisticas(encuesta)}
@@ -112,7 +111,6 @@ const ListaEncuestas = ({
                                 Para Ponente
                             </button>
 
-                            {/* Segunda fila: 2 botones */}
                             <button
                                 className="btn-accion btn-ver"
                                 onClick={() => onVerResultados(encuesta)}
@@ -142,8 +140,7 @@ const ListaEncuestas = ({
             ))}
         </div>
 
-        {/* Modal: Habilitar para ponente */}
-            {modalHabilitar && (
+        {modalHabilitar && (
                 <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.4)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <div style={{ backgroundColor: 'white', borderRadius: '12px', padding: '1.5rem', width: '100%', maxWidth: '420px', boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
                         <h3 style={{ margin: '0 0 0.5rem', fontSize: '1rem', fontWeight: 700, color: '#1e293b' }}>Habilitar encuesta para ponente</h3>

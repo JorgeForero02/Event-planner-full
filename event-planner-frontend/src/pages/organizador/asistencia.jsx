@@ -1,4 +1,3 @@
-// File: GestionAsistentes.jsx
 import React, { useState, useEffect } from 'react';
 import { Search, Users, AlertCircle, UserCheck, UserX, Download } from 'lucide-react';
 import StatusBadge from '../../components/ui/StatusBadge';
@@ -29,8 +28,7 @@ export default function GestionAsistentes() {
                     setSelectedEventoId(String(lista[0].id || lista[0]._id || lista[0].id_evento));
                 }
                 setError(null);
-            } catch (err) {
-                console.error(err);
+            } catch {
                 setError('No se pudo cargar la lista de eventos.');
             } finally {
                 setLoading(false);
@@ -38,7 +36,6 @@ export default function GestionAsistentes() {
         };
 
         cargarEventos();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -92,8 +89,7 @@ export default function GestionAsistentes() {
             setAsistentes(normalizados);
             setFilteredAsistentes(normalizados);
 
-        } catch (err) {
-            console.error('Error cargando asistentes:', err);
+        } catch {
             setError('Error al cargar asistentes.');
             setAsistentes([]);
             setFilteredAsistentes([]);
@@ -102,7 +98,6 @@ export default function GestionAsistentes() {
         }
     };
 
-    // Función auxiliar para generar colores aleatorios para avatares
     const generarColorAleatorio = () => {
         const colores = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
         return colores[Math.floor(Math.random() * colores.length)];
@@ -126,7 +121,6 @@ export default function GestionAsistentes() {
         }
 
         setFilteredAsistentes(filtered);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchTerm, filtroEstado, asistentes]);
 
     const [loadingAsistencia, setLoadingAsistencia] = useState({});
@@ -142,8 +136,7 @@ export default function GestionAsistentes() {
         try {
             await asistenciaService.actualizarAsistenciaManual(idAsistencia, nuevoEstado);
             await cargarAsistentes(selectedEventoId);
-        } catch (err) {
-            console.error('Error actualizando asistencia:', err);
+        } catch {
             setError('No se pudo actualizar la asistencia.');
         } finally {
             setLoadingAsistencia(prev => { const s = { ...prev }; delete s[idAsistencia]; return s; });
@@ -164,8 +157,7 @@ export default function GestionAsistentes() {
             link.click();
             link.remove();
             window.URL.revokeObjectURL(url);
-        } catch (err) {
-            console.error('Error exportando CSV:', err);
+        } catch {
             setError('Error al exportar el CSV.');
         } finally {
             setExportingCSV(false);
@@ -255,7 +247,6 @@ export default function GestionAsistentes() {
                     <h1 className="text-2xl font-bold tracking-tight text-slate-900">Gestión de Inscritos</h1>
                 </div>
 
-                {/* Selector de evento */}
                 <div className="bg-white rounded-xl border border-slate-200 shadow-card p-5">
                     <h3 className="text-sm font-semibold text-slate-700 mb-0.5">Seleccionar evento</h3>
                     <p className="text-xs text-slate-500 mb-3">Elige el evento para ver los inscritos</p>
@@ -294,7 +285,6 @@ export default function GestionAsistentes() {
                     </h2>
                 )}
 
-                {/* Stats */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="bg-white rounded-xl border border-slate-200 shadow-card p-5">
                         <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-1">Total Inscritos</p>
@@ -314,7 +304,6 @@ export default function GestionAsistentes() {
                     </div>
                 </div>
 
-                {/* Filtros + Exportar */}
                 <div className="flex flex-col sm:flex-row gap-3">
                     <div className="relative flex-1">
                         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
@@ -348,7 +337,6 @@ export default function GestionAsistentes() {
                     </Button>
                 </div>
 
-                {/* Tabla */}
                 <DataTable
                     columns={columns}
                     data={filteredAsistentes}

@@ -71,7 +71,6 @@ const ReporteDesempenhoPage = () => {
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      console.error('Error exportando CSV:', err);
     } finally {
       setExportLoading(false);
     }
@@ -89,7 +88,6 @@ const ReporteDesempenhoPage = () => {
           <h1 style={{ margin: '0 0 0.25rem', fontSize: '1.5rem', fontWeight: 700, color: '#1e293b' }}>Reporte de Desempeño</h1>
           <p style={{ margin: '0 0 1.5rem', color: '#6b7280', fontSize: '0.875rem' }}>Indicadores de eventos, inscripciones, asistencia, encuestas y presupuesto de tu empresa.</p>
 
-          {/* Filtros */}
           <div style={{ backgroundColor: 'white', borderRadius: '10px', padding: '1.25rem', marginBottom: '1.5rem', border: '1px solid #e2e8f0', display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#374151', marginBottom: '4px' }}>Fecha inicio</label>
@@ -129,7 +127,7 @@ const ReporteDesempenhoPage = () => {
 
           {reporte && !loading && (
             <>
-              {/* Stats de eventos */}
+
               <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#1e293b', margin: '0 0 0.75rem' }}>Eventos</h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
                 <StatCard titulo="Total eventos" valor={reporte.total_eventos} />
@@ -139,7 +137,6 @@ const ReporteDesempenhoPage = () => {
                 <StatCard titulo="Actividades" valor={reporte.total_actividades || 0} color="#7c3aed" />
               </div>
 
-              {/* Inscripciones y asistencia */}
               <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#1e293b', margin: '0 0 0.75rem' }}>Inscripciones y Asistencia</h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
                 <StatCard titulo="Total inscritos" valor={reporte.inscripciones?.total || 0} />
@@ -148,7 +145,6 @@ const ReporteDesempenhoPage = () => {
                 <StatCard titulo="Tasa asistencia" valor={`${reporte.inscripciones?.tasa_asistencia || 0}%`} color={reporte.inscripciones?.tasa_asistencia >= 70 ? '#059669' : '#d97706'} subtitulo="de inscritos confirmados" />
               </div>
 
-              {/* Encuestas */}
               <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#1e293b', margin: '0 0 0.75rem' }}>Encuestas</h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
                 <StatCard titulo="Enviadas" valor={reporte.encuestas?.total_enviadas || 0} />
@@ -156,7 +152,6 @@ const ReporteDesempenhoPage = () => {
                 <StatCard titulo="Tasa respuesta" valor={`${reporte.encuestas?.tasa_respuesta || 0}%`} color={reporte.encuestas?.tasa_respuesta >= 60 ? '#059669' : '#d97706'} />
               </div>
 
-              {/* Presupuesto */}
               <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#1e293b', margin: '0 0 0.75rem' }}>Presupuesto</h2>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
                 <StatCard titulo="Total ingresos" valor={`$${Number(reporte.presupuesto?.total_ingresos || 0).toLocaleString()}`} color="#059669" />
@@ -164,7 +159,6 @@ const ReporteDesempenhoPage = () => {
                 <StatCard titulo="Balance" valor={`$${Number(reporte.presupuesto?.balance || 0).toLocaleString()}`} color={Number(reporte.presupuesto?.balance) >= 0 ? '#059669' : '#dc2626'} />
               </div>
 
-              {/* Lista eventos */}
               {reporte.eventos?.length > 0 && (
                 <>
                   <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#1e293b', margin: '0 0 0.75rem' }}>Detalle de Eventos</h2>

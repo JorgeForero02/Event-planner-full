@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { API_URL } from '../../../config/apiConfig';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../../components/ui/dialog';
 
 const TIPO_COLORS = {
   ingreso: { bg: '#dcfce7', color: '#166534', label: 'Ingreso' },
@@ -20,6 +21,7 @@ const PresupuestoItemsPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [alerta, setAlerta] = useState(null);
   const [form, setForm] = useState({ concepto: '', monto: '', tipo: 'gasto', id_actividad: '', descripcion: '' });
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
   useEffect(() => {
     Promise.all([fetchItems(), fetchActividades()]);
@@ -109,8 +111,13 @@ const PresupuestoItemsPage = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('¿Eliminar este ítem de presupuesto?')) return;
+  const handleDelete = (id) => {
+    setConfirmDeleteId(id);
+  };
+
+  const confirmarDelete = async () => {
+    const id = confirmDeleteId;
+    setConfirmDeleteId(null);
     try {
       const res = await fetch(`${API_URL}/eventos/${eventoId}/presupuesto-items/${id}`, {
         method: 'DELETE',
@@ -131,6 +138,19 @@ const PresupuestoItemsPage = () => {
   const balance = Number(data.resumen?.balance || 0);
 
   return (
+    <>
+    <Dialog open={!!confirmDeleteId} onOpenChange={(open) => !open && setConfirmDeleteId(null)}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle>Confirmar eliminación</DialogTitle>
+        </DialogHeader>
+        <p className="text-sm text-slate-600">¿Eliminar este ítem de presupuesto?</p>
+        <DialogFooter>
+          <button onClick={() => setConfirmDeleteId(null)} style={{ background: 'none', border: '1px solid #d1d5db', borderRadius: '6px', padding: '0.4rem 0.75rem', cursor: 'pointer', color: '#374151', fontSize: '0.875rem' }}>Cancelar</button>
+          <button onClick={confirmarDelete} style={{ backgroundColor: '#dc2626', color: 'white', border: 'none', borderRadius: '6px', padding: '0.4rem 0.75rem', cursor: 'pointer', fontWeight: 600, fontSize: '0.875rem' }}>Eliminar</button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
     <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc', padding: '2rem', fontFamily: 'Inter, sans-serif' }}>
       <div style={{ maxWidth: '900px', margin: '0 auto' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
@@ -147,7 +167,6 @@ const PresupuestoItemsPage = () => {
           </button>
         </div>
 
-        {/* Resumen */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
           {[
             { label: 'Total Ingresos', value: `$${Number(data.resumen?.total_ingresos || 0).toLocaleString()}`, color: '#059669' },
@@ -266,6 +285,7 @@ const PresupuestoItemsPage = () => {
         )}
       </div>
     </div>
+    </>
   );
 };
 

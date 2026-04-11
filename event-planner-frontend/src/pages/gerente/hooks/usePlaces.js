@@ -51,7 +51,6 @@ export const usePlaces = () => {
       const empresas = await placesAPI.getEmpresas();
       setState(prev => ({ ...prev, empresas, loading: false }));
     } catch (error) {
-      console.error('Error cargando empresas:', error);
       showNotification('error', 'Error', 'Error al cargar las empresas');
       setState(prev => ({ ...prev, loading: false }));
     }
@@ -79,7 +78,6 @@ export const usePlaces = () => {
         ubicaciones: Array.isArray(ubicacionesEmpresa) ? ubicacionesEmpresa : []
       }));
     } catch (error) {
-      console.error('Error al obtener lugares:', error);
       showNotification('error', 'Error', 'Error al cargar los lugares de la empresa');
     }
   };
@@ -93,7 +91,6 @@ export const usePlaces = () => {
       }));
       return ubicacionesEmpresa;
     } catch (error) {
-      console.error('Error al obtener ubicaciones:', error);
       return [];
     }
   };
@@ -268,7 +265,6 @@ export const usePlaces = () => {
     setState(prev => ({ ...prev, sidebarCollapsed: collapsed }));
   };
 
-  // Filtrar lugares
   const filteredLugares = state.lugares.filter(lugar => {
     const matchesSearch = state.searchTerm === '' ||
       lugar.nombre?.toLowerCase().includes(state.searchTerm.toLowerCase()) ||

@@ -21,7 +21,6 @@ export const useEvents = () => {
     eventoSeleccionado: null
   });
 
-  // Función auxiliar para obtener texto del estado
   const getEstadoTexto = (estado) => {
     switch (estado) {
       case 0: return 'Borrador';
@@ -32,13 +31,12 @@ export const useEvents = () => {
     }
   };
 
-  // Función auxiliar para obtener clase CSS según estado
   const getClaseEstado = (estado) => {
     switch (estado) {
-      case 0: return 'statusDraft'; // Borrador
-      case 1: return 'statusAvailable'; // Publicado
-      case 2: return 'statusCancelled'; // Cancelado
-      case 3: return 'statusFinished'; // Finalizado
+      case 0: return 'statusDraft';
+      case 1: return 'statusAvailable';
+      case 2: return 'statusCancelled';
+      case 3: return 'statusFinished';
       default: return 'statusUnknown';
     }
   };
@@ -47,46 +45,26 @@ export const useEvents = () => {
     try {
       setState(prev => ({ ...prev, loading: true }));
 
-      // Obtener TODOS los eventos de la empresa
       const todosLosEventos = await eventsAPI.obtenerEventos();
-      console.log('🏢 Todos los eventos de la empresa:', todosLosEventos);
 
       if (!todosLosEventos.success) {
         throw new Error(todosLosEventos.message || 'Error al obtener eventos');
       }
 
-      // Obtener eventos disponibles (solo publicados con cupos calculados)
       let eventosDisponibles = [];
       try {
-        console.log('🔄 Solicitando eventos disponibles...');
         const disponiblesData = await eventsAPI.obtenerEventosDisponibles();
         eventosDisponibles = disponiblesData.data || [];
-        console.log('📊 Eventos disponibles obtenidos:', eventosDisponibles);
 
-        // Debug: mostrar IDs de eventos disponibles
         if (eventosDisponibles.length > 0) {
-          console.log('🎯 IDs de eventos disponibles:', eventosDisponibles.map(ed => ed.id));
         } else {
-          console.log('ℹ️ No se encontraron eventos disponibles');
         }
       } catch (error) {
-        console.warn('No se pudieron cargar eventos disponibles:', error);
         eventosDisponibles = [];
       }
 
-      // Combinar datos
       const eventosCombinados = todosLosEventos.data.map(evento => {
-        // Buscar si este evento está en la lista de disponibles (publicados)
         const eventoDisponible = eventosDisponibles.find(ed => ed.id === evento.id);
-
-        // Debug por evento
-        console.log(`🔍 Evento ${evento.id} - "${evento.titulo}":`, {
-          estado: evento.estado,
-          estado_texto: getEstadoTexto(evento.estado),
-          cupos_totales: evento.cupos,
-          encontrado_en_disponibles: !!eventoDisponible,
-          cupos_disponibles: eventoDisponible?.cupos_disponibles
-        });
 
         const eventoProcesado = {
           id: evento.id,
@@ -97,7 +75,7 @@ export const useEvents = () => {
           fecha_inicio: evento.fecha_inicio,
           fecha_fin: evento.fecha_fin,
           lugar: evento.lugar,
-          cupo_total: evento.cupos, // Campo importante: cupos totales
+          cupo_total: evento.cupos,
           estado: evento.estado,
           estado_texto: getEstadoTexto(evento.estado),
           empresa: evento.empresa?.nombre || 'No especificada',
@@ -108,24 +86,14 @@ export const useEvents = () => {
           actividades: evento.actividades || []
         };
 
-        // Si el evento está publicado (estado = 1) y encontramos información de cupos disponibles
         if (evento.estado === 1 && eventoDisponible) {
           eventoProcesado.cupos_disponibles = eventoDisponible.cupos_disponibles;
           eventoProcesado.inscritos = eventoDisponible.inscritos || 0;
-
-          console.log(`✅ Evento ${evento.id} marcado como publicado con cupos:`, {
-            cupos_disponibles: eventoDisponible.cupos_disponibles,
-            inscritos: eventoDisponible.inscritos,
-            cupo_total: evento.cupos
-          });
         }
 
         return eventoProcesado;
       });
 
-      console.log('🔄 Eventos combinados finales:', eventosCombinados);
-
-      // Extraer organizadores únicos
       const organizadoresUnicos = [...new Set(todosLosEventos.data
         .filter(evento => evento.creador?.nombre)
         .map(evento => evento.creador.nombre)
@@ -143,7 +111,6 @@ export const useEvents = () => {
       }));
 
     } catch (error) {
-      console.error("Error al cargar eventos:", error);
       setState(prev => ({ ...prev, loading: false }));
 
       if (error.message?.includes("Token inválido")) {
@@ -181,7 +148,6 @@ export const useEvents = () => {
 
   const verDetallesEvento = async (evento) => {
     try {
-      // Para detalles completos, obtener información adicional del endpoint /eventos
       const token = localStorage.getItem('access_token') || localStorage.getItem('token');
       if (token) {
         const response = await fetch(`${API_URL}/eventos/${evento.id}`, {
@@ -195,10 +161,9 @@ export const useEvents = () => {
         if (response.ok) {
           const result = await response.json();
           if (result.success) {
-            // Combinar datos
             const eventoCompleto = {
-              ...evento, // Mantener datos básicos incluyendo cupos_disponibles
-              ...result.data, // Agregar detalles completos
+              ...evento,
+              ...result.data,
               estado_texto: getEstadoTexto(result.data.estado)
             };
             setModalState({ showModal: true, eventoSeleccionado: eventoCompleto });
@@ -207,10 +172,8 @@ export const useEvents = () => {
         }
       }
     } catch (error) {
-      console.error('Error cargando detalles completos:', error);
     }
 
-    // Fallback: usar solo los datos básicos
     setModalState({ showModal: true, eventoSeleccionado: evento });
   };
 
@@ -252,11 +215,10 @@ export const useEvents = () => {
     return hora.substring(0, 5);
   };
 
-  // Función para calcular el estado del evento
   const getEstadoEvento = (evento) => {
     const cuposTotales = evento.cupo_total || 0;
 
-    console.log('📈 Calculando estado para evento:', {
+    console.log({
       titulo: evento.titulo,
       estado: evento.estado,
       estado_texto: evento.estado_texto,
@@ -265,7 +227,6 @@ export const useEvents = () => {
       tieneCuposDisponibles: evento.cupos_disponibles !== undefined
     });
 
-    // Si el evento no está publicado (estado !== 1), mostrar estado general
     if (evento.estado !== 1) {
       return {
         texto: evento.estado_texto || getEstadoTexto(evento.estado),
@@ -278,7 +239,6 @@ export const useEvents = () => {
       };
     }
 
-    // Para eventos publicados CON información de cupos disponibles
     if (evento.cupos_disponibles !== undefined && evento.cupos_disponibles !== null) {
       const cuposDisponibles = parseInt(evento.cupos_disponibles);
       const cuposOcupados = cuposTotales - cuposDisponibles;
@@ -315,7 +275,6 @@ export const useEvents = () => {
       };
     }
 
-    // Evento publicado pero SIN información de cupos disponibles
     return {
       texto: 'PUBLICADO',
       clase: 'statusAvailable',

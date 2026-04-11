@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import styles from './Encuestas.module.css';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../../../components/ui/dialog';
 
 const EncuestaModal = ({
@@ -37,134 +36,117 @@ const EncuestaModal = ({
                     </DialogTitle>
                 </DialogHeader>
 
-                <div className={styles.modalBody}>
+                <div className="space-y-4 py-2">
                     {!mostrarConfirmacion ? (
                         <>
-                            <div className={styles.modalInfo}>
-                                <div className={styles.modalBadges}>
-                                    <span
-                                        className={styles.modalTipo}
-                                        style={{ backgroundColor: color }}
-                                    >
-                                        {tipoTexto}
+                            {/* Badges */}
+                            <div className="flex flex-wrap gap-2">
+                                <span
+                                    className="px-2.5 py-0.5 rounded-full text-xs font-semibold text-white"
+                                    style={{ backgroundColor: color }}
+                                >
+                                    {tipoTexto}
+                                </span>
+                                {encuesta.obligatoria && (
+                                    <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-danger/10 text-danger border border-danger/20">
+                                        Obligatoria
                                     </span>
-                                    {encuesta.obligatoria && (
-                                        <span className={styles.modalObligatoria}>Obligatoria</span>
-                                    )}
-                                    <span className={`${styles.modalEstado} ${esCompletada ? styles.estadoCompletada : styles.estadoPendiente
-                                        }`}>
-                                        {esCompletada ? 'Completada' : ' Pendiente'}
-                                    </span>
-                                </div>
-
-                                <div className={styles.modalDescripcion}>
-                                    <h4>Descripción:</h4>
-                                    <p>{encuesta.descripcion || 'Sin descripción adicional'}</p>
-                                </div>
-
-                                <div className={styles.modalDetalles}>
-                                    <h4>Detalles:</h4>
-                                    <div className={styles.detalleGrid}>
-                                        <div className={styles.detalleItem}>
-                                            <span className={styles.detalleLabel}>Período:</span>
-                                            <span className={styles.detalleValue}>
-                                                {encuesta.fecha_inicio ? new Date(encuesta.fecha_inicio).toLocaleDateString() : 'Sin fecha'}
-                                                {encuesta.fecha_fin && ` - ${new Date(encuesta.fecha_fin).toLocaleDateString()}`}
-                                            </span>
-                                        </div>
-
-                                        {encuesta.respuestas?.[0]?.fecha_envio && (
-                                            <div className={styles.detalleItem}>
-                                                <span className={styles.detalleLabel}>Enviada:</span>
-                                                <span className={styles.detalleValue}>
-                                                    {new Date(encuesta.respuestas[0].fecha_envio).toLocaleDateString()}
-                                                </span>
-                                            </div>
-                                        )}
-
-                                        {esCompletada && encuesta.respuestas?.[0]?.fecha_completado && (
-                                            <div className={styles.detalleItem}>
-                                                <span className={styles.detalleLabel}>Completada:</span>
-                                                <span className={styles.detalleValue}>
-                                                    {/* Buscar la respuesta específica del asistente */}
-                                                    {(() => {
-                                                        const respuestaAsistente = encuesta.respuestas?.find(
-                                                            r => r.id_asistente === idAsistente
-                                                        );
-                                                        return respuestaAsistente?.fecha_completado
-                                                            ? new Date(respuestaAsistente.fecha_completado).toLocaleDateString()
-                                                            : 'Fecha no disponible';
-                                                    })()}
-                                                </span>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
+                                )}
+                                <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${esCompletada ? 'bg-success/10 text-success border border-success/20' : 'bg-warning/10 text-warning border border-warning/20'}`}>
+                                    {esCompletada ? 'Completada' : 'Pendiente'}
+                                </span>
                             </div>
 
-                            <div className={styles.modalAcciones}>
-                                {!esCompletada ? (
-                                    <>
-                                        <button
-                                            className={`${styles.btnModal} ${styles.btnAccederModal}`}
-                                            onClick={handleAccederFormulario}
-                                            style={{ backgroundColor: color }}
-                                        >
-                                            Acceder al Formulario Google
-                                        </button>
-                                        <p className={styles.instrucciones}>
-                                            Haz clic en el botón para abrir el formulario de Google.
-                                            Una vez que completes el formulario, regresa aquí para marcar como completada.
-                                        </p>
-                                    </>
-                                ) : (
-                                    <div className={styles.completadaContainer}>
-                                        <div className={styles.completadaMensaje}>
-                                            <div>
-                                                <h4>Encuesta Completada</h4>
-                                                <p>Has completado exitosamente esta encuesta.</p>
-                                            </div>
-                                        </div>
-                                        <button
-                                            className={`${styles.btnModal} ${styles.btnVerFormulario}`}
-                                            onClick={() => window.open(encuesta.url_google_form, '_blank')}
-                                        >
-                                            Ver Formulario
-                                        </button>
+                            {/* Description */}
+                            {encuesta.descripcion && (
+                                <div>
+                                    <p className="text-xs font-semibold text-slate-500 mb-1">Descripción:</p>
+                                    <p className="text-sm text-slate-700">{encuesta.descripcion}</p>
+                                </div>
+                            )}
+
+                            {/* Details */}
+                            <div className="bg-slate-50 rounded-lg p-3 space-y-2">
+                                <p className="text-xs font-semibold text-slate-500 mb-1">Detalles:</p>
+                                <div className="flex justify-between text-xs">
+                                    <span className="text-slate-400">Período:</span>
+                                    <span className="text-slate-700 font-medium">
+                                        {encuesta.fecha_inicio ? new Date(encuesta.fecha_inicio).toLocaleDateString() : 'Sin fecha'}
+                                        {encuesta.fecha_fin && ` - ${new Date(encuesta.fecha_fin).toLocaleDateString()}`}
+                                    </span>
+                                </div>
+                                {encuesta.respuestas?.[0]?.fecha_envio && (
+                                    <div className="flex justify-between text-xs">
+                                        <span className="text-slate-400">Enviada:</span>
+                                        <span className="text-slate-700 font-medium">{new Date(encuesta.respuestas[0].fecha_envio).toLocaleDateString()}</span>
+                                    </div>
+                                )}
+                                {esCompletada && encuesta.respuestas?.[0]?.fecha_completado && (
+                                    <div className="flex justify-between text-xs">
+                                        <span className="text-slate-400">Completada:</span>
+                                        <span className="text-slate-700 font-medium">
+                                            {(() => {
+                                                const r = encuesta.respuestas?.find(r => r.id_asistente === idAsistente);
+                                                return r?.fecha_completado ? new Date(r.fecha_completado).toLocaleDateString() : 'Fecha no disponible';
+                                            })()}
+                                        </span>
                                     </div>
                                 )}
                             </div>
+
+                            {/* Actions */}
+                            {!esCompletada ? (
+                                <div className="space-y-2">
+                                    <button
+                                        onClick={handleAccederFormulario}
+                                        className="w-full h-10 rounded-lg text-sm font-semibold text-white transition-colors"
+                                        style={{ backgroundColor: color }}
+                                    >
+                                        Acceder al Formulario Google
+                                    </button>
+                                    <p className="text-xs text-slate-400 text-center">
+                                        Haz clic para abrir el formulario. Una vez completado, regresa aquí para marcarlo.
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="flex items-center justify-between bg-success/5 border border-success/20 rounded-lg p-3">
+                                    <div>
+                                        <p className="text-sm font-semibold text-success">Encuesta Completada</p>
+                                        <p className="text-xs text-slate-500">Has completado exitosamente esta encuesta.</p>
+                                    </div>
+                                    <button
+                                        onClick={() => window.open(encuesta.url_google_form, '_blank')}
+                                        className="h-8 px-3 rounded-lg text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors"
+                                    >
+                                        Ver Formulario
+                                    </button>
+                                </div>
+                            )}
                         </>
                     ) : (
-                        <div className={styles.confirmacionContainer}>
-                            <h3>¿Completaste el formulario exitosamente?</h3>
-                            <p className={styles.confirmacionTexto}>
-                                Por favor confirma que has terminado de completar el formulario de Google.
-                                Una vez confirmado, tu respuesta será registrada como completada.
-                            </p>
-
-                            <div className={styles.confirmacionAcciones}>
+                        <div className="space-y-4">
+                            <div>
+                                <h3 className="text-sm font-semibold text-slate-800">¿Completaste el formulario exitosamente?</h3>
+                                <p className="text-xs text-slate-500 mt-1">
+                                    Por favor confirma que has terminado de completar el formulario de Google.
+                                    Una vez confirmado, tu respuesta será registrada como completada.
+                                </p>
+                            </div>
+                            <div className="flex gap-2">
                                 <button
-                                    className={`${styles.btnModal} ${styles.btnCancelar}`}
                                     onClick={() => setMostrarConfirmacion(false)}
                                     disabled={confirmandoCompletar}
+                                    className="flex-1 h-9 rounded-lg text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors disabled:opacity-60"
                                 >
                                     Volver
                                 </button>
                                 <button
-                                    className={`${styles.btnModal} ${styles.btnConfirmar}`}
                                     onClick={handleConfirmarCompletar}
                                     disabled={confirmandoCompletar}
+                                    className="flex-1 h-9 rounded-lg text-xs font-semibold text-white transition-colors disabled:opacity-60"
                                     style={{ backgroundColor: color }}
                                 >
-                                    {confirmandoCompletar ? (
-                                        <>
-                                            <span className={styles.spinnerSmall}></span>
-                                            Confirmando...
-                                        </>
-                                    ) : (
-                                        'Sí, completé el formulario'
-                                    )}
+                                    {confirmandoCompletar ? 'Confirmando...' : 'Sí, completé el formulario'}
                                 </button>
                             </div>
                         </div>

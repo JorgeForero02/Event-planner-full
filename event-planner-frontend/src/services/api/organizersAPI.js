@@ -24,7 +24,6 @@ class OrganizersAPI extends BaseService {
       }
 
       if (!empresaData) {
-        console.warn('No se encontraron empresas en la respuesta:', response);
         throw new Error('No se encontraron empresas disponibles para el gerente actual.');
       }
 
@@ -33,7 +32,6 @@ class OrganizersAPI extends BaseService {
         nombre: empresaData.nombre || 'Mi Empresa'
       };
     } catch (error) {
-      console.error('Error al cargar empresa del gerente:', error);
 
       if (error.message.includes('404')) {
         throw new Error('El endpoint /api/empresas no está disponible. Verifica la configuración del servidor.');
@@ -59,7 +57,6 @@ class OrganizersAPI extends BaseService {
         message: response.message || '¡Organizador creado exitosamente!'
       };
     } catch (error) {
-      console.error('Error en crearOrganizador:', error);
       throw new Error(error.message || 'Error al crear organizador');
     }
   }

@@ -5,5 +5,6 @@ const { auth, isOrganizadorOGerente } = require('../middlewares/auth');
 
 router.post('/generar-mensaje', auth, isOrganizadorOGerente, IAController.generarMensaje);
 router.post('/generar-descripcion', auth, isOrganizadorOGerente, IAController.generarDescripcion);
+router.post('/planificar-evento', auth, isOrganizadorOGerente, IAController.planificarEvento);
 
 module.exports = router;

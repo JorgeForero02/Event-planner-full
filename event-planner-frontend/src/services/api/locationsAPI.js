@@ -70,11 +70,9 @@ class LocationsAPI extends BaseService {
             if (result.success && result.data && Array.isArray(result.data) && result.data.length > 0) {
                 return result.data[0];
             } else {
-                // [FRONTEND-FIX] F6: Retornar null en lugar de empresa falsa
                 return null;
             }
         } catch (error) {
-            console.error('Error en getPrimeraEmpresa:', error);
             return null;
         }
     }

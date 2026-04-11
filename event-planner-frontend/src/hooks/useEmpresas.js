@@ -56,7 +56,6 @@ export const useEmpresas = () => {
                 setError(cleanError);
             }
         } catch (error) {
-            console.error('Error al cargar empresas:', error);
             const cleanError = cleanErrorMessage('Error de conexión con el servidor');
             setError(cleanError);
             setEmpresas([]);
@@ -66,7 +65,6 @@ export const useEmpresas = () => {
     }, [cleanErrorMessage]);
 
     const handleAprobarEmpresa = useCallback(async (id, nombre, creador) => {
-        // ✅ ELIMINAR el window.confirm - ya tienes tu modal personalizado
         try {
             const token = localStorage.getItem('access_token');
 
@@ -90,7 +88,6 @@ export const useEmpresas = () => {
             }
 
         } catch (error) {
-            console.error('Error:', error);
             const cleanError = cleanErrorMessage(error.message);
             throw new Error(cleanError);
         }
@@ -124,7 +121,6 @@ export const useEmpresas = () => {
                 throw new Error(cleanError);
             }
         } catch (error) {
-            console.error('Error:', error);
             const cleanError = cleanErrorMessage(error.message);
             throw new Error(cleanError);
         }

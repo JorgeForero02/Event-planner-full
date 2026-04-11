@@ -18,7 +18,6 @@ const Section = ({ title, children }) => (
   </div>
 );
 
-
 const EventDetailsModal = ({
   evento,
   onClose,
@@ -56,7 +55,6 @@ const EventDetailsModal = ({
     return 'No especificada';
   };
 
-
   return (
     <div
       className="fixed inset-0 z-[2000] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
@@ -66,7 +64,7 @@ const EventDetailsModal = ({
         className="bg-white rounded-2xl shadow-modal w-full max-w-2xl max-h-[90vh] overflow-y-auto animate-slide-up"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
+
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
           <div className="flex items-center gap-3 min-w-0">
             <div className="min-w-0">
@@ -81,7 +79,6 @@ const EventDetailsModal = ({
           </button>
         </div>
 
-        {/* Body */}
         <div className="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Section title="Información General">
             <InfoRow label="Modalidad" value={evento.modalidad || 'Presencial'} />
@@ -140,7 +137,6 @@ const EventDetailsModal = ({
           )}
         </div>
 
-        {/* Footer */}
         <div className="flex justify-end px-6 py-4 border-t border-slate-100">
           <button
             onClick={onClose}

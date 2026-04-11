@@ -1,4 +1,3 @@
-// components/DashboardOrganizador.js
 import { useState, useEffect } from 'react';
 import { obtenerPerfil, obtenerEventos } from './eventosService';
 
@@ -8,7 +7,6 @@ export const useOrganizerDashboard = () => {
     const [user, setUser] = useState(null);
     const [stats, setStats] = useState([]);
     const [recentEvents, setRecentEvents] = useState([]);
-
 
     const formatDate = (fecha) =>
         new Date(fecha).toLocaleDateString('es-CO', {

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import styles from '../styles/EstadisticasModal.module.css';
 import encuestaService from '../../../../services/encuestaService';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../../../components/ui/dialog';
+import { useToast } from '../../../../contexts/ToastContext';
 
 const EstadisticasModal = ({ encuestaId, onClose }) => {
     const [estadisticas, setEstadisticas] = useState(null);
@@ -11,6 +12,8 @@ const EstadisticasModal = ({ encuestaId, onClose }) => {
     const [filtroRespuestas, setFiltroRespuestas] = useState('todas');
     const [descargando, setDescargando] = useState(false);
     const [mostrarMenuDescarga, setMostrarMenuDescarga] = useState(false);
+
+    const toast = useToast();
 
     useEffect(() => {
         cargarEstadisticas();
@@ -139,7 +142,7 @@ const EstadisticasModal = ({ encuestaId, onClose }) => {
             saveAs(blob, `reporte_encuesta_${encuestaId}_${new Date().toISOString().split('T')[0]}.xlsx`);
 
         } catch (err) {
-            alert('Error al generar el reporte en Excel');
+            toast.error('Error al generar el reporte en Excel');
         } finally {
             setDescargando(false);
         }
@@ -447,7 +450,7 @@ const EstadisticasModal = ({ encuestaId, onClose }) => {
             saveAs(doc.output('blob'), nombreArchivo);
 
         } catch (err) {
-            alert('Error al generar el reporte en PDF');
+            toast.error('Error al generar el reporte en PDF');
         } finally {
             setDescargando(false);
         }

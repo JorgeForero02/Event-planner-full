@@ -112,7 +112,6 @@ const Lugares = () => {
                 const token = getToken();
                 await fetchEmpresas(token);
             } catch (error) {
-                console.error('Error cargando datos:', error);
                 showNotification('error', 'Error', 'Error al cargar los datos. Por favor, recargue la página.');
             } finally {
                 setLoading(false);
@@ -135,7 +134,6 @@ const Lugares = () => {
 
     const fetchLugaresByEmpresa = async (empresaId, token = null) => {
         try {
-            console.log('Buscando lugares para empresa:', empresaId);
             const headers = {
                 'Content-Type': 'application/json'
             };
@@ -150,7 +148,6 @@ const Lugares = () => {
 
             if (!response.ok) {
                 if (response.status === 404) {
-                    console.log('No se encontraron lugares para esta empresa');
                     setLugares([]);
                     return;
                 }
@@ -158,11 +155,9 @@ const Lugares = () => {
             }
 
             const result = await response.json();
-            console.log('Lugares obtenidos:', result);
 
             if (result.success && result.data) {
                 const ubicacionesEmpresa = await fetchUbicacionesByEmpresa(empresaId, token);
-                console.log('Ubicaciones para enriquecer:', ubicacionesEmpresa);
 
                 const lugaresConUbicaciones = result.data.map(lugar => {
                     const ubicacion = Array.isArray(ubicacionesEmpresa)
@@ -176,11 +171,9 @@ const Lugares = () => {
                 });
                 setLugares(lugaresConUbicaciones);
             } else {
-                console.log('No hay datos de lugares en la respuesta');
                 setLugares([]);
             }
         } catch (error) {
-            console.error('Error al obtener lugares:', error);
             setLugares([]);
             showNotification('error', 'Error', 'Error al cargar los lugares de la empresa.');
         }
@@ -205,18 +198,14 @@ const Lugares = () => {
             }
 
             const result = await response.json();
-            console.log('Empresas obtenidas:', result);
 
             if (result.success && result.data && result.data.length > 0) {
                 setEmpresas(result.data);
-                console.log('Empresas guardadas en estado:', result.data);
             } else {
-                console.log('No se encontraron empresas');
                 setEmpresas([]);
                 showNotification('warning', 'Advertencia', 'No se encontraron empresas disponibles.');
             }
         } catch (error) {
-            console.error('Error al obtener empresas:', error);
             setEmpresas([]);
             showNotification('error', 'Error', 'Error al cargar las empresas.');
         }
@@ -224,7 +213,6 @@ const Lugares = () => {
 
     const fetchUbicacionesByEmpresa = async (empresaId, token = null) => {
         try {
-            console.log('Buscando ubicaciones para empresa:', empresaId);
             const headers = {
                 'Content-Type': 'application/json'
             };
@@ -239,18 +227,15 @@ const Lugares = () => {
 
             if (!response.ok) {
                 if (response.status === 404) {
-                    console.log('No se encontraron ubicaciones para esta empresa');
                     return [];
                 }
                 throw new Error(`HTTP ${response.status}`);
             }
 
             const result = await response.json();
-            console.log('Ubicaciones obtenidas:', result);
 
             return result.success && result.data ? result.data : [];
         } catch (error) {
-            console.error('Error al obtener ubicaciones por empresa:', error);
             showNotification('error', 'Error', 'Error al cargar las ubicaciones de la empresa.');
             return [];
         }
@@ -268,8 +253,6 @@ const Lugares = () => {
                 headers['Authorization'] = `Bearer ${token}`;
             }
 
-            console.log('Enviando datos del lugar:', formData);
-
             const response = await fetch(`${API_URL}/empresas/${empresaSeleccionada.id}/lugares`, {
                 method: 'POST',
                 headers: headers,
@@ -282,7 +265,6 @@ const Lugares = () => {
             });
 
             const result = await response.json();
-            console.log('Respuesta crear lugar:', result);
 
             if (result.success) {
                 showNotification('success', 'Éxito', 'Lugar creado exitosamente');
@@ -295,7 +277,6 @@ const Lugares = () => {
                 showNotification('error', 'Error', `Error al crear lugar: ${result.message || 'Error desconocido'}`);
             }
         } catch (error) {
-            console.error('Error:', error);
             showNotification('error', 'Error', 'Error al crear lugar. Por favor, intente nuevamente.');
         }
     };
@@ -317,7 +298,6 @@ const Lugares = () => {
 
             setShowEditModal(true);
         } catch (error) {
-            console.error('Error al preparar edición:', error);
             showNotification('error', 'Error', 'Error al cargar datos para editar.');
         }
     };
@@ -339,8 +319,6 @@ const Lugares = () => {
                 return;
             }
 
-            console.log('Actualizando lugar:', formData);
-
             const response = await fetch(`${API_URL}/lugares/${editingLugar.id}`, {
                 method: 'PUT',
                 headers: headers,
@@ -352,7 +330,6 @@ const Lugares = () => {
             });
 
             const result = await response.json();
-            console.log('Respuesta actualizar lugar:', result);
 
             if (result.success) {
                 showNotification('success', 'Éxito', 'Lugar actualizado exitosamente');
@@ -365,7 +342,6 @@ const Lugares = () => {
                 showNotification('error', 'Error', `Error al actualizar lugar: ${result.message || 'Error desconocido'}`);
             }
         } catch (error) {
-            console.error('Error:', error);
             showNotification('error', 'Error', 'Error al actualizar lugar. Por favor, intente nuevamente.');
         }
     };
@@ -388,15 +364,12 @@ const Lugares = () => {
                 headers['Authorization'] = `Bearer ${token}`;
             }
 
-            console.log('Eliminando lugar:', deletingLugar.id);
-
             const response = await fetch(`${API_URL}/lugares/${deletingLugar.id}`, {
                 method: 'DELETE',
                 headers: headers
             });
 
             const result = await response.json();
-            console.log('Respuesta eliminar lugar:', result);
 
             if (result.success) {
                 showNotification('success', 'Éxito', 'Lugar eliminado exitosamente');
@@ -409,7 +382,6 @@ const Lugares = () => {
                 showNotification('error', 'Error', `Error al eliminar lugar: ${result.message || 'Error desconocido'}`);
             }
         } catch (error) {
-            console.error('Error:', error);
             showNotification('error', 'Error', 'Error al eliminar lugar. Por favor, intente nuevamente.');
         }
     };
@@ -474,7 +446,6 @@ const Lugares = () => {
                 showNotification('error', 'Error', result.message || 'No se pudo cambiar el estado');
             }
         } catch (error) {
-            console.error('Error al cambiar estado del lugar:', error);
             showNotification('error', 'Error', 'Error al cambiar estado del lugar');
         }
     };
@@ -526,7 +497,6 @@ const Lugares = () => {
         <div className={styles.appContainer}>
             <Header />
 
-            {/* Sistema de notificaciones */}
             <div className={styles.notificationContainer}>
                 {notifications.map((notification) => (
                     <Notification
@@ -638,7 +608,6 @@ const Lugares = () => {
                 </div>
             </div>
 
-            {/* Modal para crear lugar */}
             <Dialog open={showModal && !!empresaSeleccionada} onOpenChange={(open) => !open && closeAllModals()}>
                 <DialogContent>
                     <DialogHeader>
@@ -722,7 +691,6 @@ const Lugares = () => {
                 </DialogContent>
             </Dialog>
 
-            {/* Modal para editar lugar */}
             <Dialog open={showEditModal && !!editingLugar && !!empresaSeleccionada} onOpenChange={(open) => !open && closeAllModals()}>
                 <DialogContent>
                     <DialogHeader>
@@ -801,7 +769,6 @@ const Lugares = () => {
                 </DialogContent>
             </Dialog>
 
-            {/* Modal de eventos bloqueantes al deshabilitar */}
             <Dialog open={showBloqueoModal} onOpenChange={(open) => { if (!open) { setShowBloqueoModal(false); setEventosBloqueantes([]); setLugarBloqueo(null); } }}>
                 <DialogContent>
                     <DialogHeader>
@@ -838,7 +805,6 @@ const Lugares = () => {
                 </DialogContent>
             </Dialog>
 
-            {/* Modal de confirmación para eliminar */}
             <Dialog open={showDeleteModal && !!deletingLugar} onOpenChange={(open) => !open && closeAllModals()}>
                 <DialogContent>
                     <DialogHeader>

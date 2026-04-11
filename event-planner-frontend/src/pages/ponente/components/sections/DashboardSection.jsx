@@ -1,18 +1,14 @@
 import { useState } from 'react';
-// eslint-disable-next-line no-unused-vars
-import ActividadCard from '../ui/ActividadCard';
 import { ClipboardList, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
 import KpiCard from '../../../../components/ui/KpiCard';
 
 const DashboardSection = ({ actividades, loading }) => {
-    // eslint-disable-next-line no-unused-vars
-    const [filter, setFilter] = useState('todas');
+    const [filter] = useState('todas');
 
-    // Asegurar que actividades siempre sea un array
     const actividadesSeguras = actividades || [];
 
     // eslint-disable-next-line no-unused-vars
-    const actividadesFiltradas = actividadesSeguras.filter(actividad => {
+    const _actividadesFiltradas = actividadesSeguras.filter(actividad => {
         if (filter === 'pendientes') return actividad.estado === 'pendiente';
         if (filter === 'aceptadas') return actividad.estado === 'aceptado';
         if (filter === 'solicitud_cambio') return actividad.estado === 'solicitud_cambio';

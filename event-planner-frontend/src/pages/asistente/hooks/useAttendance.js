@@ -25,7 +25,6 @@ export const useAttendance = () => {
 
             return { success: true, message: 'Asistencia registrada exitosamente' };
         } catch (error) {
-            console.error('Error al registrar asistencia:', error);
             setError(error.message);
             throw error;
         } finally {
@@ -38,7 +37,6 @@ export const useAttendance = () => {
         const nuevasAsistencias = new Set();
         const hoy = new Date().toISOString().split('T')[0];
 
-        console.log('🔄 Actualizando asistencias desde inscripciones:', inscripciones);
 
         inscripciones.forEach(inscripcion => {
             if (inscripcion.asistencias && Array.isArray(inscripcion.asistencias)) {
@@ -47,12 +45,10 @@ export const useAttendance = () => {
                 );
                 if (asistenciaHoy) {
                     nuevasAsistencias.add(inscripcion.id);
-                    console.log('✅ Asistencia encontrada para inscripción:', inscripcion.id);
                 }
             }
         });
 
-        console.log('📋 Nuevas asistencias registradas:', nuevasAsistencias);
         setAsistenciasRegistradas(nuevasAsistencias);
     };
 

@@ -80,7 +80,6 @@ const ResponderInvitacionModal = ({ actividad, onClose, onSubmit }) => {
             await onSubmit(datosEnvio);
 
         } catch (error) {
-            console.error('Error al enviar respuesta:', error);
         } finally {
             setIsSubmitting(false);
         }
@@ -94,7 +93,7 @@ const ResponderInvitacionModal = ({ actividad, onClose, onSubmit }) => {
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Información de la actividad */}
+
                     <div className="space-y-2">
                         <h3 className="text-sm font-semibold text-slate-700">Actividad</h3>
                         <div className="rounded-md bg-slate-50 border border-slate-200 p-3 text-sm space-y-1">
@@ -105,7 +104,6 @@ const ResponderInvitacionModal = ({ actividad, onClose, onSubmit }) => {
                         </div>
                     </div>
 
-                    {/* Selección de respuesta */}
                     <div className="space-y-2">
                         <h3 className="text-sm font-semibold text-slate-700">Tu Respuesta</h3>
 
@@ -146,7 +144,6 @@ const ResponderInvitacionModal = ({ actividad, onClose, onSubmit }) => {
                         )}
                     </div>
 
-                    {/* Motivo de rechazo (solo si se selecciona rechazar) */}
                     {respuesta === 'rechazar' && (
                         <div className="space-y-4">
                             <h3 className="text-sm font-semibold text-slate-700">Motivo del Rechazo</h3>

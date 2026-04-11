@@ -1,23 +1,20 @@
 export const formatFecha = (fecha) => {
     if (!fecha) return 'Fecha no definida';
     try {
-        // Para evitar problemas de zona horaria, usar UTC
-        const fechaObj = new Date(fecha + 'T00:00:00'); // Agregar tiempo para evitar ajuste de zona horaria
+        const fechaObj = new Date(fecha + 'T00:00:00');
         return fechaObj.toLocaleDateString('es-ES', {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
-            timeZone: 'UTC' // Especificar UTC para consistencia
+            timeZone: 'UTC'
         });
     } catch (e) {
-        console.error('Error formateando fecha:', fecha, e);
         return fecha;
     }
 };
 
 export const formatHora = (hora) => {
     if (!hora) return '';
-    // Asegurar formato HH:MM
     if (hora.includes(':')) {
         return hora.substring(0, 5);
     }
@@ -37,12 +34,10 @@ export const formatFechaCompleta = (fecha) => {
             timeZone: 'UTC'
         });
     } catch (e) {
-        console.error('Error formateando fecha completa:', fecha, e);
         return fecha;
     }
 };
 
-// Función MEJORADA para mostrar rango de fechas
 export const formatRangoFechas = (fechaInicio, fechaFin) => {
     if (!fechaInicio || !fechaFin) return 'Fechas no disponibles';
 
@@ -66,28 +61,17 @@ export const formatRangoFechas = (fechaInicio, fechaFin) => {
 
         return `${fechaInicioStr} al ${fechaFinStr}`;
     } catch (e) {
-        console.error('Error formateando rango de fechas:', e);
         return `${fechaInicio} al ${fechaFin}`;
     }
 };
 
-// Función para debug de fechas
 export const debugFecha = (fecha, label = 'Fecha') => {
     if (!fecha) {
-        console.log(`🔍 ${label}: null/undefined`);
         return;
     }
 
     try {
-        const fechaObj = new Date(fecha + 'T00:00:00');
-        console.log(`🔍 ${label}:`, {
-            original: fecha,
-            fechaObj: fechaObj,
-            local: fechaObj.toLocaleDateString('es-ES'),
-            iso: fechaObj.toISOString(),
-            utc: fechaObj.toUTCString()
-        });
+        new Date(fecha + 'T00:00:00');
     } catch (e) {
-        console.log(`🔍 ${label}: ERROR -`, fecha, e);
     }
 };

@@ -12,7 +12,8 @@ const CatalogoEventos = () => {
 
   useEffect(() => {
     fetchEventos();
-  }, [filtroModalidad]); // eslint-disable-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filtroModalidad]);
 
   const fetchEventos = async () => {
     try {
@@ -47,7 +48,7 @@ const CatalogoEventos = () => {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc', fontFamily: 'Inter, sans-serif' }}>
-      {/* Header */}
+
       <header style={{ backgroundColor: '#1e293b', color: 'white', padding: '1rem 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <h1 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 700 }}>Catálogo de Eventos</h1>
         <button
@@ -58,7 +59,6 @@ const CatalogoEventos = () => {
         </button>
       </header>
 
-      {/* Filtros */}
       <div style={{ backgroundColor: 'white', borderBottom: '1px solid #e2e8f0', padding: '1rem 2rem', display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'center' }}>
         <input
           type="text"
@@ -82,7 +82,6 @@ const CatalogoEventos = () => {
         </span>
       </div>
 
-      {/* Contenido */}
       <main style={{ maxWidth: '1100px', margin: '0 auto', padding: '2rem 1rem' }}>
         {loading && (
           <div style={{ textAlign: 'center', padding: '3rem', color: '#6b7280' }}>Cargando eventos...</div>

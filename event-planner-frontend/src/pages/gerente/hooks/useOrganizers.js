@@ -41,7 +41,6 @@ export const useOrganizers = () => {
       }));
 
     } catch (error) {
-      console.error('Error al cargar empresa:', error);
 
       let errorMessage = error.message;
       if (error.message.includes('404')) {
@@ -138,7 +137,6 @@ export const useOrganizers = () => {
         id_empresa: state.empresaInfo.id
       };
 
-      console.log('Enviando datos del organizador:', datosCompletos);
 
       const resultado = await organizersAPI.crearOrganizador(datosCompletos);
 
@@ -163,7 +161,6 @@ export const useOrganizers = () => {
       }, 2000);
 
     } catch (error) {
-      console.error('Error al crear organizador:', error);
 
       let errorMessage = error.message;
       if (error.message.includes('400')) {

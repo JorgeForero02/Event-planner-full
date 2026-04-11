@@ -1,6 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import ActividadCard from '../ui/ActividadCard';
-import styles from '../styles/MisActividadesSection.module.css';
+
+const FILTERS = [
+    { key: 'todas', label: 'Todas' },
+    { key: 'pendientes', label: 'Pendientes' },
+    { key: 'aceptadas', label: 'Aceptadas' },
+    { key: 'solicitud_cambio', label: 'Con Solicitud' },
+];
 
 const MisActividadesSection = ({ actividades, onSolicitudEnviada, error }) => {
     const [filter, setFilter] = useState('todas');
@@ -13,39 +19,24 @@ const MisActividadesSection = ({ actividades, onSolicitudEnviada, error }) => {
         }
     }, [actividades]);
 
-    // Función para actualizar el estado de una actividad
     const handleActualizarEstadoActividad = useCallback((idActividad, nuevoEstado, fechaRespuesta) => {
-        console.log('🔄 [MisActividadesSection] Actualizando actividad:');
-        console.log('🔍 ID recibido:', idActividad);
-        console.log('🔍 Nuevo estado:', nuevoEstado);
-        console.log('🔍 Fecha respuesta:', fechaRespuesta);
-        console.log('📋 Actividades actuales:', actividadesData);
-
         setActividadesData(prev => {
             return prev.map(actividad => {
-                // Buscar la actividad por diferentes identificadores posibles
                 if (actividad.id_actividad === idActividad ||
                     actividad.id_asignacion === idActividad ||
                     (actividad.actividad && actividad.actividad.id_actividad === idActividad)) {
 
-                    console.log('✅ Actividad encontrada, actualizando estado...');
-
-                    // Crear una nueva versión de la actividad con el estado actualizado
-                    const actividadActualizada = {
+                    return {
                         ...actividad,
                         estado: nuevoEstado,
                         fecha_respuesta: fechaRespuesta || new Date().toISOString()
                     };
-
-                    return actividadActualizada;
                 }
                 return actividad;
             });
         });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Procesar actividades para mostrar
     useEffect(() => {
         if (!actividadesData || !Array.isArray(actividadesData)) {
             setActividadesFiltradas([]);
@@ -97,79 +88,67 @@ const MisActividadesSection = ({ actividades, onSolicitudEnviada, error }) => {
     }, [actividadesData, filter]);
 
     return (
-        <div className={styles.actividades}>
-            <h2>Mis Actividades</h2>
-            <p className={styles.subtitle}>Gestiona tus actividades asignadas</p>
+        <div className="space-y-6">
+            {/* Header */}
+            <div>
+                <h2 className="text-xl font-bold text-slate-800">Mis Actividades</h2>
+                <p className="text-sm text-slate-500">Gestiona tus actividades asignadas</p>
+            </div>
 
             {error && (
-                <div className={styles.errorMessage}>
+                <div className="rounded-lg bg-danger/10 border border-danger/20 px-4 py-3 text-sm text-danger">
                     <strong>Atención:</strong> {error}. Si crees que deberías tener actividades, contacta al organizador o administrador para que te vinculen como ponente.
                 </div>
             )}
 
-            {/* Filtros con contador */}
-            <div className={styles.filtersContainer}>
-                <div className={styles.filters}>
-                    <button
-                        className={`${styles.filterBtn} ${filter === 'todas' ? styles.active : ''}`}
-                        onClick={() => setFilter('todas')}
-                    >
-                        Todas
-                    </button>
-                    <button
-                        className={`${styles.filterBtn} ${filter === 'pendientes' ? styles.active : ''}`}
-                        onClick={() => setFilter('pendientes')}
-                    >
-                        Pendientes
-                    </button>
-                    <button
-                        className={`${styles.filterBtn} ${filter === 'aceptadas' ? styles.active : ''}`}
-                        onClick={() => setFilter('aceptadas')}
-                    >
-                        Aceptadas
-                    </button>
-                    <button
-                        className={`${styles.filterBtn} ${filter === 'solicitud_cambio' ? styles.active : ''}`}
-                        onClick={() => setFilter('solicitud_cambio')}
-                    >
-                        Con Solicitud
-                    </button>
+            {/* Filters + counter */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="flex flex-wrap gap-2">
+                    {FILTERS.map(({ key, label }) => (
+                        <button
+                            key={key}
+                            onClick={() => setFilter(key)}
+                            className={
+                                filter === key
+                                    ? 'px-4 py-1.5 rounded-lg text-xs font-semibold bg-brand-600 text-white'
+                                    : 'px-4 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors'
+                            }
+                        >
+                            {label}
+                        </button>
+                    ))}
                 </div>
-
-                <div className={styles.filterCounter}>
-                    <span className={styles.counterNumber}>{actividadesFiltradas.length}</span>
-                    <span className={styles.counterText}>
-                        {actividadesFiltradas.length === 1 ? 'actividad' : 'actividades'}
-                        {filter !== 'todas' && ` ${filter}`}
-                    </span>
-                </div>
+                <span className="text-sm text-slate-500 shrink-0">
+                    <span className="font-semibold text-slate-700">{actividadesFiltradas.length}</span>{' '}
+                    {actividadesFiltradas.length === 1 ? 'actividad' : 'actividades'}
+                </span>
             </div>
 
-            <div className={styles.actividadesList}>
-                <div className={styles.actividadesGrid}>
-                    {actividadesFiltradas.length === 0 ? (
-                        <div className={styles.emptyState}>
-                            <p>No tienes actividades {filter !== 'todas' ? filter : ''}.</p>
-                            <p className={styles.emptySubtitle}>
-                                {actividades?.length === 0
-                                    ? 'Cuando un organizador te asigne actividades, aparecerán aquí.'
-                                    : 'Prueba con otro filtro para ver más actividades.'
-                                }
-                            </p>
-                        </div>
-                    ) : (
-                        actividadesFiltradas.map((actividad, index) => (
-                            <ActividadCard
-                                key={actividad.id_asignacion || `${actividad.id_ponente}-${actividad.id_actividad}-${index}`}
-                                actividad={actividad}
-                                showActions={true}
-                                onSolicitudEnviada={onSolicitudEnviada}
-                                onActualizarEstado={handleActualizarEstadoActividad} // ← Nueva prop
-                            />
-                        ))
-                    )}
+            {/* Grid */}
+            {actividadesFiltradas.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                    <p className="text-slate-500 text-sm">
+                        No tienes actividades{filter !== 'todas' ? ` ${filter}` : ''}.
+                    </p>
+                    <p className="text-slate-400 text-sm mt-1">
+                        {actividades?.length === 0
+                            ? 'Cuando un organizador te asigne actividades, aparecerán aquí.'
+                            : 'Prueba con otro filtro para ver más actividades.'}
+                    </p>
                 </div>
-            </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                    {actividadesFiltradas.map((actividad, index) => (
+                        <ActividadCard
+                            key={actividad.id_asignacion || `${actividad.id_ponente}-${actividad.id_actividad}-${index}`}
+                            actividad={actividad}
+                            showActions={true}
+                            onSolicitudEnviada={onSolicitudEnviada}
+                            onActualizarEstado={handleActualizarEstadoActividad}
+                        />
+                    ))}
+                </div>
+            )}
         </div>
     );
 };

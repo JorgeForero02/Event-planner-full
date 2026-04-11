@@ -29,7 +29,7 @@ export const FormularioEmpresa = ({
             </div>
 
             <form onSubmit={handleSubmit}>
-                {/* Sección Información Básica */}
+
                 <div className="form-section">
                     <div className="section-header">
                         <h2>Información Básica de la Empresa</h2>
@@ -58,7 +58,6 @@ export const FormularioEmpresa = ({
                     </div>
                 </div>
 
-                {/* Sección Información de Contacto */}
                 <div className="form-section">
                     <div className="section-header">
                         <h2>Información de Contacto</h2>

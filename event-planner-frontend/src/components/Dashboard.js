@@ -1,4 +1,3 @@
-// src/components/Dashboard.js
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isAdmin, getRoleName } from '../utils/roleUtils';
@@ -38,7 +37,6 @@ const Dashboard = () => {
             <strong>Teléfono:</strong> {user?.telefono || 'No disponible'}
           </p>
           
-          {/* Botón para acceder al panel de administración - solo visible para admins */}
           {isAdmin(user) && (
             <button 
               onClick={() => navigate('/admin')}

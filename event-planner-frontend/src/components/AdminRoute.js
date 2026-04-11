@@ -1,18 +1,17 @@
-// src/components/AdminRoute.js
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { isAdmin } from '../utils/roleUtils';
+import { isAdmin, getRedirectPath } from '../utils/roleUtils';
 
 const AdminRoute = ({ children }) => {
-  const { isAuthenticated, user } = useAuth(); // ✅ Usar hook
+  const { isAuthenticated, user } = useAuth();
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
   if (!isAdmin(user)) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={getRedirectPath(user)} replace />;
   }
 
   return children;

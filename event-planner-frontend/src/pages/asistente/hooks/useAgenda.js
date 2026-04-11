@@ -16,7 +16,6 @@ export const useAgenda = (misInscripciones = []) => {
 
             if (evento && evento.actividades && Array.isArray(evento.actividades)) {
                 evento.actividades.forEach(actividad => {
-                    // Solo incluir actividades de eventos confirmados
                     if (inscripcion.estado === 'Confirmada') {
                         todasActividades.push({
                             id: actividad.id_actividad || actividad.id,
@@ -43,7 +42,6 @@ export const useAgenda = (misInscripciones = []) => {
         return todasActividades;
     }, [misInscripciones]);
 
-    // Agrupar actividades por fecha
     const actividadesAgrupadas = useMemo(() => {
         return actividades.reduce((agrupadas, actividad) => {
             const fecha = actividad.fecha_actividad;
@@ -55,12 +53,10 @@ export const useAgenda = (misInscripciones = []) => {
         }, {});
     }, [actividades]);
 
-    // Ordenar fechas
     const fechasOrdenadas = useMemo(() => {
         return Object.keys(actividadesAgrupadas).sort();
     }, [actividadesAgrupadas]);
 
-    // Filtrar actividades futuras y pasadas
     const actividadesFuturas = useMemo(() => {
         const hoy = new Date().toISOString().split('T')[0];
         return actividades.filter(actividad => actividad.fecha_actividad >= hoy);

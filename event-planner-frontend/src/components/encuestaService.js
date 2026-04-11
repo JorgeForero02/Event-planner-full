@@ -26,7 +26,6 @@ const encuestaService = {
             const response = await axiosInstance.post(`/encuestas/${encuestaId}/enviar`);
             return response.data;
         } catch (error) {
-            console.error('Error en enviarEncuestaMasiva:', error);
 
             if (error.response?.status === 401) {
                 throw new Error('No autorizado. Por favor, inicia sesión nuevamente.');
@@ -43,7 +42,6 @@ const encuestaService = {
             const response = await axiosInstance.get('/encuestas');
             return response.data;
         } catch (error) {
-            console.error('Error al obtener encuestas:', error);
             throw error;
         }
     },
@@ -53,7 +51,6 @@ const encuestaService = {
             const response = await axiosInstance.get(`/encuestas/${id}`);
             return response.data;
         } catch (error) {
-            console.error('Error al obtener encuesta:', error);
             throw error;
         }
     },
@@ -63,7 +60,6 @@ const encuestaService = {
             const response = await axiosInstance.get(`/encuestas/${encuestaId}/estadisticas`);
             return response.data;
         } catch (error) {
-            console.error('Error al obtener estadísticas:', error);
             if (error.response?.status === 401) {
                 throw new Error('No autorizado. Por favor, inicia sesión nuevamente.');
             } else if (error.response?.status === 404) {

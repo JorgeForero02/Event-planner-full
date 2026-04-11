@@ -1,8 +1,7 @@
-// [FRONTEND-SYNC] F2: Guard de ruta para asistente (actualizado para usar useAuth)
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { isAsistente } from '../utils/roleUtils';
+import { isAsistente, getRedirectPath } from '../utils/roleUtils';
 
 const AsistenteRoute = ({ children }) => {
   const { isAuthenticated, user, initialized } = useAuth();
@@ -20,7 +19,7 @@ const AsistenteRoute = ({ children }) => {
   }
 
   if (!isAsistente(user)) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={getRedirectPath(user)} replace />;
   }
 
   return children;

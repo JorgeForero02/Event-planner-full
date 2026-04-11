@@ -1,8 +1,7 @@
-// [FRONTEND-SYNC] F2: Guard de ruta para ponente
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { isPonente } from '../utils/roleUtils';
+import { isPonente, getRedirectPath } from '../utils/roleUtils';
 
 const PonenteRoute = ({ children }) => {
   const { isAuthenticated, user, initialized } = useAuth();
@@ -20,7 +19,7 @@ const PonenteRoute = ({ children }) => {
   }
 
   if (!isPonente(user)) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={getRedirectPath(user)} replace />;
   }
 
   return children;

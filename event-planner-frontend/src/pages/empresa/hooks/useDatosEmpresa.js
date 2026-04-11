@@ -27,7 +27,6 @@ export const useDatosEmpresa = () => {
             setLoadError(null);
 
             const respuesta = await empresaAPI.obtenerEmpresaGerente();
-            console.log('Empresa cargada exitosamente:', respuesta);
 
             const empresaData = respuesta?.data?.[0];
             if (!empresaData) throw new Error('No se encontraron datos de la empresa.');
@@ -64,7 +63,6 @@ export const useDatosEmpresa = () => {
                 };
             }
         } catch (error) {
-            console.error('Error al cargar empresa:', error);
             setLoadError(error.message || 'No se pudieron cargar los datos de la empresa.');
         } finally {
             setIsLoading(false);

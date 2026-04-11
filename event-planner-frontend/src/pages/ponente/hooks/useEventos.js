@@ -21,10 +21,8 @@ export const useEventos = () => {
             }
 
             const data = await ponenteEventosService.obtenerEventosDisponibles(token);
-            console.log('📅 Eventos cargados para ponente:', data);
             setEventos(data);
         } catch (err) {
-            console.error('❌ Error cargando eventos:', err);
             setError(err.message);
             setEventos([]);
         } finally {

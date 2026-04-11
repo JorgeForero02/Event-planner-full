@@ -1,9 +1,8 @@
 import axios from "axios";
 
 const API_URL = (process.env.REACT_APP_API_URL || 'http://localhost:3000/api')
-  .replace(/\/$/, ""); // elimina slash final
+  .replace(/\/$/, "");
 
-// instancia axios con baseURL y headers por defecto
 const api = axios.create({
   baseURL: API_URL,
   headers: {
@@ -11,7 +10,6 @@ const api = axios.create({
   }
 });
 
-// interceptor para agregar token automáticamente a todas las peticiones
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("access_token") || localStorage.getItem("token");
   if (token) {
@@ -33,10 +31,6 @@ export const getHeaders = () => {
   if (token) headers.Authorization = `Bearer ${token}`;
   return { headers };
 };
-
-// =========================
-//     MÉTODOS DEL API
-// =========================
 
 /**
  * Obtener lista de eventos (acepta filtros como objetos que se enviarán en params)
@@ -68,7 +62,6 @@ export const crearActividad = async (eventoId, actividadData) => {
  * Obtener perfil del usuario autenticado
  */
 export const obtenerPerfil = async () => {
-  // endpoint común para perfil; ajustar si en tu API es otro path
   const res = await api.get(`/auth/profile`);
   return res.data;
 };
@@ -86,7 +79,6 @@ export const obtenerUbicaciones = async (empresaId) => {
  */
 export const obtenerLugares = async (empresaId, ubicacionId) => {
   const res = await api.get(`/empresas/${empresaId}/lugares`);
-  // Si se pasa ubicacionId, filtramos los resultados en el frontend
   if (ubicacionId && res.data?.data) {
     const filtrados = Array.isArray(res.data.data)
       ? res.data.data.filter(l => String(l.id_ubicacion) === String(ubicacionId))

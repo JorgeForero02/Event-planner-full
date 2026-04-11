@@ -124,7 +124,6 @@ const Ubicaciones = () => {
         try {
             const token = getToken();
             if (!token) {
-                console.error('No se encontró token de autenticación');
                 return;
             }
 
@@ -134,7 +133,6 @@ const Ubicaciones = () => {
 
             ]);
         } catch (error) {
-            console.error('Error cargando datos:', error);
         } finally {
             setLoading(false);
         }
@@ -150,7 +148,6 @@ const Ubicaciones = () => {
                 headers['Authorization'] = `Bearer ${token}`;
             }
 
-            console.log('🔍 Obteniendo perfil del usuario...');
             const profileResponse = await fetch(`${API_URL}/auth/profile`, {
                 headers: headers
             });
@@ -160,7 +157,6 @@ const Ubicaciones = () => {
             }
 
             const profileResult = await profileResponse.json();
-            console.log('👤 Perfil del usuario:', profileResult);
 
             if (profileResult.success) {
                 let empresaId = null;
@@ -181,20 +177,15 @@ const Ubicaciones = () => {
                     empresaId = profileResult.data.usuario.id_empresa;
                 }
 
-                console.log('🏢 ID de empresa encontrado:', empresaId);
-
                 if (empresaId) {
                     await fetchEmpresaDetalles(empresaId, token);
                 } else {
-                    console.error('❌ No se pudo encontrar el ID de la empresa en el perfil');
                     await fetchPrimeraEmpresa(token);
                 }
             } else {
-                console.error('❌ Error en respuesta del perfil:', profileResult.message);
                 await fetchPrimeraEmpresa(token);
             }
         } catch (error) {
-            console.error('❌ Error al obtener empresa del usuario:', error);
             await fetchPrimeraEmpresa(token);
         }
     };
@@ -209,14 +200,12 @@ const Ubicaciones = () => {
                 headers['Authorization'] = `Bearer ${token}`;
             }
 
-            console.log(`🔍 Obteniendo detalles de la empresa ID: ${empresaId}`);
             const response = await fetch(`${API_URL}/empresas/${empresaId}`, {
                 headers: headers
             });
 
             if (!response.ok) {
                 if (response.status === 404) {
-                    console.log('🏢 Empresa no encontrada, intentando obtener lista...');
                     await fetchPrimeraEmpresa(token);
                     return;
                 }
@@ -224,17 +213,14 @@ const Ubicaciones = () => {
             }
 
             const result = await response.json();
-            console.log('📊 Detalles de empresa:', result);
 
             if (result.success && result.data) {
                 setEmpresa(result.data);
                 await fetchUbicacionesByEmpresa(result.data.id, token);
             } else {
-                console.error('❌ Error al obtener detalles de empresa:', result.message);
                 await fetchPrimeraEmpresa(token);
             }
         } catch (error) {
-            console.error('❌ Error al obtener detalles de la empresa:', error);
             await fetchPrimeraEmpresa(token);
         }
     };
@@ -249,7 +235,6 @@ const Ubicaciones = () => {
                 headers['Authorization'] = `Bearer ${token}`;
             }
 
-            console.log('🏢 Obteniendo lista de empresas...');
             const response = await fetch(`${API_URL}/empresas`, {
                 headers: headers
             });
@@ -259,16 +244,12 @@ const Ubicaciones = () => {
             }
 
             const result = await response.json();
-            console.log('📊 Lista de empresas recibida:', result);
 
-            // Validar que result.data sea un array
             if (result.success && result.data && Array.isArray(result.data) && result.data.length > 0) {
                 const primeraEmpresa = result.data[0];
-                console.log('✅ Primera empresa encontrada:', primeraEmpresa);
                 setEmpresa(primeraEmpresa);
                 await fetchUbicacionesByEmpresa(primeraEmpresa.id, token);
             } else {
-                console.error('❌ No se encontraron empresas disponibles o formato inválido');
                 const empresaDefault = {
                     id: 1,
                     nombre: 'Mi Empresa'
@@ -277,7 +258,6 @@ const Ubicaciones = () => {
                 setUbicaciones([]);
             }
         } catch (error) {
-            console.error('❌ Error al obtener lista de empresas:', error);
             const empresaDefault = {
                 id: 1,
                 nombre: 'Mi Empresa'
@@ -297,17 +277,12 @@ const Ubicaciones = () => {
                 headers['Authorization'] = `Bearer ${token}`;
             }
 
-            console.log(`🔍 Buscando ubicaciones para empresa ID: ${empresaId}`);
-
             const response = await fetch(`${API_URL}/empresas/${empresaId}/ubicaciones`, {
                 headers: headers
             });
 
-            console.log('📊 Response status:', response.status);
-
             if (!response.ok) {
                 if (response.status === 404) {
-                    console.log('📍 No se encontraron ubicaciones para esta empresa');
                     setUbicaciones([]);
                     return;
                 }
@@ -315,13 +290,11 @@ const Ubicaciones = () => {
             }
 
             const result = await response.json();
-            console.log('📄 Respuesta completa del servidor:', result);
 
             if (result.success && result.data) {
                 let ubicacionesArray = result.data;
 
                 if (!Array.isArray(ubicacionesArray)) {
-                    console.warn('⚠️ result.data no es un array, convirtiendo:', ubicacionesArray);
 
                     if (ubicacionesArray === null || ubicacionesArray === undefined) {
                         ubicacionesArray = [];
@@ -332,14 +305,10 @@ const Ubicaciones = () => {
                     }
                 }
 
-                console.log(`📍 Total de ubicaciones a procesar: ${ubicacionesArray.length}`);
-
                 const ubicacionesConCiudades = ubicacionesArray.map(ubicacion => {
-                    console.log('🔍 Procesando ubicación completa:', ubicacion);
 
                     let ciudadNombre = 'Sin ciudad';
 
-                    // Múltiples formas de obtener el nombre de la ciudad
                     if (Array.isArray(ubicacion.ciudad) && ubicacion.ciudad.length > 0) {
                         ciudadNombre = ubicacion.ciudad[0].nombre;
                     } else if (ubicacion.ciudad && typeof ubicacion.ciudad === 'object' && ubicacion.ciudad.nombre) {
@@ -349,14 +318,11 @@ const Ubicaciones = () => {
                     } else if (ubicacion.nombre_ciudad) {
                         ciudadNombre = ubicacion.nombre_ciudad;
                     } else if (ubicacion.id_ciudad && Array.isArray(ciudades) && ciudades.length > 0) {
-                        // Buscar en el listado de ciudades si tenemos el id_ciudad
                         const ciudadEncontrada = ciudades.find(ciudad => ciudad.id === ubicacion.id_ciudad);
                         if (ciudadEncontrada) {
                             ciudadNombre = ciudadEncontrada.nombre;
                         }
                     }
-
-                    console.log(`🏙️ Ciudad asignada para ubicación ${ubicacion.id}: ${ciudadNombre}`);
 
                     return {
                         ...ubicacion,
@@ -364,14 +330,11 @@ const Ubicaciones = () => {
                     };
                 });
 
-                console.log('✅ Ubicaciones procesadas:', ubicacionesConCiudades);
                 setUbicaciones(ubicacionesConCiudades);
             } else {
-                console.warn('⚠️ Respuesta sin data o success=false:', result);
                 setUbicaciones([]);
             }
         } catch (error) {
-            console.error('❌ Error al obtener ubicaciones:', error);
             setUbicaciones([]);
         }
     };
@@ -386,7 +349,6 @@ const Ubicaciones = () => {
                 headers['Authorization'] = `Bearer ${token}`;
             }
 
-            console.log('🏙️ Obteniendo lista de ciudades...');
             const response = await fetch(`${API_URL}/ciudades`, {
                 headers: headers
             });
@@ -396,16 +358,13 @@ const Ubicaciones = () => {
             }
 
             const result = await response.json();
-            console.log('📊 Ciudades recibidas:', result);
 
             if (result.success && result.data && Array.isArray(result.data)) {
                 setCiudades(result.data);
             } else {
-                console.warn('⚠️ No se pudieron cargar las ciudades:', result);
                 setCiudades([]);
             }
         } catch (error) {
-            console.error('❌ Error al obtener ciudades:', error);
             setCiudades([]);
         }
     };
@@ -427,8 +386,6 @@ const Ubicaciones = () => {
                 return;
             }
 
-            console.log('📤 Creando nueva ubicación...', formData);
-
             const response = await fetch(`${API_URL}/empresas/${empresa.id}/ubicaciones`, {
                 method: 'POST',
                 headers: headers,
@@ -442,7 +399,6 @@ const Ubicaciones = () => {
             });
 
             const result = await response.json();
-            console.log('📥 Respuesta creación:', result);
 
             if (result.success) {
                 showNotification('success', 'Éxito', 'Ubicación creada exitosamente');
@@ -452,7 +408,6 @@ const Ubicaciones = () => {
                 showNotification('error', 'Error', `Error al crear ubicación: ${result.message || 'Error desconocido'}`);
             }
         } catch (error) {
-            console.error('❌ Error:', error);
             showNotification('error', 'Error', 'Error al crear ubicación. Por favor, intente nuevamente.');
         }
     };
@@ -486,8 +441,6 @@ const Ubicaciones = () => {
                 return;
             }
 
-            console.log('📤 Actualizando ubicación...', formData);
-
             const response = await fetch(`${API_URL}/ubicaciones/${editingUbicacion.id}`, {
                 method: 'PUT',
                 headers: headers,
@@ -513,7 +466,6 @@ const Ubicaciones = () => {
                 showNotification('error', 'Error', `Error al actualizar ubicación: ${result.message || 'Error desconocido'}`);
             }
         } catch (error) {
-            console.error('Error:', error);
             showNotification('error', 'Error', 'Error al actualizar ubicación. Por favor, intente nuevamente.');
         }
     };
@@ -536,8 +488,6 @@ const Ubicaciones = () => {
                 headers['Authorization'] = `Bearer ${token}`;
             }
 
-            console.log('🗑️ Eliminando ubicación...', deletingUbicacion.id);
-
             const response = await fetch(`${API_URL}/ubicaciones/${deletingUbicacion.id}`, {
                 method: 'DELETE',
                 headers: headers
@@ -553,7 +503,6 @@ const Ubicaciones = () => {
                 showNotification('error', 'Error', `Error al eliminar ubicación: ${result.message || 'Error desconocido'}`);
             }
         } catch (error) {
-            console.error('Error:', error);
             showNotification('error', 'Error', 'Error al eliminar ubicación. Por favor, intente nuevamente.');
         }
     };
@@ -563,7 +512,6 @@ const Ubicaciones = () => {
         setDeletingUbicacion(null);
     };
 
-    // Función para cerrar todos los modales y resetear estados
     const closeAllModals = () => {
         setShowModal(false);
         setShowEditModal(false);
@@ -601,7 +549,6 @@ const Ubicaciones = () => {
         <div className={styles.appContainer}>
             <Header />
 
-            {/* Sistema de notificaciones */}
             <div className={styles.notificationContainer}>
                 {notifications.map((notification) => (
                     <Notification
@@ -705,7 +652,6 @@ const Ubicaciones = () => {
                 </div>
             </div>
 
-            {/* Modal para crear ubicación */}
             <Dialog open={showModal} onOpenChange={(open) => !open && closeAllModals()}>
                 <DialogContent>
                     <DialogHeader>
@@ -803,7 +749,6 @@ const Ubicaciones = () => {
                 </DialogContent>
             </Dialog>
 
-            {/* Modal para editar ubicación */}
             <Dialog open={showEditModal && !!editingUbicacion} onOpenChange={(open) => !open && closeAllModals()}>
                 <DialogContent>
                     <DialogHeader>

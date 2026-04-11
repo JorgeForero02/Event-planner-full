@@ -2,7 +2,6 @@ import React from 'react';
 import { Badge } from './badge';
 
 export const STATUS_MAP = {
-  // Event states
   publicado:         { variant: 'published',    label: 'Publicado' },
   activo:            { variant: 'success',       label: 'Activo' },
   activa:            { variant: 'success',       label: 'Activa' },
@@ -14,7 +13,6 @@ export const STATUS_MAP = {
   en_curso:          { variant: 'info',          label: 'En Curso' },
   'en curso':        { variant: 'info',          label: 'En Curso' },
 
-  // Approval states
   aprobado:          { variant: 'success',       label: 'Aprobado' },
   aprobada:          { variant: 'success',       label: 'Aprobada' },
   rechazado:         { variant: 'destructive',   label: 'Rechazado' },
@@ -23,14 +21,12 @@ export const STATUS_MAP = {
   inactivo:          { variant: 'destructive',   label: 'Inactivo' },
   inactiva:          { variant: 'destructive',   label: 'Inactiva' },
 
-  // Survey / response states
   completada:        { variant: 'success',       label: 'Completada' },
   completado:        { variant: 'success',       label: 'Completado' },
   cerrada:           { variant: 'info',          label: 'Cerrada' },
   expirada:          { variant: 'destructive',   label: 'Expirada' },
   'no enviada':      { variant: 'secondary',     label: 'No enviada' },
 
-  // Inscription / Attendance states
   inscrito:          { variant: 'success',       label: 'Inscrito' },
   inscrita:          { variant: 'success',       label: 'Inscrita' },
   confirmado:        { variant: 'success',       label: 'Confirmado' },
@@ -38,13 +34,11 @@ export const STATUS_MAP = {
   ausente:           { variant: 'destructive',   label: 'Ausente' },
   'no asistio':      { variant: 'destructive',   label: 'No asistió' },
 
-  // Activity invitation states
   aceptado:          { variant: 'success',       label: 'Aceptado' },
   aceptada:          { variant: 'success',       label: 'Aceptada' },
   solicitud_cambio:  { variant: 'info',          label: 'Solicitud Cambio' },
   solicitudcambio:   { variant: 'info',          label: 'Solicitud Cambio' },
 
-  // Location / Place states
   habilitada:        { variant: 'success',       label: 'Habilitada' },
   deshabilitada:     { variant: 'secondary',     label: 'Deshabilitada' },
   habilitado:        { variant: 'success',       label: 'Habilitado' },

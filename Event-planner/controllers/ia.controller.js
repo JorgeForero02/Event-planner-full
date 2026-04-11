@@ -143,6 +143,49 @@ class IAController {
             });
         }
     }
+
+    async planificarEvento(req, res) {
+        try {
+            const { mensaje, historial = [], contexto = {} } = req.body;
+
+            if (!mensaje || typeof mensaje !== 'string' || mensaje.trim().length === 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Se requiere un mensaje'
+                });
+            }
+
+            if (mensaje.trim().length > 1000) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'El mensaje no puede superar los 1000 caracteres'
+                });
+            }
+
+            const resultado = await IAService.planificarEvento({
+                mensaje: mensaje.trim(),
+                historial: Array.isArray(historial) ? historial : [],
+                contexto
+            });
+
+            return res.json({
+                success: true,
+                data: resultado
+            });
+        } catch (error) {
+            if (error.status === 401 || (error.message && error.message.includes('API'))) {
+                return res.status(503).json({
+                    success: false,
+                    message: 'El servicio de IA no está disponible en este momento'
+                });
+            }
+            return res.status(500).json({
+                success: false,
+                message: 'Error al procesar la solicitud de planificación',
+                error: error.message
+            });
+        }
+    }
 }
 
 module.exports = new IAController();

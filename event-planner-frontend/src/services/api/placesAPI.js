@@ -20,7 +20,6 @@ class PlacesAPI extends BaseService {
         throw new Error('No se encontraron empresas disponibles');
       }
     } catch (error) {
-      console.error('Error al obtener empresas:', error);
       throw new Error('Error al cargar las empresas');
     }
   }
@@ -30,7 +29,6 @@ class PlacesAPI extends BaseService {
       const response = await this.fetch(`/empresas/${empresaId}/lugares`);
       return response.success && response.data ? response.data : [];
     } catch (error) {
-      console.error('Error al obtener lugares:', error);
       throw new Error('Error al cargar los lugares de la empresa');
     }
   }
@@ -40,7 +38,6 @@ class PlacesAPI extends BaseService {
       const response = await this.fetch(`/empresas/${empresaId}/ubicaciones`);
       return response.success && response.data ? response.data : [];
     } catch (error) {
-      console.error('Error al obtener ubicaciones:', error);
       return [];
     }
   }
@@ -64,7 +61,6 @@ class PlacesAPI extends BaseService {
 
       return result;
     } catch (error) {
-      console.error('Error al crear lugar:', error);
       throw new Error(error.message || 'Error al crear lugar');
     }
   }
@@ -87,7 +83,6 @@ class PlacesAPI extends BaseService {
 
       return result;
     } catch (error) {
-      console.error('Error al actualizar lugar:', error);
       throw new Error(error.message || 'Error al actualizar lugar');
     }
   }
@@ -110,7 +105,6 @@ class PlacesAPI extends BaseService {
 
       return result;
     } catch (error) {
-      console.error('Error al eliminar lugar:', error);
 
       if (error.message.includes('400')) {
         throw new Error('No se puede eliminar el lugar. Puede que tenga eventos asociados.');
@@ -134,7 +128,6 @@ class PlacesAPI extends BaseService {
 
       return result;
     } catch (error) {
-      console.error('Error al cambiar estado del lugar:', error);
       throw new Error(error.message || 'Error al cambiar estado del lugar');
     }
   }

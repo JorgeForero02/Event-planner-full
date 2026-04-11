@@ -8,10 +8,7 @@ import { Button } from '../../../../components/ui/button';
 const API_BASE = API_PREFIX;
 
 const SolicitudCambioModal = ({ actividad, onClose, onSubmit }) => {
-    // DEBUG: Ver qué datos llegan realmente
-    console.log('Datos recibidos en modal (RAW):', actividad);
 
-    // Estado para cargar los datos completos
     const [actividadCompleta, setActividadCompleta] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -21,24 +18,17 @@ const SolicitudCambioModal = ({ actividad, onClose, onSubmit }) => {
             try {
                 setLoading(true);
 
-                // Si ya tenemos los datos completos (con lugares), usarlos
                 if (actividad?.lugares || actividad?.actividad?.lugares) {
-                    console.log('Ya tiene lugares, usando datos directamente');
                     setActividadCompleta(actividad);
                     setLoading(false);
                     return;
                 }
 
-                // Si no, necesitamos obtener los datos completos
-                console.log('Obteniendo datos completos de la actividad...');
-
-                // Obtener el token
                 const token = localStorage.getItem('access_token');
                 if (!token) {
                     throw new Error('No hay token de autenticación');
                 }
 
-                // Obtener IDs
                 const ponenteId = actividad?.id_ponente;
                 const actividadId = actividad?.id_actividad || actividad?.id;
 
@@ -46,7 +36,6 @@ const SolicitudCambioModal = ({ actividad, onClose, onSubmit }) => {
                     throw new Error('Faltan IDs para obtener los datos completos');
                 }
 
-                // Hacer la petición para obtener datos completos
                 const response = await fetch(
                     `${API_BASE}/ponente-actividad/${ponenteId}/${actividadId}`,
                     {
@@ -65,18 +54,13 @@ const SolicitudCambioModal = ({ actividad, onClose, onSubmit }) => {
                 const result = await response.json();
 
                 if (result.success && result.data?.actividad) {
-                    console.log('Datos completos obtenidos:', result.data.actividad);
                     setActividadCompleta(result.data.actividad);
                 } else {
-                    // Si no podemos obtener datos completos, usar los que tenemos
-                    console.log('Usando datos disponibles (sin lugares)');
                     setActividadCompleta(actividad);
                 }
 
             } catch (error) {
-                console.error('Error al cargar actividad completa:', error);
                 setError(error.message);
-                // Usar los datos que tenemos aunque sean incompletos
                 setActividadCompleta(actividad);
             } finally {
                 setLoading(false);
@@ -101,15 +85,15 @@ const SolicitudCambioModal = ({ actividad, onClose, onSubmit }) => {
 
     const [errors, setErrors] = useState({});
     // eslint-disable-next-line no-unused-vars
-    const [showNotification, setShowNotification] = useState(false);
+    const [_showNotification, setShowNotification] = useState(false);
     // eslint-disable-next-line no-unused-vars
-    const [notificationMessage, setNotificationMessage] = useState('');
+    const [_notificationMessage, setNotificationMessage] = useState('');
     // eslint-disable-next-line no-unused-vars
-    const [notificationType, setNotificationType] = useState('');
+    const [_notificationType, setNotificationType] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     // eslint-disable-next-line no-unused-vars
-    function formatDateForInput(dateString) {
+    function _formatDateForInput(dateString) {
         if (!dateString) return '';
         const date = new Date(dateString);
         const adjustedDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
@@ -235,8 +219,6 @@ const SolicitudCambioModal = ({ actividad, onClose, onSubmit }) => {
                 justificacion: justificacion
             };
 
-            console.log('Datos a enviar:', datosEnvio);
-
             await onSubmit(datosEnvio);
 
             showAlert('Tu solicitud de cambio ha sido enviada para revisión', 'success');
@@ -246,7 +228,6 @@ const SolicitudCambioModal = ({ actividad, onClose, onSubmit }) => {
             }, 2000);
 
         } catch (error) {
-            console.error('Error al enviar solicitud:', error);
 
             if (error.message && error.message.includes('400')) {
                 showAlert('Error: La justificación es requerida o muy corta', 'error');
@@ -263,7 +244,6 @@ const SolicitudCambioModal = ({ actividad, onClose, onSubmit }) => {
     const getUbicacionCompleta = (actividad) => {
         if (!actividad) return 'No asignada';
 
-        // Intentar obtener lugares de diferentes formas
         const lugares = actividad.lugares || actividad.actividad?.lugares;
 
         if (!lugares || lugares.length === 0) {
@@ -273,12 +253,10 @@ const SolicitudCambioModal = ({ actividad, onClose, onSubmit }) => {
         const lugar = lugares[0];
         const partes = [];
 
-        // Nombre del lugar (ej: AG-404)
         if (lugar.nombre?.trim()) {
             partes.push(lugar.nombre.trim());
         }
 
-        // Información de ubicación
         if (lugar.ubicacion) {
             if (lugar.ubicacion.lugar?.trim()) {
                 partes.push(lugar.ubicacion.lugar.trim());
@@ -288,7 +266,6 @@ const SolicitudCambioModal = ({ actividad, onClose, onSubmit }) => {
             }
         }
 
-        // Descripción del lugar
         if (lugar.descripcion?.trim()) {
             partes.push(lugar.descripcion.trim());
         }
@@ -297,12 +274,10 @@ const SolicitudCambioModal = ({ actividad, onClose, onSubmit }) => {
     };
 
     const getValorActual = (campo) => {
-        // Usar actividadCompleta si está disponible, sino usar actividad
         const datos = actividadCompleta || actividad;
 
         switch (campo) {
             case 'fecha_actividad':
-                // Intentar obtener fecha de diferentes formas
                 const fecha = datos?.fecha_actividad || datos?.fecha;
                 return formatDateForDisplay(fecha);
             case 'hora_inicio':
@@ -310,7 +285,6 @@ const SolicitudCambioModal = ({ actividad, onClose, onSubmit }) => {
             case 'hora_fin':
                 return datos?.hora_fin ? datos.hora_fin.substring(0, 5) : 'No definida';
             case 'titulo':
-                // Intentar obtener título de diferentes formas
                 return datos?.titulo || datos?.nombre || 'No definido';
             case 'descripcion':
                 return datos?.descripcion || 'No disponible';
@@ -325,7 +299,6 @@ const SolicitudCambioModal = ({ actividad, onClose, onSubmit }) => {
         handleInputChange(`cambios_solicitados.${field}`, '');
     };
 
-    // Mostrar loading mientras se cargan datos
     if (loading) {
         return (
             <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
@@ -341,10 +314,7 @@ const SolicitudCambioModal = ({ actividad, onClose, onSubmit }) => {
         );
     }
 
-    // Si hay error
     if (error) {
-        console.warn('Error al cargar datos completos:', error);
-        // Continuamos con los datos disponibles
     }
 
     return (
@@ -355,7 +325,7 @@ const SolicitudCambioModal = ({ actividad, onClose, onSubmit }) => {
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Información de la actividad actual */}
+
                     <div className="space-y-2">
                         <h3 className="text-sm font-semibold text-slate-700">Actividad Actual</h3>
                         <div className="rounded-md bg-slate-50 border border-slate-200 p-3 text-sm space-y-1">

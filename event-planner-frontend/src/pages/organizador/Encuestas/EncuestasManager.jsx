@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './EncuestasManager.css';
 import ListaEncuestas from './ListaEncuestas';
 import FormularioEncuesta from './FormularioEncuesta';
@@ -6,8 +6,10 @@ import EnviarEncuestaAsistentes from './EnviarEncuestaAsistentes';
 import Sidebar from "../Sidebar";
 import EstadisticasEncuesta from './EstadisticasEncuesta';
 import { useEncuestasManager } from '../../../components/useEncuestasManager';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../../components/ui/dialog';
 
 const EncuestasManager = () => {
+    const [confirmDeleteId, setConfirmDeleteId] = useState(null);
     const {
         encuestas,
         eventos,
@@ -113,7 +115,7 @@ const EncuestasManager = () => {
                     onVerEstadisticas={abrirEstadisticas}
                     onEditar={editarEncuesta}
                     onActivar={activarEncuesta}
-                    onEliminar={eliminarEncuesta}
+                    onEliminar={(id) => setConfirmDeleteId(id)}
                     onEnviar={abrirEnvioEncuesta}
                     onHabilitar={habilitarParaPonente}
                     onCrearPrimera={abrirFormularioNuevo}
@@ -190,6 +192,19 @@ const EncuestasManager = () => {
                     onCerrar={cerrarEstadisticas}
                 />
             )}
+
+            <Dialog open={!!confirmDeleteId} onOpenChange={(open) => !open && setConfirmDeleteId(null)}>
+                <DialogContent className="max-w-sm">
+                    <DialogHeader>
+                        <DialogTitle>Confirmar eliminación</DialogTitle>
+                    </DialogHeader>
+                    <p className="text-sm text-slate-600">¿Estás seguro de que deseas eliminar esta encuesta?</p>
+                    <DialogFooter>
+                        <button onClick={() => setConfirmDeleteId(null)} style={{ background: 'none', border: '1px solid #d1d5db', borderRadius: '6px', padding: '0.4rem 0.75rem', cursor: 'pointer' }}>Cancelar</button>
+                        <button onClick={() => { eliminarEncuesta(confirmDeleteId); setConfirmDeleteId(null); }} style={{ backgroundColor: '#dc2626', color: 'white', border: 'none', borderRadius: '6px', padding: '0.4rem 0.75rem', cursor: 'pointer', fontWeight: 600 }}>Eliminar</button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 };

@@ -26,7 +26,6 @@ const Dashboard = () => {
     const [cargando, setCargando] = useState(true);
     const [cargandoActividades, setCargandoActividades] = useState(false);
 
-    // Función para obtener todas las métricas
     const obtenerMetricas = async () => {
         setCargando(true);
         try {
@@ -35,14 +34,11 @@ const Dashboard = () => {
                 throw new Error('No hay token disponible');
             }
 
-            // Obtener inscripciones del usuario
             const inscripciones = await inscriptionService.getMyInscriptions(token);
             setMisInscripciones(inscripciones);
 
-            // Obtener eventos disponibles para métricas generales
             const eventosDisponibles = await eventService.getAvailableEvents(token);
 
-            // Obtener actividades para métricas
             const actividadesProximas = await agendaService.obtenerActividadesPorFecha(
                 inscripciones,
                 token,
@@ -55,15 +51,13 @@ const Dashboard = () => {
                 'hoy'
             );
 
-            setProximasActividades(actividadesProximas.slice(0, 5)); // Últimas 5 actividades
+            setProximasActividades(actividadesProximas.slice(0, 5));
             setActividadesHoy(actividadesDelDia);
 
-            // Calcular asistencias registradas
             const asistenciasTotales = inscripciones.reduce((total, inscripcion) => {
                 return total + (inscripcion.asistencias?.length || 0);
             }, 0);
 
-            // Actualizar métricas
             setMetricas({
                 totalEventos: eventosDisponibles.length,
                 eventosActivos: eventosDisponibles.filter(evento =>
@@ -75,18 +69,16 @@ const Dashboard = () => {
                 actividadesHoy: actividadesDelDia.length
             });
 
-            // Obtener eventos recientes (últimos 3 eventos disponibles)
             setEventosRecientes(eventosDisponibles.slice(0, 3));
 
         } catch (error) {
-            console.error('Error obteniendo métricas del dashboard:', error);
         } finally {
             setCargando(false);
         }
     };
 
     // eslint-disable-next-line no-unused-vars
-    const obtenerActividadesProximas = async () => {
+    const _obtenerActividadesProximas = async () => {
         if (misInscripciones.length === 0) return;
 
         setCargandoActividades(true);
@@ -99,7 +91,6 @@ const Dashboard = () => {
             );
             setProximasActividades(actividades.slice(0, 5));
         } catch (error) {
-            console.error('Error obteniendo actividades próximas:', error);
         } finally {
             setCargandoActividades(false);
         }
@@ -109,20 +100,17 @@ const Dashboard = () => {
         obtenerMetricas();
     }, []);
 
-    // Función para formatear el rango de horas
     const formatRangoHoras = (horaInicio, horaFin) => {
         const inicio = formatHora(horaInicio);
         const fin = formatHora(horaFin);
         return `${inicio} - ${fin}`;
     };
 
-    // Función para obtener lugares como string
     const obtenerLugaresTexto = (lugares) => {
         if (!lugares || lugares.length === 0) return 'Virtual';
         return lugares.map(lugar => lugar.nombre).join(', ');
     };
 
-    // Función para obtener el texto del estado
     const getTextoEstado = (actividad) => {
         if (agendaService.estaEnCurso(actividad)) {
             return 'En curso';
@@ -144,13 +132,12 @@ const Dashboard = () => {
 
     return (
         <div className="p-6 space-y-6">
-            {/* Header */}
+
             <div className="text-center">
                 <h1 className="text-3xl font-bold text-slate-800">Mi Dashboard</h1>
                 <p className="text-slate-500 mt-1">Resumen de tus actividades y eventos</p>
             </div>
 
-            {/* Métricas */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <KpiCard
                     icon={CalendarDays}
@@ -166,9 +153,8 @@ const Dashboard = () => {
                 />
             </div>
 
-            {/* Contenido Principal */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Columna Izquierda - Actividades Próximas (2/3) */}
+
                 <div className="lg:col-span-2 space-y-6">
                     <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
                         <div className="flex justify-between items-center pb-4 mb-5 border-b border-slate-100">
@@ -234,9 +220,8 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                {/* Columna Derecha (1/3) */}
                 <div className="space-y-6">
-                    {/* Mis Inscripciones */}
+
                     <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
                         <div className="flex justify-between items-center pb-4 mb-5 border-b border-slate-100">
                             <h2 className="text-base font-semibold text-slate-800">Mis Inscripciones</h2>
@@ -276,7 +261,6 @@ const Dashboard = () => {
                         )}
                     </div>
 
-                    {/* Eventos Disponibles */}
                     <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
                         <div className="flex justify-between items-center pb-4 mb-5 border-b border-slate-100">
                             <h2 className="text-base font-semibold text-slate-800">Eventos Disponibles</h2>
@@ -315,7 +299,6 @@ const Dashboard = () => {
                         )}
                     </div>
 
-                    {/* Resumen Rápido */}
                     <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-6">
                         <h2 className="text-base font-semibold text-slate-800 pb-4 mb-4 border-b border-slate-100">Resumen Rápido</h2>
                         <div className="flex flex-col divide-y divide-slate-100">

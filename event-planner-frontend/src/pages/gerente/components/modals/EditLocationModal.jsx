@@ -32,7 +32,7 @@ const EditLocationModal = ({
                 className="bg-white rounded-2xl shadow-modal w-full max-w-lg max-h-[90vh] overflow-y-auto animate-slide-up"
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Header */}
+
                 <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
                     <h2 className="text-base font-semibold text-slate-800">Editar Ubicación</h2>
                     <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">

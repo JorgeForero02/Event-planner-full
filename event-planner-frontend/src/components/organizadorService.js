@@ -1,4 +1,3 @@
-// src/services/organizadorService.js
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
@@ -12,7 +11,6 @@ const getAuthToken = () => {
 /**
  * Headers comunes para las peticiones
  */
-// [FRONTEND-SYNC] F3: Corregido anidamiento incorrecto de headers
 const getHeaders = () => {
   const token = getAuthToken();
   return {
@@ -52,11 +50,9 @@ export const crearOrganizador = async (organizadorData) => {
       message: data.message
     };
   } catch (error) {
-    console.error('Error en crearOrganizador:', error);
     throw error;
   }
 };
-
 
 /**
  * Obtiene el equipo de una empresa
@@ -71,7 +67,6 @@ export const obtenerEquipo = async (idEmpresa) => {
     });
 
     if (response.status === 401) {
-      // Token inválido, limpiar localStorage
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
       localStorage.removeItem('user');
@@ -83,8 +78,6 @@ export const obtenerEquipo = async (idEmpresa) => {
 
     return { success: true, data: data.data || [] };
   } catch (error) {
-    // [FRONTEND-SYNC] F3: Corregido catch que referenciaba variables fuera de scope
-    console.error('Error en obtenerEquipo:', error);
     throw error;
   }
 };
@@ -148,7 +141,6 @@ export const actualizarOrganizador = async (id, datosActualizados) => {
       message: data.message
     };
   } catch (error) {
-    console.error('Error en actualizarOrganizador:', error);
     throw error;
   }
 };
@@ -177,7 +169,6 @@ export const eliminarOrganizador = async (id) => {
       message: data.message
     };
   } catch (error) {
-    console.error('Error en eliminarOrganizador:', error);
     throw error;
   }
 };

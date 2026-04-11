@@ -45,7 +45,6 @@ export const useGerenteDashboard = () => {
       setState(prev => ({ ...prev, loading: false }));
 
     } catch (error) {
-      console.error('Error inicializando dashboard:', error);
       setState(prev => ({
         ...prev,
         error: 'Error al cargar los datos del dashboard',
@@ -57,7 +56,6 @@ export const useGerenteDashboard = () => {
   const loadTeam = async (user) => {
     try {
       if (!user?.rolData?.id_empresa) {
-        console.log('No hay id_empresa disponible');
         setState(prev => ({ ...prev, equipo: [] }));
         return;
       }
@@ -68,7 +66,6 @@ export const useGerenteDashboard = () => {
         equipo
       }));
     } catch (error) {
-      console.error('Error cargando equipo:', error);
       setState(prev => ({ ...prev, equipo: [] }));
     }
   };
@@ -86,7 +83,6 @@ export const useGerenteDashboard = () => {
         setState(prev => ({ ...prev, empresa: data.data }));
       }
     } catch (error) {
-      console.error('Error cargando empresa:', error);
     }
   };
 
@@ -105,7 +101,6 @@ export const useGerenteDashboard = () => {
         }
       }));
     } catch (error) {
-      console.error('Error cargando estadísticas:', error);
       setState(prev => ({
         ...prev,
         stats: {

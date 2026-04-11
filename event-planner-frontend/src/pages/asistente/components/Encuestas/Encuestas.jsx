@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import styles from './Encuestas.module.css';
 import { useEncuestas } from '../../hooks/useEncuestas';
 import EncuestaCard from './EncuestaCard';
 import EncuestaModal from './EncuestaModal';
@@ -30,20 +29,15 @@ const Encuestas = ({ actividadesDisponibles = [], cargandoActividades = false })
     const [tipoAlerta, setTipoAlerta] = useState('success');
     const [idAsistente, setIdAsistente] = useState(null);
 
-    // Función para obtener id_asistente del usuario actual
     const obtenerIdAsistente = () => {
         try {
-            // 1. Obtener usuario del localStorage
             const userStr = localStorage.getItem('user');
             if (!userStr) {
-                console.log('❌ No se encontró objeto user en localStorage');
                 return null;
             }
 
             const user = JSON.parse(userStr);
-            console.log('👤 Usuario encontrado en localStorage:', user);
 
-            // 2. Buscar id_asistente en diferentes propiedades
             const posiblesPropiedades = [
                 'id_asistente',
                 'asistente_id',
@@ -53,7 +47,6 @@ const Encuestas = ({ actividadesDisponibles = [], cargandoActividades = false })
 
             for (const prop of posiblesPropiedades) {
                 if (prop.includes('.')) {
-                    // Para propiedades anidadas como 'rolData.id_asistente'
                     const parts = prop.split('.');
                     let value = user;
                     for (const part of parts) {
@@ -66,76 +59,57 @@ const Encuestas = ({ actividadesDisponibles = [], cargandoActividades = false })
                     }
 
                     if (value) {
-                        console.log(`✅ Encontrado id_asistente en ${prop}:`, value);
                         return value;
                     }
                 } else {
-                    // Para propiedades directas
                     if (user[prop]) {
-                        console.log(`✅ Encontrado id_asistente en ${prop}:`, user[prop]);
                         return user[prop];
                     }
                 }
             }
 
-            // 3. Si no se encontró en las propiedades directas, intentar desde rolData
             if (user.rolData) {
-                console.log('🔍 Buscando en rolData:', user.rolData);
 
                 if (user.rolData.id_asistente) {
-                    console.log('✅ Encontrado id_asistente en rolData:', user.rolData.id_asistente);
                     return user.rolData.id_asistente;
                 }
 
-                // También verificar otras posibles propiedades en rolData
                 if (user.rolData.asistente_id) {
-                    console.log('✅ Encontrado asistente_id en rolData:', user.rolData.asistente_id);
                     return user.rolData.asistente_id;
                 }
             }
 
-            // 4. Intentar desde el token como último recurso
             const token = localStorage.getItem('access_token');
             if (token) {
                 try {
                     const payload = JSON.parse(atob(token.split('.')[1]));
-                    console.log('🔍 Buscando en payload del token:', payload);
 
                     if (payload.rolData?.id_asistente) {
-                        console.log('✅ Encontrado id_asistente en token payload:', payload.rolData.id_asistente);
                         return payload.rolData.id_asistente;
                     }
 
                     if (payload.id_asistente) {
-                        console.log('✅ Encontrado id_asistente directo en token:', payload.id_asistente);
                         return payload.id_asistente;
                     }
                 } catch (error) {
-                    console.log('❌ Error parseando token:', error);
                 }
             }
 
-            console.log('⚠️ No se pudo encontrar id_asistente en ninguna propiedad conocida');
-            console.log('📋 Propiedades disponibles en user:', Object.keys(user));
             if (user.rolData) {
-                console.log('📋 Propiedades disponibles en rolData:', Object.keys(user.rolData));
             }
 
             return null;
         } catch (error) {
-            console.error('❌ Error obteniendo id_asistente:', error);
             return null;
         }
     };
 
-    // Obtener id_asistente al montar el componente
     useEffect(() => {
         const asistenteId = obtenerIdAsistente();
         setIdAsistente(asistenteId);
 
         if (!asistenteId) {
-            console.warn('⚠️ IMPORTANTE: No se encontró id_asistente');
-            mostrarAlertaError('No se pudo identificar tu cuenta. Por favor, cierra sesión y vuelve a iniciar.');
+            mostrarAlertaError('No se pudo identificar tu cuenta. Por favor, cierra sesiÃ³n y vuelve a iniciar.');
         }
     }, []);
 
@@ -240,7 +214,7 @@ const Encuestas = ({ actividadesDisponibles = [], cargandoActividades = false })
         { value: 'pre_actividad', label: 'Pre Actividad' },
         { value: 'durante_actividad', label: 'Durante Actividad' },
         { value: 'post_actividad', label: 'Post Actividad' },
-        { value: 'satisfaccion_evento', label: 'Satisfacción Evento' }
+        { value: 'satisfaccion_evento', label: 'SatisfacciÃ³n Evento' }
     ];
 
     const handleAccederEncuesta = (encuesta) => {
@@ -255,7 +229,7 @@ const Encuestas = ({ actividadesDisponibles = [], cargandoActividades = false })
     const confirmarCompletar = async () => {
         try {
             if (!idAsistente) {
-                throw new Error('No se pudo identificar tu cuenta. Por favor, recarga la página.');
+                throw new Error('No se pudo identificar tu cuenta. Por favor, recarga la pÃ¡gina.');
             }
 
             await marcarComoCompletada(encuestaSeleccionada.id);
@@ -309,7 +283,7 @@ const Encuestas = ({ actividadesDisponibles = [], cargandoActividades = false })
             case 'pre_actividad': return 'Pre Actividad';
             case 'durante_actividad': return 'Durante Actividad';
             case 'post_actividad': return 'Post Actividad';
-            case 'satisfaccion_evento': return 'Satisfacción Evento';
+            case 'satisfaccion_evento': return 'SatisfacciÃ³n Evento';
             default: return tipo;
         }
     };
@@ -324,7 +298,7 @@ const Encuestas = ({ actividadesDisponibles = [], cargandoActividades = false })
 
     const getTituloSeccion = () => {
         if (filtroTipo === 'satisfaccion_evento') {
-            return `Encuestas de Satisfacción del Evento: ${eventoNombre}`;
+            return `Encuestas de SatisfacciÃ³n del Evento: ${eventoNombre}`;
         } else if (actividadSeleccionada && actividadNombre) {
             return `Encuestas de la Actividad: ${actividadNombre}`;
         } else if (eventoNombre) {
@@ -335,39 +309,33 @@ const Encuestas = ({ actividadesDisponibles = [], cargandoActividades = false })
 
     if (actividadesDisponibles.length === 0) {
         return (
-            <div className={styles.noActividad}>
-                <h3>No hay actividades disponibles</h3>
-                <p>No estás inscrito en ningún evento o los eventos no tienen actividades asignadas.</p>
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+                <h3 className="text-slate-700 font-semibold">No hay actividades disponibles</h3>
+                <p className="text-sm text-slate-400 mt-1">No estÃ¡s inscrito en ningÃºn evento o los eventos no tienen actividades asignadas.</p>
             </div>
         );
     }
 
     return (
-        <div className={styles.encuestasContainer}>
+        <div className="space-y-6">
+            {/* Alert */}
             {mostrarAlerta && (
-                <div className={`${styles.alerta} ${styles[tipoAlerta]}`}>
-                    <div className={styles.alertaContenido}>
-                        <span>{mensajeAlerta}</span>
-                        <button
-                            onClick={cerrarAlerta}
-                            className={styles.cerrarAlerta}
-                        >
-                            ×
-                        </button>
-                    </div>
+                <div className={`flex items-center justify-between px-4 py-3 rounded-lg border text-sm ${tipoAlerta === 'success' ? 'bg-success/10 border-success/20 text-success' : 'bg-danger/10 border-danger/20 text-danger'}`}>
+                    <span>{mensajeAlerta}</span>
+                    <button onClick={cerrarAlerta} className="ml-3 text-lg leading-none opacity-60 hover:opacity-100">Ã—</button>
                 </div>
             )}
 
-            <div className={styles.header}>
-                <div>
-                    <h2 className={styles.title}>Encuestas</h2>
-                    <p className={styles.subtitle}>Selecciona un evento y una actividad para ver las encuestas disponibles</p>
-                </div>
+            {/* Header */}
+            <div>
+                <h2 className="text-xl font-bold text-slate-800">Encuestas</h2>
+                <p className="text-sm text-slate-500">Selecciona un evento y una actividad para ver las encuestas disponibles</p>
             </div>
 
-            <div className={styles.filtrosCascada}>
-                <div className={styles.filtroGrupo}>
-                    <label className={styles.filtroLabel}>Evento:</label>
+            {/* Cascade filters */}
+            <div className="flex flex-wrap gap-3 items-end">
+                <div className="flex flex-col gap-1 min-w-[180px]">
+                    <label className="text-xs font-semibold text-slate-500">Evento:</label>
                     <select
                         value={eventoSeleccionado}
                         onChange={(e) => {
@@ -375,7 +343,7 @@ const Encuestas = ({ actividadesDisponibles = [], cargandoActividades = false })
                             setActividadSeleccionada('');
                             setFiltroTipo('');
                         }}
-                        className={styles.filtroSelect}
+                        className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500"
                     >
                         <option value="">Seleccionar evento</option>
                         {eventosUnicos.map(evento => (
@@ -387,18 +355,16 @@ const Encuestas = ({ actividadesDisponibles = [], cargandoActividades = false })
                 </div>
 
                 {eventoSeleccionado && filtroTipo !== 'satisfaccion_evento' && (
-                    <div className={styles.filtroGrupo}>
-                        <label className={styles.filtroLabel}>Actividad:</label>
+                    <div className="flex flex-col gap-1 min-w-[180px]">
+                        <label className="text-xs font-semibold text-slate-500">Actividad:</label>
                         <select
                             value={actividadSeleccionada}
                             onChange={(e) => {
                                 setActividadSeleccionada(e.target.value);
-                                if (filtroTipo === 'satisfaccion_evento') {
-                                    setFiltroTipo('');
-                                }
+                                if (filtroTipo === 'satisfaccion_evento') setFiltroTipo('');
                             }}
-                            className={styles.filtroSelect}
                             disabled={actividadesFiltradas.length === 0}
+                            className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500 disabled:opacity-50"
                         >
                             <option value="">Seleccionar actividad</option>
                             {actividadesFiltradas.map(actividad => (
@@ -408,30 +374,25 @@ const Encuestas = ({ actividadesDisponibles = [], cargandoActividades = false })
                             ))}
                         </select>
                         {actividadesFiltradas.length === 0 && (
-                            <div className={styles.sinActividades}>Este evento no tiene actividades</div>
+                            <p className="text-xs text-slate-400">Este evento no tiene actividades</p>
                         )}
                     </div>
                 )}
 
                 {eventoSeleccionado && (
-                    <div className={styles.filtroGrupo}>
-                        <label className={styles.filtroLabel}>Tipo de encuesta:</label>
+                    <div className="flex flex-col gap-1 min-w-[180px]">
+                        <label className="text-xs font-semibold text-slate-500">Tipo de encuesta:</label>
                         <select
                             value={filtroTipo}
                             onChange={(e) => {
                                 const nuevoTipo = e.target.value;
                                 setFiltroTipo(nuevoTipo);
-
-                                if (nuevoTipo === 'satisfaccion_evento') {
-                                    setActividadSeleccionada('');
-                                }
+                                if (nuevoTipo === 'satisfaccion_evento') setActividadSeleccionada('');
                             }}
-                            className={styles.filtroSelect}
+                            className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500"
                         >
                             {tiposEncuesta.map(tipo => (
-                                <option key={tipo.value} value={tipo.value}>
-                                    {tipo.label}
-                                </option>
+                                <option key={tipo.value} value={tipo.value}>{tipo.label}</option>
                             ))}
                         </select>
                     </div>
@@ -439,9 +400,8 @@ const Encuestas = ({ actividadesDisponibles = [], cargandoActividades = false })
 
                 {(eventoSeleccionado || actividadSeleccionada || filtroTipo) && (
                     <button
-                        className={styles.resetButton}
                         onClick={resetearFiltros}
-                        title="Resetear filtros"
+                        className="h-9 px-4 rounded-lg text-xs font-semibold bg-white text-slate-500 border border-slate-200 hover:bg-slate-50 transition-colors"
                     >
                         Limpiar filtros
                     </button>
@@ -449,61 +409,52 @@ const Encuestas = ({ actividadesDisponibles = [], cargandoActividades = false })
             </div>
 
             {(eventoSeleccionado || actividadSeleccionada) && (
-                <div className={styles.seccionTitulo}>
-                    <h3>{getTituloSeccion()}</h3>
-                </div>
+                <h3 className="text-sm font-semibold text-slate-700">{getTituloSeccion()}</h3>
             )}
 
             {!eventoSeleccionado ? (
-                <div className={styles.noSeleccion}>
-                    <h3>Selecciona un evento</h3>
-                    <p>Elige un evento para ver las encuestas disponibles</p>
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                    <h3 className="text-slate-600 font-semibold">Selecciona un evento</h3>
+                    <p className="text-sm text-slate-400 mt-1">Elige un evento para ver las encuestas disponibles</p>
                 </div>
             ) : loading ? (
-                <div className={styles.loadingContainer}>
-                    <div className={styles.spinner}></div>
-                    <p>Cargando encuestas...</p>
+                <div className="flex items-center gap-3 py-8 justify-center text-slate-500 text-sm">
+                    <div className="w-5 h-5 rounded-full border-2 border-brand-500 border-t-transparent animate-spin" />
+                    Cargando encuestas...
                 </div>
             ) : error ? (
-                <div className={styles.errorContainer}>
-                    <h3>Error al cargar encuestas</h3>
-                    <p>{error}</p>
-                    <button className={styles.retryButton} onClick={cargarEncuestas}>
+                <div className="flex flex-col items-center gap-3 py-8 text-center">
+                    <p className="text-sm text-danger">{error}</p>
+                    <button onClick={cargarEncuestas} className="h-8 px-4 rounded-lg text-xs font-semibold bg-brand-600 text-white hover:bg-brand-700 transition-colors">
                         Reintentar
                     </button>
                 </div>
             ) : encuestasFiltradas.length === 0 ? (
-                <div className={styles.noEncuestas}>
-                    <h3>No hay encuestas disponibles</h3>
-                    <p>
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                    <h3 className="text-slate-600 font-semibold">No hay encuestas disponibles</h3>
+                    <p className="text-sm text-slate-400 mt-1">
                         {filtroTipo
                             ? `No hay encuestas del tipo "${getTextoPorTipo(filtroTipo)}" para esta ${filtroTipo === 'satisfaccion_evento' ? 'evento' : 'actividad'}.`
-                            : 'No hay encuestas asignadas.'
-                        }
+                            : 'No hay encuestas asignadas.'}
                     </p>
                 </div>
             ) : (
                 <>
-                    <div className={styles.stats}>
-                        <div className={styles.statCard}>
-                            <span className={styles.statNumber}>{encuestasFiltradas.length}</span>
-                            <span className={styles.statLabel}>Total</span>
-                        </div>
-                        <div className={styles.statCard}>
-                            <span className={styles.statNumber}>
-                                {encuestasFiltradas.filter(e => obtenerEstadoEncuesta(e).estado === 'completada').length}
-                            </span>
-                            <span className={styles.statLabel}>Completadas</span>
-                        </div>
-                        <div className={styles.statCard}>
-                            <span className={styles.statNumber}>
-                                {encuestasFiltradas.filter(e => obtenerEstadoEncuesta(e).estado === 'pendiente').length}
-                            </span>
-                            <span className={styles.statLabel}>Pendientes</span>
-                        </div>
+                    {/* Stats row */}
+                    <div className="grid grid-cols-3 gap-3">
+                        {[
+                            { label: 'Total', value: encuestasFiltradas.length },
+                            { label: 'Completadas', value: encuestasFiltradas.filter(e => obtenerEstadoEncuesta(e).estado === 'completada').length },
+                            { label: 'Pendientes', value: encuestasFiltradas.filter(e => obtenerEstadoEncuesta(e).estado === 'pendiente').length },
+                        ].map(({ label, value }) => (
+                            <div key={label} className="bg-white rounded-xl border border-slate-200 p-4 text-center">
+                                <p className="text-2xl font-bold text-slate-800">{value}</p>
+                                <p className="text-xs text-slate-500 mt-0.5">{label}</p>
+                            </div>
+                        ))}
                     </div>
 
-                    <div className={styles.encuestasGrid}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                         {encuestasFiltradas.map((encuesta) => (
                             <EncuestaCard
                                 key={encuesta.id}
@@ -516,7 +467,7 @@ const Encuestas = ({ actividadesDisponibles = [], cargandoActividades = false })
                                 loading={completando}
                                 esEncuestaEvento={encuesta.tipo_encuesta === 'satisfaccion_evento'}
                                 eventoNombre={eventoNombre}
-                                idAsistente={idAsistente} // ← Pasar id_asistente como prop
+                                idAsistente={idAsistente}
                             />
                         ))}
                     </div>
@@ -537,11 +488,12 @@ const Encuestas = ({ actividadesDisponibles = [], cargandoActividades = false })
                     color={getColorPorTipo(encuestaSeleccionada.tipo_encuesta)}
                     esEncuestaEvento={encuestaSeleccionada.tipo_encuesta === 'satisfaccion_evento'}
                     eventoNombre={eventoNombre}
-                    idAsistente={idAsistente} // ← Pasar también aquí
+                    idAsistente={idAsistente}
                 />
             )}
         </div>
     );
 };
+
 
 export default Encuestas;

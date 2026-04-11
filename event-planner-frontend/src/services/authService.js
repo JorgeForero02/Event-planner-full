@@ -46,7 +46,6 @@ export const apiRequest = async (endpoint, options = {}) => {
 
     return response;
   } catch (error) {
-    console.error('Error en la petición:', error);
     throw error;
   }
 };
@@ -79,7 +78,6 @@ export const refreshAccessToken = async () => {
       return false;
     }
   } catch (error) {
-    console.error('Error al refrescar el token:', error);
     return false;
   }
 };
@@ -100,7 +98,6 @@ export const login = async (email, password) => {
       throw new Error(result.message || 'Error durante el inicio de sesión');
     }
 
-    // Los tokens están en result.data según la estructura del backend
     const token = result.data?.accessToken;
     const refreshToken = result.data?.refreshToken;
     const usuario = result.data?.usuario;
@@ -118,7 +115,6 @@ export const login = async (email, password) => {
       throw new Error('No se recibió el token de acceso');
     }
   } catch (error) {
-    console.error('Error en login:', error);
     throw error;
   }
 };

@@ -3,6 +3,10 @@ import { adminService } from '../../services/adminService';
 import { API_URL } from '../../config/apiConfig';
 import styles from './afiliaciones.module.css';
 import { useToast } from '../../contexts/ToastContext';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog';
+import { Label } from '../../components/ui/label';
+import { Textarea } from '../../components/ui/textarea';
+import { Button } from '../../components/ui/button';
 
 const AfiliacionesPendientes = () => {
   const toast = useToast();
@@ -11,6 +15,9 @@ const AfiliacionesPendientes = () => {
   const [approvingIds, setApprovingIds] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [error, setError] = useState('');
+  const [confirmApprove, setConfirmApprove] = useState(null);
+  const [rejectTarget, setRejectTarget] = useState(null);
+  const [rejectMotivo, setRejectMotivo] = useState('');
 
   useEffect(() => {
     fetchEmpresas();
@@ -55,8 +62,7 @@ const AfiliacionesPendientes = () => {
         const errorData = await response.json();
         setError(errorData.message || 'Error al cargar empresas');
       }
-    } catch (error) {
-      console.error('Error al cargar empresas:', error);
+    } catch {
       setError('Error de conexión con el servidor');
       setEmpresas([]);
     } finally {
@@ -81,15 +87,12 @@ const AfiliacionesPendientes = () => {
         if (promoteResult.success) {
           toast.success('El usuario solicitante ha sido promovido a Gerente.');
         } else {
-          console.warn('Fallback promoción fallida:', promoteResult);
           toast.warning('Empresa aprobada, pero no se pudo promover al usuario solicitante.');
         }
       } else {
-        console.warn('Fallback promote API responded with status', promoteResp.status);
         toast.warning('Empresa aprobada, pero la promoción del usuario falló en el servidor.');
       }
-    } catch (err) {
-      console.error('Error en fallback promotion:', err);
+    } catch {
       toast.warning('Empresa aprobada, pero hubo un error al promover al usuario solicitante.');
     }
   };
@@ -111,7 +114,6 @@ const AfiliacionesPendientes = () => {
     );
   };
 
-  // Obtener detalles de una empresa por id (para recuperar solicitante si no viene en la respuesta de aprobar)
   const fetchEmpresaById = async (empresaId) => {
     try {
       const token = localStorage.getItem('access_token');
@@ -122,46 +124,35 @@ const AfiliacionesPendientes = () => {
         }
       });
 
-      if (!resp.ok) {
-        console.warn('No se pudo obtener empresa por id', empresaId, resp.status);
-        return null;
-      }
+      if (!resp.ok) return null;
 
       const json = await resp.json().catch(() => null);
       return json?.data || null;
-    } catch (err) {
-      console.error('Error fetchEmpresaById:', err);
+    } catch {
       return null;
     }
   };
 
-  const handleApprove = async (id, nombre) => {
-    if (!window.confirm(`¿Aprobar la empresa "${nombre}"? Esta acción no se puede deshacer.`)) return;
+  const handleApprove = (id, nombre) => {
+    setConfirmApprove({ id, nombre });
+  };
 
-    // Evitar reintentos concurrentes
+  const confirmarApprove = async () => {
+    const { id } = confirmApprove;
+    setConfirmApprove(null);
+
     if (approvingIds.includes(id)) return;
-
     setApprovingIds(prev => [...prev, id]);
 
     try {
       const result = await adminService.aprobarEmpresaYPromover(id);
-
       toast.success('Empresa aprobada exitosamente');
-
       if (result?.promote?.success) {
         toast.success('El usuario solicitante ha sido promovido a Gerente.');
-      } else if (result?.promote && !result.promote.success) {
-        console.warn('Promoción fallida o no disponible:', result.promote);
-        if (result.promote.status === 404) {
-          console.info('Endpoint de promoción no disponible.');
-        }
       }
-
-      // Actualizar UI: remover empresa aprobada
       setEmpresas(prev => prev.filter(e => e.id !== id));
       fetchEmpresas();
     } catch (error) {
-      console.error('Error aprobando empresa:', error);
       toast.error(error.message || 'Error al aprobar empresa');
       fetchEmpresas();
     } finally {
@@ -169,28 +160,28 @@ const AfiliacionesPendientes = () => {
     }
   };
 
-  const handleReject = async (id, nombre) => {
-    const motivo = prompt(`¿Por qué rechazas la empresa "${nombre}"?`);
-    if (motivo === null) return;
+  const handleReject = (id, nombre) => {
+    setRejectTarget({ id, nombre });
+    setRejectMotivo('');
+  };
 
-    if (!motivo.trim()) {
+  const confirmarReject = async () => {
+    if (!rejectMotivo.trim()) {
       toast.warning('Debes proporcionar un motivo para el rechazo');
       return;
     }
+    const { id } = rejectTarget;
+    setRejectTarget(null);
 
     try {
       const token = localStorage.getItem('access_token');
-
       const response = await fetch(`${API_URL}/empresas/${id}/aprobar`, {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          aprobar: false,
-          motivo: motivo
-        })
+        body: JSON.stringify({ aprobar: false, motivo: rejectMotivo })
       });
 
       if (response.ok) {
@@ -200,8 +191,7 @@ const AfiliacionesPendientes = () => {
         const result = await response.json();
         toast.error(result.message || 'Error al rechazar empresa');
       }
-    } catch (error) {
-      console.error('Error:', error);
+    } catch {
       toast.error('Error al rechazar empresa');
     }
   };
@@ -311,6 +301,40 @@ const AfiliacionesPendientes = () => {
           ))}
         </div>
       )}
+
+      <Dialog open={!!confirmApprove} onOpenChange={(open) => !open && setConfirmApprove(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Confirmar aprobación</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-slate-600">¿Aprobar la empresa "{confirmApprove?.nombre}"? Esta acción no se puede deshacer.</p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmApprove(null)}>Cancelar</Button>
+            <Button onClick={confirmarApprove}>Aprobar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!rejectTarget} onOpenChange={(open) => !open && setRejectTarget(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Rechazar empresa</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 py-2">
+            <Label>Motivo del rechazo *</Label>
+            <Textarea
+              value={rejectMotivo}
+              onChange={(e) => setRejectMotivo(e.target.value)}
+              placeholder={`¿Por qué rechazas la empresa "${rejectTarget?.nombre}"?`}
+              rows={3}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRejectTarget(null)}>Cancelar</Button>
+            <Button variant="destructive" onClick={confirmarReject}>Rechazar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

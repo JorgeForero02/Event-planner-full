@@ -30,7 +30,6 @@ const AgendaSection = ({ evento }) => {
             const actividades = await cargarAgendaPorEvento(evento.id);
             setAgenda(actividades);
         } catch (err) {
-            console.error('Error cargando agenda del evento:', err);
         }
     };
 

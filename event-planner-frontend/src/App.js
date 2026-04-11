@@ -6,7 +6,6 @@ import Dashboard from './components/Dashboard';
 import Admin from './pages/admin/admin';
 import PrivateRoute from './components/PrivateRoute';
 import AdminRoute from './components/AdminRoute';
-// [FRONTEND-SYNC] F2: Importar nuevos route guards por rol
 import GerenteRoute from './components/GerenteRoute';
 import OrganizadorRoute from './components/OrganizadorRoute';
 import PonenteRoute from './components/PonenteRoute';
@@ -53,11 +52,10 @@ function App() {
       <ToastProvider>
       <BrowserRouter>
         <Routes>
-          {/* Rutas públicas */}
+
           <Route path="/login" element={<Login />} />
           <Route path="/catalogo" element={<CatalogoEventos />} />
 
-          {/* Ruta protegida */}
           <Route
             path="/dashboard"
             element={
@@ -70,7 +68,6 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/login-admin" element={<AdminLogin />} />
 
-          {/* Ruta del panel de administración */}
           <Route
             path="/admin/*"
             element={
@@ -80,7 +77,6 @@ function App() {
             }
           />
 
-          {/* Rutas de Gerente — protegidas por GerenteRoute (F2) */}
           <Route
             path="/gerente"
             element={
@@ -169,8 +165,31 @@ function App() {
               </GerenteRoute>
             }
           />
+          <Route
+            path="/gerente/eventos/:eventoId/agenda"
+            element={
+              <GerenteRoute>
+                <GestionarAgendaPage />
+              </GerenteRoute>
+            }
+          />
+          <Route
+            path="/gerente/eventos/:eventoId/actividades/crear"
+            element={
+              <GerenteRoute>
+                <CrearActividadPage />
+              </GerenteRoute>
+            }
+          />
+          <Route
+            path="/gerente/actividades/:idActividad/editar"
+            element={
+              <GerenteRoute>
+                <EditarActividadPage />
+              </GerenteRoute>
+            }
+          />
 
-          {/* Rutas Asistente — /asistente/* cubre dashboard, eventos, agenda, inscripciones, encuestas */}
           <Route
             path="/asistente/empresa"
             element={
@@ -188,7 +207,6 @@ function App() {
             }
           />
 
-          {/* Ruta para gestión de empresa — protegidas por GerenteRoute (F2) */}
           <Route
             path="/empresa"
             element={
@@ -198,7 +216,6 @@ function App() {
             }
           />
 
-          {/* Rutas para gestión de afiliaciones */}
           <Route
             path="/empresa/afiliaciones-aprobadas"
             element={
@@ -224,7 +241,6 @@ function App() {
             }
           />
 
-          {/* Rutas Organizador — protegidas por OrganizadorRoute (F1+F2) */}
           <Route
             path="/organizador"
             element={
@@ -330,7 +346,6 @@ function App() {
             }
           />
 
-          {/* Rutas Ponente — protegidas por PonenteRoute */}
           <Route
             path="/ponente"
             element={
@@ -363,13 +378,12 @@ function App() {
               </PonenteRoute>
             }
           />
-          {/* Ruta por defecto */}
+
           <Route
             path="/"
             element={<Navigate to="/login" replace />}
           />
 
-          {/* Ruta 404 - Página no encontrada */}
           <Route
             path="*"
             element={

@@ -8,6 +8,7 @@ import { Input } from './ui/input';
 const ChatbotWidget = () => {
     const { isAuthenticated } = useAuth();
     const [open, setOpen] = useState(false);
+    const [iaAbierta, setIaAbierta] = useState(false);
     const [messages, setMessages] = useState([
         { role: 'bot', text: 'Hola, soy el asistente de EventPlanner. ¿En qué puedo ayudarte?' }
     ]);
@@ -16,12 +17,21 @@ const ChatbotWidget = () => {
     const bottomRef = useRef(null);
 
     useEffect(() => {
+        const observer = new MutationObserver(() => {
+            setIaAbierta(document.body.classList.contains('ia-asistente-open'));
+        });
+        observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+        return () => observer.disconnect();
+    }, []);
+
+    useEffect(() => {
         if (open && bottomRef.current) {
             bottomRef.current.scrollIntoView({ behavior: 'smooth' });
         }
     }, [messages, open]);
 
     if (!isAuthenticated) return null;
+    if (iaAbierta) return null;
 
     const sendMessage = async () => {
         const text = input.trim();

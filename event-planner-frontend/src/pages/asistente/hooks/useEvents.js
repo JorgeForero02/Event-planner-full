@@ -42,7 +42,6 @@ export const useEvents = () => {
     try {
       await cargarEventosDisponibles();
     } catch (error) {
-      // Error silencioso para actualización de cupos
     }
   };
 

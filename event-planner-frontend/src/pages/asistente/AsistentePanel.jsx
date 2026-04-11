@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useToast } from '../../contexts/ToastContext';
-import styles from './asistentePanel.module.css';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../components/ui/dialog';
 import Sidebar from '../../layouts/Sidebar/sidebarAsistente/sidebar';
 import Header from '../../layouts/Header/header';
@@ -123,7 +122,7 @@ const AsistentePanel = () => {
         checkAuth();
         cargarEventosDisponibles();
         cargarMisInscripciones();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
@@ -144,7 +143,7 @@ const AsistentePanel = () => {
         } else if (vistaActual !== 'encuestas') {
             setActividadesDisponibles([]);
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [vistaActual, misInscripciones]);
 
     const showSnackbar = (message, severity = 'success') => {
@@ -183,7 +182,7 @@ const AsistentePanel = () => {
         }
 
         const estado = getEventStatus(evento, eventosInscritos);
-        if (estado.texto !== 'DISPONIBLE') {
+        if (estado.texto !== 'DISPONIBLE' && estado.texto !== 'POR COMENZAR') {
             showSnackbar('No es posible inscribirse en este evento porque está lleno o cerrado.', 'warning');
             return;
         }
@@ -326,49 +325,47 @@ const AsistentePanel = () => {
 
             case 'eventos':
                 return (
-                    <div className={styles.mainContent}>
-                        <div className={styles.headerSection}>
-                            <h1 className={styles.mainTitle}>Eventos Disponibles para Inscripción</h1>
-                            <p className={styles.subtitle}>Explora los eventos disponibles e inscribete según tus intereses.</p>
+                    <div className="flex-1 p-8 bg-slate-50">
+                        <div className="bg-white p-8 rounded-xl shadow-sm border border-slate-200 mb-6">
+                            <h1 className="text-2xl font-bold text-slate-800 mb-1">Eventos Disponibles para Inscripción</h1>
+                            <p className="text-sm text-slate-500">Explora los eventos disponibles e inscribete según tus intereses.</p>
                         </div>
 
-                        <div className={styles.filtersSection}>
-                            <div className={styles.searchBar}>
+                        <div className="bg-white px-6 py-4 rounded-xl shadow-sm border border-slate-200 mb-6 flex gap-4 items-center flex-wrap">
+                            <div className="relative flex-1 min-w-[260px] max-w-[400px]">
                                 <input
                                     type="text"
                                     placeholder="Buscar eventos por nombre, descripción o lugar..."
                                     value={busqueda}
                                     onChange={(e) => setBusqueda(e.target.value)}
-                                    className={styles.searchInput}
+                                    className="w-full h-9 rounded-lg border border-slate-200 bg-white px-3 pr-8 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500"
                                 />
                                 {busqueda && (
                                     <button
-                                        className={styles.clearSearchButton}
                                         onClick={limpiarBusqueda}
                                         title="Limpiar búsqueda"
+                                        className="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors text-base leading-none"
                                     >
                                         ×
                                     </button>
                                 )}
                             </div>
 
-                            <div className={styles.filterGroup}>
+                            <div className="flex gap-3 items-center flex-wrap">
                                 <select
                                     value={filtroCategoria}
                                     onChange={(e) => setFiltroCategoria(e.target.value)}
-                                    className={styles.filterSelect}
+                                    className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500"
                                 >
                                     <option value="">Todas las modalidades</option>
                                     {categorias.map((categoria) => (
-                                        <option key={categoria} value={categoria}>
-                                            {categoria}
-                                        </option>
+                                        <option key={categoria} value={categoria}>{categoria}</option>
                                     ))}
                                 </select>
 
                                 <button
-                                    className={`${styles.tabButton} ${vistaActual === 'misInscripciones' ? styles.tabButtonActive : ''}`}
                                     onClick={() => navigate('/asistente/inscripciones')}
+                                    className="h-9 px-4 rounded-lg text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors"
                                 >
                                     Mis Inscripciones
                                 </button>
@@ -376,99 +373,96 @@ const AsistentePanel = () => {
                         </div>
 
                         {loadingEventos ? (
-                            <div className={styles.loadingContainer}>
-                                <div className={styles.spinner}></div>
-                                <p>Cargando eventos disponibles...</p>
+                            <div className="flex flex-col items-center justify-center py-16 gap-3">
+                                <div className="w-8 h-8 border-4 border-brand-600 border-t-transparent rounded-full animate-spin" />
+                                <p className="text-sm text-slate-500">Cargando eventos disponibles...</p>
                             </div>
                         ) : eventosFiltradosFinal.length === 0 ? (
-                            <div className={styles.noEventsCard}>
-                                <h3>
+                            <div className="bg-white rounded-xl border border-slate-200 p-10 text-center">
+                                <p className="text-slate-600 font-medium">
                                     {eventos.length === 0
-                                        ? "Actualmente no hay eventos disponibles para inscripción."
+                                        ? 'Actualmente no hay eventos disponibles para inscripción.'
                                         : busqueda || filtroCategoria
-                                            ? "No se encontraron eventos con los filtros aplicados."
-                                            : "No hay eventos disponibles."}
-                                </h3>
+                                            ? 'No se encontraron eventos con los filtros aplicados.'
+                                            : 'No hay eventos disponibles.'}
+                                </p>
                                 {(busqueda || filtroCategoria) && (
                                     <button
-                                        className={styles.btnShowAll}
-                                        onClick={() => {
-                                            setBusqueda('');
-                                            setFiltroCategoria('');
-                                        }}
+                                        onClick={() => { setBusqueda(''); setFiltroCategoria(''); }}
+                                        className="mt-4 h-9 px-5 rounded-lg text-xs font-semibold bg-brand-600 text-white hover:bg-brand-700 transition-colors"
                                     >
                                         Ver todos los eventos
                                     </button>
                                 )}
                             </div>
                         ) : (
-                            <>
-                                <div className={styles.eventsGrid}>
-                                    {eventosFiltradosFinal.map((evento) => (
-                                        <EventCard
-                                            key={evento.id}
-                                            evento={evento}
-                                            estado={getEventStatus(evento, eventosInscritos)}
-                                            onViewDetails={handleViewDetails}
-                                            onInscribe={handleInscribe}
-                                            formatFecha={formatFecha}
-                                            formatHora={formatHora}
-                                        />
-                                    ))}
-                                </div>
-                            </>
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                                {eventosFiltradosFinal.map((evento) => (
+                                    <EventCard
+                                        key={evento.id}
+                                        evento={evento}
+                                        estado={getEventStatus(evento, eventosInscritos)}
+                                        onViewDetails={handleViewDetails}
+                                        onInscribe={handleInscribe}
+                                        formatFecha={formatFecha}
+                                        formatHora={formatHora}
+                                    />
+                                ))}
+                            </div>
                         )}
                     </div>
                 );
 
             case 'agenda':
                 return (
-                    <Agenda
-                        misInscripciones={misInscripciones}
-                        onRegisterAttendance={handleOpenAttendanceModal}
-                    />
+                    <div className="flex-1 p-8 bg-slate-50">
+                        <Agenda
+                            misInscripciones={misInscripciones}
+                            onRegisterAttendance={handleOpenAttendanceModal}
+                        />
+                    </div>
                 );
 
             case 'misInscripciones':
                 return (
-                    <InscriptionsList
-                        misInscripciones={misInscripciones}
-                        loading={loadingInscripciones}
-                        asistenciasRegistradas={asistenciasRegistradas}
-                        registrandoAsistencia={registrandoAsistencia}
-                        inscripcionRegistrando={inscripcionRegistrando}
-                        handleRegistrarAsistencia={handleRegistrarAsistenciaDirecta}
-                        puedeRegistrarAsistencia={puedeRegistrarAsistencia}
-                        handleCancelarInscripcion={handleCancelarInscripcion}
-                        puedeCancelar={puedeCancelar}
-                        formatFecha={formatFecha}
-                        formatHora={formatHora}
-                        onViewEvents={() => navigate('/asistente/eventos')}
-                    />
+                    <div className="flex-1 p-8 bg-slate-50">
+                        <InscriptionsList
+                            misInscripciones={misInscripciones}
+                            loading={loadingInscripciones}
+                            asistenciasRegistradas={asistenciasRegistradas}
+                            registrandoAsistencia={registrandoAsistencia}
+                            inscripcionRegistrando={inscripcionRegistrando}
+                            handleRegistrarAsistencia={handleRegistrarAsistenciaDirecta}
+                            puedeRegistrarAsistencia={puedeRegistrarAsistencia}
+                            handleCancelarInscripcion={handleCancelarInscripcion}
+                            puedeCancelar={puedeCancelar}
+                            formatFecha={formatFecha}
+                            formatHora={formatHora}
+                            onViewEvents={() => navigate('/asistente/eventos')}
+                        />
+                    </div>
                 );
 
             case 'encuestas':
                 return (
-                    <div className={styles.mainContent}>
-
+                    <div className="flex-1 p-8 bg-slate-50">
                         {cargandoActividades ? (
-                            <div className={styles.loadingContainer}>
-                                <div className={styles.spinner}></div>
-                                <p>Cargando actividades disponibles...</p>
+                            <div className="flex flex-col items-center justify-center py-16 gap-3">
+                                <div className="w-8 h-8 border-4 border-brand-600 border-t-transparent rounded-full animate-spin" />
+                                <p className="text-sm text-slate-500">Cargando actividades disponibles...</p>
                             </div>
                         ) : actividadesDisponibles.length === 0 ? (
-                            <div className={styles.noSelection}>
-                                <h3>No hay actividades disponibles</h3>
-                                <p>
+                            <div className="bg-white rounded-xl border border-slate-200 p-10 text-center space-y-2">
+                                <h3 className="text-base font-semibold text-slate-700">No hay actividades disponibles</h3>
+                                <p className="text-sm text-slate-500">
                                     {misInscripciones.length === 0
-                                        ? "No estás inscrito en ningún evento. Inscríbete en un evento primero."
-                                        : "Los eventos en los que estás inscrito no tienen actividades asignadas o no se pudieron cargar."
-                                    }
+                                        ? 'No estás inscrito en ningún evento. Inscríbete en un evento primero.'
+                                        : 'Los eventos en los que estás inscrito no tienen actividades asignadas o no se pudieron cargar.'}
                                 </p>
                                 {misInscripciones.length === 0 && (
                                     <button
-                                        className={styles.btnShowAll}
                                         onClick={() => navigate('/asistente/eventos')}
+                                        className="mt-2 h-9 px-5 rounded-lg text-xs font-semibold bg-brand-600 text-white hover:bg-brand-700 transition-colors"
                                     >
                                         Ver eventos disponibles
                                     </button>
@@ -489,12 +483,12 @@ const AsistentePanel = () => {
     };
 
     return (
-        <div className={styles.asistenteContainer}>
+        <div className="flex min-h-screen bg-slate-50">
             <Sidebar
                 onToggle={(collapsed) => setSidebarCollapsed(collapsed)}
             />
 
-            <div className={`${styles.mainPanel} ${sidebarCollapsed ? styles.mainPanelExpanded : ''}`}>
+            <div className={`flex-1 flex flex-col min-h-screen transition-[margin-left] duration-300 ${sidebarCollapsed ? 'ml-[80px]' : 'ml-[250px]'}`}>
                 <Header
                     userEmail={userData ? `${userData.nombre} (${userData.email})` : "Cargando..."}
                     userRole="Asistente"

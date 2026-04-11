@@ -18,7 +18,6 @@ import {
     TableHeader, TableRow
 } from '../../../components/ui/table';
 
-// [FRONTEND-FIX] L1: Mapeo de estados con variantes Badge shadcn/ui
 const ESTADOS_EVENTO = {
     0: { texto: 'Borrador',   variant: 'draft' },
     1: { texto: 'Publicado',  variant: 'published' },
@@ -35,27 +34,21 @@ const EventosPageOrganizador = () => {
     const [eventoAEliminar, setEventoAEliminar] = useState(null);
     const [eventoAVer, setEventoAVer] = useState(null);
     const [loadingEliminar, setLoadingEliminar] = useState(false);
-    // FIX 2: Cancelar evento
     const [modalCancelarVisible, setModalCancelarVisible] = useState(false);
     const [eventoACancelar, setEventoACancelar] = useState(null);
     const [loadingCancelar, setLoadingCancelar] = useState(false);
-    // FIX 5: Notificaciones manuales
     const [modalNotifVisible, setModalNotifVisible] = useState(false);
     const [eventoNotif, setEventoNotif] = useState(null);
     const [notifForm, setNotifForm] = useState({ asunto: '', mensaje: '' });
     const [loadingNotif, setLoadingNotif] = useState(false);
     const [notifSuccess, setNotifSuccess] = useState(false);
-    // [UI-FIX] U2: Estado de error inline en lugar de alert()
     const [errorMsg, setErrorMsg] = useState(null);
-    // [UI-FIX] U3: Estado de carga para spinner
     const [loadingEventos, setLoadingEventos] = useState(true);
-    // U4: Focus trap y Escape manejados nativamente por Radix Dialog
 
     const cargarEventos = async () => {
         try {
             setLoadingEventos(true);
             const perfil = await obtenerPerfil();
-            // Obtener id del creador desde distintas formas según la respuesta del endpoint
             const idCreador = perfil?.data?.usuario?.id
                 || perfil?.data?.id
                 || perfil?.usuario?.id
@@ -66,7 +59,6 @@ const EventosPageOrganizador = () => {
             const data = await obtenerEventos();
             const listaEventos = Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
 
-            // Normalizar y filtrar por posibles campos de creador
             const eventosDelCreador = listaEventos.filter((e) => {
                 if (!idCreador) return false;
                 const creadorFields = [
@@ -85,7 +77,6 @@ const EventosPageOrganizador = () => {
 
             setEventos(eventosDelCreador);
         } catch (error) {
-            // [UI-FIX] U2: Error inline en vez de alert()
             setErrorMsg("Error al cargar eventos.");
         } finally {
             setLoadingEventos(false);
@@ -103,7 +94,6 @@ const EventosPageOrganizador = () => {
 
     const verEvento = (evento) => {
         setEventoAVer(evento);
-        console.log(evento)
         setModalVerVisible(true);
     };
 
@@ -117,10 +107,8 @@ const EventosPageOrganizador = () => {
             setModalVisible(false);
             setEventoAEliminar(null);
 
-            // Volver a cargar los eventos filtrados por organizador
             await cargarEventos();
         } catch {
-            // [UI-FIX] U2: Error inline en vez de alert()
             setErrorMsg('Error al eliminar el evento.');
         } finally {
             setLoadingEliminar(false);
@@ -186,7 +174,6 @@ const EventosPageOrganizador = () => {
         evento.titulo.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // Agregar función para parsear fechas correctamente
     const parsearFecha = (fechaString) => {
         const [year, month, day] = fechaString.split('T')[0].split('-');
         return new Date(year, month - 1, day);
@@ -194,13 +181,11 @@ const EventosPageOrganizador = () => {
 
     return (
         <div className="flex min-h-screen bg-slate-50">
-            {/* Sidebar fijo de 280px */}
+
             <Sidebar />
 
-            {/* Área de contenido principal desplazada por el sidebar */}
             <main className="flex-1 ml-0 md:ml-[280px] p-6 lg:p-8">
 
-                {/* ── Page header ────────────────────────────────────────── */}
                 <div className="flex items-center gap-3 mb-6">
                     <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-brand-600 text-white shrink-0">
                         <CalendarDays size={20} />
@@ -208,7 +193,6 @@ const EventosPageOrganizador = () => {
                     <h1 className="text-2xl font-bold text-slate-900">Gestionar Eventos</h1>
                 </div>
 
-                {/* ── Error banner ────────────────────────────────────────── */}
                 {errorMsg && (
                     <div className="flex items-center gap-2 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 mb-4" role="alert">
                         <AlertCircle size={16} className="shrink-0 text-rose-600" />
@@ -223,7 +207,6 @@ const EventosPageOrganizador = () => {
                     </div>
                 )}
 
-                {/* ── Action bar ─────────────────────────────────────────── */}
                 <div className="flex flex-col sm:flex-row gap-3 mb-5">
                     <div className="relative flex-1">
                         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
@@ -244,7 +227,6 @@ const EventosPageOrganizador = () => {
                     </Button>
                 </div>
 
-                {/* ── Tabla / skeleton ─────────────────────────────────── */}
                 {loadingEventos ? (
                     <div className="bg-white rounded-xl border border-slate-200 p-6 space-y-3">
                         {[...Array(5)].map((_, i) => (
@@ -298,7 +280,7 @@ const EventosPageOrganizador = () => {
                                                 {evento.modalidad}
                                             </TableCell>
                                             <TableCell>
-                                                {/* [FRONTEND-FIX] L2: Inscritos reales */}
+
                                                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-xs font-medium">
                                                     <Users size={11} />
                                                     {evento.inscripciones?.length ?? 0}/{evento.cupos}
@@ -339,7 +321,7 @@ const EventosPageOrganizador = () => {
                                                         <DollarSign size={13} />
                                                         <span className="sr-only sm:not-sr-only sm:ml-1 text-xs">Presupuesto</span>
                                                     </Button>
-                                                    {/* FIX 2: Cancelar — solo visible si estado es Publicado (1) */}
+
                                                     {evento.estado === 1 && (
                                                         <Button
                                                             variant="ghost"
@@ -352,7 +334,7 @@ const EventosPageOrganizador = () => {
                                                             <span className="sr-only sm:not-sr-only sm:ml-1 text-xs">Cancelar</span>
                                                         </Button>
                                                     )}
-                                                    {/* FIX 5: Notificaciones manuales */}
+
                                                     <Button
                                                         variant="ghost"
                                                         size="sm"
@@ -383,7 +365,6 @@ const EventosPageOrganizador = () => {
                 )}
             </main>
 
-            {/* ── Dialog: Confirmar cancelación ───────────────────────────────── */}
             <Dialog open={modalCancelarVisible} onOpenChange={setModalCancelarVisible}>
                 <DialogContent className="max-w-md">
                     <DialogHeader>
@@ -409,7 +390,6 @@ const EventosPageOrganizador = () => {
                 </DialogContent>
             </Dialog>
 
-            {/* ── Dialog: Notificaciones manuales ──────────────────────────────── */}
             <Dialog open={modalNotifVisible} onOpenChange={(open) => { setModalNotifVisible(open); if (!open) setNotifSuccess(false); }}>
                 <DialogContent className="max-w-md">
                     <DialogHeader>
@@ -471,7 +451,6 @@ const EventosPageOrganizador = () => {
                 </DialogContent>
             </Dialog>
 
-            {/* ── Dialog: Confirmar eliminación (Radix — focus trap + Esc nativo) ── */}
             <Dialog open={modalVisible} onOpenChange={setModalVisible}>
                 <DialogContent className="max-w-md">
                     <DialogHeader>
@@ -491,7 +470,6 @@ const EventosPageOrganizador = () => {
                 </DialogContent>
             </Dialog>
 
-            {/* ── Dialog: Ver detalle del evento ───────────────────────────────── */}
             <Dialog open={modalVerVisible} onOpenChange={setModalVerVisible}>
                 <DialogContent className="max-w-2xl">
                     {eventoAVer && (
@@ -506,7 +484,7 @@ const EventosPageOrganizador = () => {
                             </DialogHeader>
 
                             <div className="space-y-4 mt-2">
-                                {/* Descripción */}
+
                                 {eventoAVer.descripcion && (
                                     <div className="rounded-lg border border-slate-200 p-4">
                                         <p className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-2">
@@ -519,7 +497,6 @@ const EventosPageOrganizador = () => {
                                     </div>
                                 )}
 
-                                {/* Fechas */}
                                 <div className="rounded-lg border border-slate-200 p-4">
                                     <p className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-3">
                                         <span className="flex items-center justify-center w-6 h-6 rounded-full bg-amber-100 text-amber-600">
@@ -541,7 +518,6 @@ const EventosPageOrganizador = () => {
                                     </div>
                                 </div>
 
-                                {/* Asistencia */}
                                 <div className="rounded-lg border border-slate-200 p-4">
                                     <p className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-3">
                                         <span className="flex items-center justify-center w-6 h-6 rounded-full bg-sky-100 text-sky-600">
@@ -563,7 +539,6 @@ const EventosPageOrganizador = () => {
                                     </div>
                                 </div>
 
-                                {/* Ubicación */}
                                 {eventoAVer.modalidad !== 'Virtual' && eventoAVer.lugar && (
                                     <div className="rounded-lg border border-slate-200 p-4">
                                         <p className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-2">

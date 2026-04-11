@@ -214,7 +214,8 @@ export const useEvento = (idEvento = null) => {
         const sanitized = {};
         Object.keys(dataAEnviar).forEach((k) => {
             const v = dataAEnviar[k];
-            if (v !== null && v !== undefined) sanitized[k] = v;
+            // Excluir null, undefined y strings vacíos (campos opcionales no completados)
+            if (v !== null && v !== undefined && v !== '') sanitized[k] = v;
         });
 
         if (sanitized.cupos !== undefined) {
@@ -238,7 +239,6 @@ export const useEvento = (idEvento = null) => {
 
             setMostrarModalExito(true);
         } catch (err) {
-            console.error("Error al guardar evento:", err);
             const backendMsg = err?.response?.data?.message || err?.message || null;
             const texto = backendMsg || 'Error al guardar el evento';
             setMensaje({ tipo: 'error', texto });
@@ -299,7 +299,6 @@ export const useEvento = (idEvento = null) => {
             }, 2000);
             return () => clearTimeout(timer);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [mostrarModalExito, handleCerrarModal]);
 
     return {

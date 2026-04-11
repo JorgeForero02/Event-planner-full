@@ -1,7 +1,3 @@
-// src/utils/roleUtils.js
-// [LOGIC-FIX] L3: Simplificadas todas las funciones de rol a comparación directa con user.rol
-// El backend siempre devuelve { rol: 'administrador'|'gerente'|'organizador'|'ponente'|'asistente' }
-// Las heurísticas anteriores (JSON.stringify, búsqueda por email, etc.) causaban falsos positivos
 
 /**
  * Obtiene el rol normalizado del usuario

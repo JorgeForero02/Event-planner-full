@@ -1,8 +1,7 @@
-// [FRONTEND-SYNC] F2: Guard de ruta para gerente
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { isGerente } from '../utils/roleUtils';
+import { isGerente, getRedirectPath } from '../utils/roleUtils';
 
 const GerenteRoute = ({ children }) => {
   const { isAuthenticated, user, initialized } = useAuth();
@@ -20,7 +19,7 @@ const GerenteRoute = ({ children }) => {
   }
 
   if (!isGerente(user)) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to={getRedirectPath(user)} replace />;
   }
 
   if (!user?.rolData?.id_empresa) {

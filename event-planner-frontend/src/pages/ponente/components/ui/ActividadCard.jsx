@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import styles from '../styles/ActividadCard.module.css';
+import { Calendar, Clock, Building2, ClipboardList } from 'lucide-react';
 import StatusBadge from '../../../../components/ui/StatusBadge';
 import SolicitudCambioModal from './SolicitarCambioModal';
 import ResponderInvitacionModal from './ResponderInvitacionModal';
 import ActividadDetallesModal from './ActividadDetallesModal';
 import ponenteAgendaService from '../../../../services/ponenteAgendaService';
+import { cn } from '../../../../lib/utils';
 
 const ActividadCard = ({ actividad, showActions = true, onSolicitudEnviada, onActualizarEstado, onShowNotification }) => {
     const [showModal, setShowModal] = useState(false);
@@ -55,12 +56,9 @@ const ActividadCard = ({ actividad, showActions = true, onSolicitudEnviada, onAc
         return defaultValue;
     };
 
-
     const showNotification = (message, type = 'info') => {
         if (onShowNotification) {
             onShowNotification(message, type);
-        } else {
-            console.log(`[${type.toUpperCase()}] ${message}`);
         }
     };
 
@@ -115,7 +113,6 @@ const ActividadCard = ({ actividad, showActions = true, onSolicitudEnviada, onAc
         } else if (estadoActual === 'aceptado') {
             handleSolicitarCambio();
         }
-        // Para estado 'rechazado' y 'solicitud_cambio' no hace nada
     };
 
     const handleSolicitudSubmit = async (solicitudData) => {
@@ -123,11 +120,9 @@ const ActividadCard = ({ actividad, showActions = true, onSolicitudEnviada, onAc
             setIsLoading(true);
             const token = localStorage.getItem('access_token');
 
-            // Cambiar estado a solicitud_cambio
             const nuevoEstado = 'solicitud_cambio';
             setEstadoLocal(nuevoEstado);
 
-            // Notificar al padre
             if (onActualizarEstado) {
                 onActualizarEstado(actividad.id_actividad, nuevoEstado, actividad.fecha_respuesta);
             }
@@ -144,7 +139,6 @@ const ActividadCard = ({ actividad, showActions = true, onSolicitudEnviada, onAc
             setShowModal(false);
 
         } catch (error) {
-            console.error('Error al enviar solicitud de cambio:', error);
             setEstadoLocal(actividad.estado);
             if (onActualizarEstado) {
                 onActualizarEstado(actividad.id_actividad, actividad.estado, actividad.fecha_respuesta);
@@ -170,10 +164,6 @@ const ActividadCard = ({ actividad, showActions = true, onSolicitudEnviada, onAc
             const nuevoEstado = respuestaData.aceptar ? 'aceptado' : 'rechazado';
             const fechaRespuesta = new Date().toISOString();
 
-            console.log('📝 Intentando cambiar estado de pendiente a:', nuevoEstado);
-
-            // 1. Enviar al servidor PRIMERO
-            console.log('📡 Enviando respuesta al servidor...');
             const resultado = await ponenteAgendaService.responderInvitacion(
                 actividad.id_ponente,
                 actividad.id_actividad,
@@ -182,16 +172,9 @@ const ActividadCard = ({ actividad, showActions = true, onSolicitudEnviada, onAc
                 token
             );
 
-            console.log('✅ Respuesta del servidor:', resultado);
-
-            // 2. SI el servidor responde éxito, entonces actualizar localmente
             if (resultado.success || resultado.exito) {
-                console.log('🔄 Servidor confirmó éxito, actualizando estado local...');
-
-                // Actualizar estado local
                 setEstadoLocal(nuevoEstado);
 
-                // Notificar al padre
                 if (onActualizarEstado) {
                     onActualizarEstado(
                         actividad.id_actividad,
@@ -200,13 +183,10 @@ const ActividadCard = ({ actividad, showActions = true, onSolicitudEnviada, onAc
                     );
                 }
 
-                // FORZAR una recarga de datos desde el servidor
-                // Si tienes acceso a una función refetch, llámala aquí
                 if (window.recargarActividades) {
                     window.recargarActividades();
                 }
 
-                // O guardar en localStorage que ya respondió
                 localStorage.setItem(`actividad_${actividad.id_actividad}_respondida`, 'true');
                 localStorage.setItem(`actividad_${actividad.id_actividad}_estado`, nuevoEstado);
 
@@ -226,22 +206,15 @@ const ActividadCard = ({ actividad, showActions = true, onSolicitudEnviada, onAc
             }
 
         } catch (error) {
-            console.error('❌ Error completo:', error);
-
-            // Si el error es que ya está respondida
             if ((error.message && error.message.includes('ya fue respondida')) ||
                 error.message.includes('Estado actual:')) {
 
-                console.log('⚠️ El servidor dice que ya fue respondida');
-
-                // Extraer el estado actual del mensaje de error
-                let estadoReal = estadoLocal; // Por defecto mantener el estado actual
+                let estadoReal = estadoLocal;
 
                 if (error.message.includes('rechazada') || error.message.includes('rechazado')) {
                     estadoReal = 'rechazado';
                 }
 
-                // Sincronizar con lo que dice el servidor
                 setEstadoLocal(estadoReal);
 
                 if (onActualizarEstado) {
@@ -252,7 +225,6 @@ const ActividadCard = ({ actividad, showActions = true, onSolicitudEnviada, onAc
                     );
                 }
 
-                // Guardar en localStorage para persistencia
                 localStorage.setItem(`actividad_${actividad.id_actividad}_estado`, estadoReal);
 
                 showNotification(`Esta actividad ya fue ${estadoReal} anteriormente.`, 'info');
@@ -277,99 +249,89 @@ const ActividadCard = ({ actividad, showActions = true, onSolicitudEnviada, onAc
 
     const actividadId = actividad.id_ponente || actividad.id_actividad || actividad.actividad?.id_actividad || actividad.actividad?.id;
 
+    const primaryBtnClass = cn(
+        'flex-1 h-9 rounded-lg text-xs font-semibold transition-colors',
+        estadoLocal === 'pendiente'
+            ? 'bg-brand-600 text-white hover:bg-brand-700'
+            : estadoLocal === 'aceptado'
+                ? 'bg-warning/10 text-warning border border-warning/30 hover:bg-warning/20'
+                : 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
+    );
+
     return (
         <>
-            <div className={styles.card}>
-                <div className={styles.cardHeader}>
-                    <div>
-                        <h3 className={styles.titulo}>{nombreActividad}</h3>
-                        <span className={styles.modalidadBadge}>
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col">
+
+                {/* Header */}
+                <div className="px-5 pt-5 pb-3 flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                        <h3 className="text-sm font-semibold text-slate-800 leading-snug truncate">{nombreActividad}</h3>
+                        <span className="text-xs text-slate-500 mt-0.5 block">
                             {actividad.tipo || 'Actividad'}
                         </span>
                     </div>
-                    <StatusBadge status={estadoLocal} />
+                    <StatusBadge status={estadoLocal} className="shrink-0" />
                 </div>
 
-                <div className={styles.cardBody}>
-                    <div className={styles.detalles}>
-                        <div className={styles.detalleItem}>
-                            <div className={styles.detalleContent}>
-                                <span className={styles.detalleLabel}>Fecha</span>
-                                <span className={styles.detalleValue}>
-                                    {formatDate(fecha)}
-                                </span>
-                            </div>
-                        </div>
-
-                        <div className={styles.detalleItem}>
-                            <div className={styles.detalleContent}>
-                                <span className={styles.detalleLabel}>Horario</span>
-                                <span className={styles.detalleValue}>
-                                    {horaInicio && horaFin ?
-                                        `${horaInicio.substring(0, 5)} - ${horaFin.substring(0, 5)}` :
-                                        'Por definir'}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className={styles.detalles} style={{ marginTop: 8 }}>
-                        <div className={styles.detalleItem}>
-                            <div className={styles.detalleContent}>
-                                <span className={styles.detalleLabel}>Fecha asignación</span>
-                                <span className={styles.detalleValue}>
-                                    {formatDateTime(actividad.fecha_asignacion)}
-                                </span>
-                            </div>
-                        </div>
-
-                        <div className={styles.detalleItem}>
-                            <div className={styles.detalleContent}>
-                                <span className={styles.detalleLabel}>Fecha respuesta</span>
-                                <span className={styles.detalleValue}>
-                                    {formatDateTime(actividad.fecha_respuesta)}
-                                </span>
-                            </div>
-                        </div>
-
-                        {empresa && (
-                            <div className={styles.detalleItem}>
-                                <div className={styles.detalleContent}>
-                                    <span className={styles.detalleLabel}>Empresa</span>
-                                    <span className={styles.detalleValue}>{empresa}</span>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    {descripcion && descripcion !== 'No disponible' && (
-                        <div className={styles.descripcionContainer}>
-                            <div className={styles.descripcionLabel}>Descripción</div>
-                            <div className={styles.descripcionText}>{descripcion}</div>
-                        </div>
-                    )}
-
-                    {showActions && (
-                        <div className={styles.actions}>
-                            <button
-                                className={`${styles.solicitarBtn} ${estadoLocal === 'rechazado' ? styles.rechazadoBtn : ''
-                                    } ${estadoLocal === 'solicitud_cambio' ? styles.solicitudEnviadaBtn : ''
-                                    }`}
-                                onClick={handleBotonPrincipal}
-                                disabled={estadoLocal === 'rechazado' || estadoLocal === 'solicitud_cambio' || isLoading}
-                            >
-                                {isLoading ? 'Procesando...' : getTextoBotonPrincipal()}
-                            </button>
-                            <button
-                                className={styles.verDetallesBtn}
-                                onClick={handleVerDetalles}
-                                disabled={isLoading}
-                            >
-                                Ver Detalles
-                            </button>
-                        </div>
+                {/* Details */}
+                <div className="px-5 pb-3 flex flex-wrap gap-x-4 gap-y-1">
+                    <span className="flex items-center gap-1 text-xs text-slate-500">
+                        <Calendar size={12} className="shrink-0" />
+                        {formatDate(fecha)}
+                    </span>
+                    <span className="flex items-center gap-1 text-xs text-slate-500">
+                        <Clock size={12} className="shrink-0" />
+                        {horaInicio && horaFin
+                            ? `${horaInicio.substring(0, 5)} - ${horaFin.substring(0, 5)}`
+                            : 'Por definir'}
+                    </span>
+                    {empresa && (
+                        <span className="flex items-center gap-1 text-xs text-slate-500">
+                            <Building2 size={12} className="shrink-0" />
+                            {empresa}
+                        </span>
                     )}
                 </div>
+
+                {/* Dates assigned/responded */}
+                <div className="px-5 pb-3 flex flex-wrap gap-x-4 gap-y-1 border-t border-slate-100 pt-2">
+                    <span className="flex items-center gap-1 text-xs text-slate-400">
+                        <ClipboardList size={12} className="shrink-0" />
+                        Asignado: {formatDateTime(actividad.fecha_asignacion)}
+                    </span>
+                    {actividad.fecha_respuesta && (
+                        <span className="flex items-center gap-1 text-xs text-slate-400">
+                            Respuesta: {formatDateTime(actividad.fecha_respuesta)}
+                        </span>
+                    )}
+                </div>
+
+                {/* Description */}
+                {descripcion && descripcion !== 'No disponible' && (
+                    <div className="px-5 pb-3">
+                        <p className="text-xs text-slate-500 line-clamp-2">{descripcion}</p>
+                    </div>
+                )}
+
+                {/* Actions */}
+                {showActions && (
+                    <div className="mt-auto px-5 pb-5 flex gap-2">
+                        <button
+                            className={primaryBtnClass}
+                            onClick={handleBotonPrincipal}
+                            disabled={estadoLocal === 'rechazado' || estadoLocal === 'solicitud_cambio' || isLoading}
+                        >
+                            {isLoading ? 'Procesando...' : getTextoBotonPrincipal()}
+                        </button>
+                        <button
+                            className="flex-1 h-9 rounded-lg bg-slate-50 text-slate-700 text-xs font-semibold hover:bg-slate-100 transition-colors border border-slate-200"
+                            onClick={handleVerDetalles}
+                            disabled={isLoading}
+                        >
+                            Ver Detalles
+                        </button>
+                    </div>
+                )}
             </div>
 
             {showResponderModal && estadoLocal === 'pendiente' && (

@@ -11,10 +11,13 @@ import LoadingState from '../components/shared/LoadingState';
 import SearchBar from '../components/shared/SearchBar';
 
 const MiembroCard = ({ miembro }) => {
-  const nombre = miembro.nombre || miembro.name || 'Sin nombre';
-  const correo = miembro.correo || miembro.email || '';
-  const cedula = miembro.cedula || '';
-  const telefono = miembro.telefono || miembro.phone || '';
+  // Backend returns { id, usuario: { nombre, correo, cedula, telefono }, rol }
+  const u = miembro.usuario || miembro;
+  const nombre = u.nombre || miembro.nombre || miembro.name || 'Sin nombre';
+  const correo = u.correo || miembro.correo || miembro.email || '';
+  const cedula = u.cedula || miembro.cedula || '';
+  const telefono = u.telefono || miembro.telefono || miembro.phone || '';
+  const rol = miembro.rol || '';
   const inicial = nombre[0]?.toUpperCase() ?? '?';
 
   return (
@@ -23,7 +26,10 @@ const MiembroCard = ({ miembro }) => {
         {inicial}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-slate-800 truncate">{nombre}</p>
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-semibold text-slate-800 truncate">{nombre}</p>
+          {rol && <span className="text-xs px-1.5 py-0.5 rounded-full bg-brand-50 text-brand-700 font-medium capitalize shrink-0">{rol}</span>}
+        </div>
         {correo && (
           <div className="flex items-center gap-1.5 mt-1 text-xs text-slate-500">
             <Mail size={12} className="shrink-0" />

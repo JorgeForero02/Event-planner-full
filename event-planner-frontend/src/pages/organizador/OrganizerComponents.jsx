@@ -1,4 +1,3 @@
-// components/OrganizerComponents.jsx
 import React from 'react';
 import { Lock, X, Eye, EyeOff, Menu, AlertCircle, CheckCircle2, CalendarDays, TrendingUp } from 'lucide-react';
 import KpiCard from '../../components/ui/KpiCard';
@@ -160,7 +159,6 @@ export const StatCard = ({ label, value, color }) => (
     />
 );
 
-// Fila de evento
 export const EventRow = ({ event }) => (
     <div className="flex items-center justify-between py-3 px-4 border-b border-slate-100 last:border-0 hover:bg-slate-50/60 transition-colors rounded-lg">
         <div>

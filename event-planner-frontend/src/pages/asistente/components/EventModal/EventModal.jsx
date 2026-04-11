@@ -1,5 +1,4 @@
 import React from 'react';
-import styles from './EventModal.module.css';
 import { debugFecha } from '../../utils/dateUtils';
 
 const EventModal = ({ evento, onClose, formatFecha, formatFechaCompleta }) => {
@@ -7,28 +6,17 @@ const EventModal = ({ evento, onClose, formatFecha, formatFechaCompleta }) => {
     const [, setCargandoPonentes] = React.useState(false);
     const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
-    // Debug para verificar toda la información del evento
     React.useEffect(() => {
-        console.log('📊 Debug EventModal - Información completa:', {
-            titulo: evento.titulo,
-            cupo_total: evento.cupo_total,
-            cupos_disponibles: evento.cupos_disponibles,
-            inscritos_count: evento.inscritos_count,
-            estado_evento: evento.estado_evento,
-            modalidad: evento.modalidad
-        });
-
         debugFecha(evento.fecha_inicio, 'Modal - Fecha inicio');
         debugFecha(evento.fecha_fin, 'Modal - Fecha fin');
     }, [evento]);
 
-    // ✅ Cargar ponentes para todas las actividades
     React.useEffect(() => {
         const cargarPonentes = async () => {
             if (!evento.actividades || evento.actividades.length === 0) return;
 
             setCargandoPonentes(true);
-            const token = localStorage.getItem('access_token'); // Ajusta según tu implementación
+            const token = localStorage.getItem('access_token');
             const ponentesData = {};
 
             try {
@@ -45,7 +33,6 @@ const EventModal = ({ evento, onClose, formatFecha, formatFechaCompleta }) => {
 
                     if (response.ok) {
                         const data = await response.json();
-                        // Filtrar solo ponentes aceptados
                         ponentesData[actividad.id_actividad] = data.data?.filter(
                             pa => pa.estado === 'aceptado'
                         ) || [];
@@ -54,31 +41,21 @@ const EventModal = ({ evento, onClose, formatFecha, formatFechaCompleta }) => {
 
                 setPonentePorActividad(ponentesData);
             } catch (error) {
-                console.error('Error cargando ponentes:', error);
             } finally {
                 setCargandoPonentes(false);
             }
         };
 
-cargarPonentes();
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+        cargarPonentes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [evento.actividades]);
 
-    // ✅ Función para formatear el número de cupos
     const formatearCupos = (valor) => {
         if (valor === undefined || valor === null) return 'No disponible';
         if (typeof valor === 'number') return valor.toString();
         return valor;
     };
 
-    // ✅ Función para calcular porcentaje de disponibilidad
-    const calcularPorcentajeDisponibilidad = () => {
-        if (!evento.cupo_total || evento.cupo_total === 0) return 0;
-        if (typeof evento.cupos_disponibles !== 'number') return 0;
-        return Math.round((evento.cupos_disponibles / evento.cupo_total) * 100);
-    };
-
-    // ✅ Función para ordenar actividades cronológicamente
     const obtenerActividadesOrdenadas = () => {
         if (!evento.actividades || evento.actividades.length === 0) return [];
 
@@ -89,7 +66,6 @@ cargarPonentes();
         });
     };
 
-    // ✅ Función para formatear hora de 24h a 12h (user-friendly)
     const formatearHora = (hora) => {
         if (!hora) return '';
         const [hours, minutes] = hora.split(':');
@@ -99,211 +75,98 @@ cargarPonentes();
         return `${hora12}:${minutes} ${ampm}`;
     };
 
-    // eslint-disable-next-line no-unused-vars
-    const porcentajeDisponible = calcularPorcentajeDisponibilidad();
     const actividadesOrdenadas = obtenerActividadesOrdenadas();
 
+    const InfoItem = ({ label, children }) => (
+        <div className="flex flex-col gap-0.5">
+            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wide">{label}</span>
+            <span className="text-sm text-slate-700">{children}</span>
+        </div>
+    );
+
+    const Section = ({ title, children }) => (
+        <div className="bg-slate-50 rounded-xl p-4 space-y-3">
+            <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider">{title}</h4>
+            {children}
+        </div>
+    );
+
     return (
-        <div className={styles.modalBody}>
-            <div className={styles.eventInfoGrid}>
-                <div className={styles.infoSection}>
-                    <h4>Información General</h4>
-                    <div className={styles.infoItem}>
-                        <label>Título:</label>
-                        <span>{evento.titulo}</span>
-                    </div>
-                    <div className={styles.infoItem}>
-                        <label>Descripción:</label>
-                        <p>{evento.descripcion || 'No disponible'}</p>
-                    </div>
-                    <div className={styles.infoItem}>
-                        <label>Modalidad:</label>
-                        <span>{evento.modalidad || 'No especificado'}</span>
-                    </div>
-                    <div className={styles.infoItem}>
-                        <label>Estado:</label>
-                        <span>{evento.estado_evento === 'Disponible' ? 'Disponible' : 'No disponible'}</span>
-                    </div>
-                </div>
+        <div className="space-y-4 py-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <Section title="Información General">
+                    <InfoItem label="Título">{evento.titulo}</InfoItem>
+                    <InfoItem label="Descripción">{evento.descripcion || 'No disponible'}</InfoItem>
+                    <InfoItem label="Modalidad">{evento.modalidad || 'No especificado'}</InfoItem>
+                    <InfoItem label="Estado">{evento.estado_evento === 'Disponible' ? 'Disponible' : 'No disponible'}</InfoItem>
+                </Section>
 
-                <div className={styles.infoSection}>
-                    <h4>Fechas</h4>
-                    <div className={styles.infoItem}>
-                        <label>Fecha de inicio:</label>
-                        <span>{formatFecha(evento.fecha_inicio)}</span>
-                    </div>
-                    <div className={styles.infoItem}>
-                        <label>Fecha de fin:</label>
-                        <span>{formatFecha(evento.fecha_fin)}</span>
-                    </div>
-                    {evento.hora && (
-                        <div className={styles.infoItem}>
-                            <label>Hora:</label>
-                            <span>{evento.hora}</span>
-                        </div>
-                    )}
-                </div>
+                <Section title="Fechas">
+                    <InfoItem label="Fecha de inicio">{formatFecha(evento.fecha_inicio)}</InfoItem>
+                    <InfoItem label="Fecha de fin">{formatFecha(evento.fecha_fin)}</InfoItem>
+                    {evento.hora && <InfoItem label="Hora">{evento.hora}</InfoItem>}
+                </Section>
 
-                <div className={styles.infoSection}>
-                    <h4>Capacidad y Organización</h4>
-                    <div className={styles.infoItem}>
-                        <label>Cupos totales:</label>
-                        <span>{formatearCupos(evento.cupo_total)}</span>
-                    </div>
-                    <div className={styles.infoItem}>
-                        <label>Gerente:</label>
-                        <span>{evento.organizador || evento.creador?.nombre || 'No especificado'}</span>
-                    </div>
-                    {evento.correo_organizador && (
-                        <div className={styles.infoItem}>
-                            <label>Correo del gerente:</label>
-                            <span>{evento.correo_organizador}</span>
-                        </div>
-                    )}
-                    <div className={styles.infoItem}>
-                        <label>Empresa:</label>
-                        <span>{evento.empresa || 'No especificada'}</span>
-                    </div>
-                </div>
+                <Section title="Capacidad y Organización">
+                    <InfoItem label="Cupos totales">{formatearCupos(evento.cupo_total)}</InfoItem>
+                    <InfoItem label="Gerente">{evento.organizador || evento.creador?.nombre || 'No especificado'}</InfoItem>
+                    {evento.correo_organizador && <InfoItem label="Correo del gerente">{evento.correo_organizador}</InfoItem>}
+                    <InfoItem label="Empresa">{evento.empresa || 'No especificada'}</InfoItem>
+                </Section>
 
-                <div className={styles.infoSection}>
-                    <h4>Información Adicional</h4>
-                    <div className={styles.infoItem}>
-                        <label>Fecha de creación:</label>
-                        <span>{formatFechaCompleta(evento.fecha_creacion)}</span>
-                    </div>
-                    <div className={styles.infoItem}>
-                        <label>Última actualización:</label>
-                        <span>{formatFechaCompleta(evento.fecha_actualizacion)}</span>
-                    </div>
+                <Section title="Información Adicional">
+                    <InfoItem label="Fecha de creación">{formatFechaCompleta(evento.fecha_creacion)}</InfoItem>
+                    <InfoItem label="Última actualización">{formatFechaCompleta(evento.fecha_actualizacion)}</InfoItem>
                     {actividadesOrdenadas.length > 0 && (
-                        <div className={styles.infoItem}>
-                            <label>Total de actividades:</label>
-                            <span>{actividadesOrdenadas.length} actividad(es) programada(s)</span>
-                        </div>
+                        <InfoItem label="Total de actividades">{actividadesOrdenadas.length} actividad(es) programada(s)</InfoItem>
                     )}
-                </div>
+                </Section>
             </div>
 
-            {/* Sección de Actividades en orden cronológico */}
             {actividadesOrdenadas.length > 0 && (
-                <div style={{ marginTop: '20px' }}>
-                    <div className={styles.infoSection}>
-                        <h4>Cronograma de Actividades</h4>
+                <div className="bg-slate-50 rounded-xl p-4">
+                    <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Cronograma de Actividades</h4>
+                    <div className="space-y-3">
                         {actividadesOrdenadas.map((actividad, index) => {
                             const ponentes = ponentesPorActividad[actividad.id_actividad] || [];
-
                             return (
-                                <div key={actividad.id_actividad} style={{
-                                    marginBottom: index < actividadesOrdenadas.length - 1 ? '16px' : '0',
-                                    paddingBottom: index < actividadesOrdenadas.length - 1 ? '16px' : '0',
-                                    borderBottom: index < actividadesOrdenadas.length - 1 ? '1px solid #e5e7eb' : 'none'
-                                }}>
-                                    <div style={{
-                                        marginBottom: '12px',
-                                        paddingLeft: '8px',
-                                        borderLeft: '3px solid #2C5F7C',
-                                        background: 'white',
-                                        padding: '12px',
-                                        borderRadius: '8px'
-                                    }}>
-                                        <div style={{
-                                            fontSize: '1rem',
-                                            fontWeight: '600',
-                                            color: '#2C5F7C',
-                                            marginBottom: '8px'
-                                        }}>
-                                            {index + 1}. {actividad.titulo}
+                                <div key={actividad.id_actividad}
+                                    className={`border-l-2 border-brand-600 pl-3 py-2 bg-white rounded-r-lg ${index < actividadesOrdenadas.length - 1 ? 'mb-3' : ''}`}>
+                                    <p className="text-sm font-semibold text-brand-700 mb-1">{index + 1}. {actividad.titulo}</p>
+                                    <div className="grid gap-1 text-xs">
+                                        <div className="flex gap-2">
+                                            <span className="font-semibold text-slate-600 w-16 shrink-0">Fecha:</span>
+                                            <span className="text-slate-500">{formatFecha(actividad.fecha_actividad)}</span>
                                         </div>
-
-                                        <div style={{
-                                            display: 'grid',
-                                            gap: '8px',
-                                            fontSize: '0.9rem'
-                                        }}>
-                                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                                <span style={{ fontWeight: '600', color: '#374151', minWidth: '80px' }}>
-                                                    Fecha:
-                                                </span>
-                                                <span style={{ color: '#6b7280' }}>
-                                                    {formatFecha(actividad.fecha_actividad)}
-                                                </span>
-                                            </div>
-
-                                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                                <span style={{ fontWeight: '600', color: '#374151', minWidth: '80px' }}>
-                                                    Horario:
-                                                </span>
-                                                <span style={{ color: '#6b7280' }}>
-                                                    {formatearHora(actividad.hora_inicio)} - {formatearHora(actividad.hora_fin)}
-                                                </span>
-                                            </div>
-
-                                            {actividad.lugares && actividad.lugares.length > 0 && (
-                                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                                    <span style={{ fontWeight: '600', color: '#374151', minWidth: '80px' }}>
-                                                        Lugar:
-                                                    </span>
-                                                    <span style={{ color: '#6b7280' }}>
-                                                        {actividad.lugares.map(lugar => lugar.nombre).join(', ')}
-                                                    </span>
-                                                </div>
-                                            )}
-
-                                            {ponentes.length > 0 && (
-                                                <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
-                                                    <span style={{ fontWeight: '600', color: '#374151', minWidth: '80px' }}>
-                                                        Ponente(s):
-                                                    </span>
-                                                    <span style={{ color: '#6b7280' }}>
-                                                        {ponentes.map(pa =>
-                                                            pa.ponente?.usuario?.nombre || 'Nombre no disponible'
-                                                        ).join(', ')}
-                                                    </span>
-                                                </div>
-                                            )}
-
-                                            {actividad.descripcion && (
-                                                <div style={{ marginTop: '4px' }}>
-                                                    <span style={{
-                                                        fontWeight: '600',
-                                                        color: '#374151',
-                                                        display: 'block',
-                                                        marginBottom: '4px'
-                                                    }}>
-                                                        Descripción:
-                                                    </span>
-                                                    <p style={{
-                                                        margin: 0,
-                                                        color: '#6b7280',
-                                                        lineHeight: '1.5',
-                                                        paddingLeft: '8px'
-                                                    }}>
-                                                        {actividad.descripcion}
-                                                    </p>
-                                                </div>
-                                            )}
-
-                                            {actividad.url && (
-                                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                                    <span style={{ fontWeight: '600', color: '#374151', minWidth: '80px' }}>
-                                                        Enlace:
-                                                    </span>
-                                                    <a
-                                                        href={actividad.url}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        style={{
-                                                            color: '#2C5F7C',
-                                                            textDecoration: 'none',
-                                                            wordBreak: 'break-all'
-                                                        }}
-                                                    >
-                                                        {actividad.url}
-                                                    </a>
-                                                </div>
-                                            )}
+                                        <div className="flex gap-2">
+                                            <span className="font-semibold text-slate-600 w-16 shrink-0">Horario:</span>
+                                            <span className="text-slate-500">{formatearHora(actividad.hora_inicio)} - {formatearHora(actividad.hora_fin)}</span>
                                         </div>
+                                        {actividad.lugares?.length > 0 && (
+                                            <div className="flex gap-2">
+                                                <span className="font-semibold text-slate-600 w-16 shrink-0">Lugar:</span>
+                                                <span className="text-slate-500">{actividad.lugares.map(l => l.nombre).join(', ')}</span>
+                                            </div>
+                                        )}
+                                        {ponentes.length > 0 && (
+                                            <div className="flex gap-2">
+                                                <span className="font-semibold text-slate-600 w-16 shrink-0">Ponente(s):</span>
+                                                <span className="text-slate-500">{ponentes.map(pa => pa.ponente?.usuario?.nombre || 'N/D').join(', ')}</span>
+                                            </div>
+                                        )}
+                                        {actividad.descripcion && (
+                                            <div className="flex gap-2 mt-1">
+                                                <span className="font-semibold text-slate-600 w-16 shrink-0">Descripción:</span>
+                                                <span className="text-slate-500 leading-relaxed">{actividad.descripcion}</span>
+                                            </div>
+                                        )}
+                                        {actividad.url && (
+                                            <div className="flex gap-2">
+                                                <span className="font-semibold text-slate-600 w-16 shrink-0">Enlace:</span>
+                                                <a href={actividad.url} target="_blank" rel="noopener noreferrer"
+                                                    className="text-brand-600 hover:underline break-all">{actividad.url}</a>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             );
@@ -312,10 +175,10 @@ cargarPonentes();
                 </div>
             )}
 
-            <div className={styles.modalActions}>
+            <div className="flex justify-end pt-2">
                 <button
-                    className={styles.btnCancel}
                     onClick={onClose}
+                    className="h-9 px-5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
                 >
                     Cerrar
                 </button>

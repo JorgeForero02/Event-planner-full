@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import styles from '../styles/EncuestasSection.module.css';
 import { useEncuestasPonente } from '../../hooks/useEncuestasPonente';
 import EncuestaCard from '../ui/EncuestaCard';
 import CrearEncuestaModal from '../ui/CrearEncuestaModal';
@@ -20,13 +19,12 @@ const EncuestasSection = ({ eventos = [], ponenteId }) => {
     const [showEstadisticasModal, setShowEstadisticasModal] = useState(false);
     const [encuestaSeleccionada, setEncuestaSeleccionada] = useState(null);
     const [alerta, setAlerta] = useState(null);
-    // eslint-disable-next-line no-unused-vars
-    const [isRefreshing, setIsRefreshing] = useState(false);
 
     const [showRapidaModal, setShowRapidaModal] = useState(false);
     const [rapidaForm, setRapidaForm] = useState({ titulo: '', url_google_form: '', id_actividad: '' });
     const [rapidaErrors, setRapidaErrors] = useState({});
     const [rapidaSaving, setRapidaSaving] = useState(false);
+    const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
     const {
         encuestas,
@@ -73,10 +71,6 @@ const EncuestasSection = ({ eventos = [], ponenteId }) => {
     ];
 
     useEffect(() => {
-        if (!ponenteId) {
-            console.error('No se recibió ponenteId');
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ponenteId]);
 
     const cargarEncuestas = async () => {
@@ -84,7 +78,6 @@ const EncuestasSection = ({ eventos = [], ponenteId }) => {
             return;
         }
 
-        setIsRefreshing(true);
         try {
             if (selectedActividad) {
                 await obtenerEncuestasPorActividad(selectedActividad);
@@ -92,7 +85,6 @@ const EncuestasSection = ({ eventos = [], ponenteId }) => {
                 await obtenerEncuestasPorEvento(selectedEvento);
             }
         } finally {
-            setIsRefreshing(false);
         }
     };
 
@@ -221,19 +213,20 @@ const EncuestasSection = ({ eventos = [], ponenteId }) => {
         }
     };
 
-    const handleEliminarEncuesta = async (encuestaId) => {
-        if (!window.confirm('¿Estás seguro de que deseas eliminar esta encuesta? Esta acción no se puede deshacer.')) {
-            return;
-        }
+    const handleEliminarEncuesta = (encuestaId) => {
+        setConfirmDeleteId(encuestaId);
+    };
 
+    const confirmarEliminar = async () => {
         try {
-            const response = await eliminarEncuesta(encuestaId);
-
+            const response = await eliminarEncuesta(confirmDeleteId);
+            setConfirmDeleteId(null);
             if (response.success) {
                 mostrarAlerta('success', 'Encuesta eliminada exitosamente');
             }
-        } catch (error) {
+        } catch {
             mostrarAlerta('error', 'Error al eliminar encuesta');
+            setConfirmDeleteId(null);
         }
     };
 
@@ -242,19 +235,7 @@ const EncuestasSection = ({ eventos = [], ponenteId }) => {
             const response = await enviarEncuestaMasiva(encuestaId);
 
             if (response.success) {
-                // eslint-disable-next-line no-unused-vars
-                const totalEnviadas = response.data?.data?.total_enviadas || 0;
-                const asistentes = response.data?.data?.asistentes || [];
-
-                let mensaje = `Encuesta enviada`;
-
-                if (asistentes.length > 0) {
-                    // eslint-disable-next-line no-unused-vars
-                    const nombres = asistentes.map(a => a.nombre).join(', ');
-                    mensaje = `Encuesta enviada`;
-                }
-
-                mostrarAlerta('success', mensaje);
+                mostrarAlerta('success', 'Encuesta enviada');
 
                 setTimeout(() => {
                     cargarEncuestas();
@@ -278,63 +259,49 @@ const EncuestasSection = ({ eventos = [], ponenteId }) => {
         return actividadesFiltradas.find(a => a.id_actividad === parseInt(selectedActividad));
     };
 
+    const selectCls = "h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-500 disabled:opacity-50";
+    const labelCls = "text-xs font-semibold text-slate-500";
+
     return (
-        <div className={styles.encuestasContainer}>
+        <div className="space-y-4">
             {alerta && (
-                <div className={`${styles.alerta} ${styles[alerta.tipo]}`}>
-                    <div className={styles.alertaContenido}>
-                        <span>{alerta.mensaje}</span>
-                        <button
-                            className={styles.cerrarAlerta}
-                            onClick={() => setAlerta(null)}
-                        >
-                            ×
-                        </button>
-                    </div>
+                <div className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium ${
+                    alerta.tipo === 'success' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                    alerta.tipo === 'error'   ? 'bg-red-50 text-red-700 border border-red-200' :
+                    'bg-amber-50 text-amber-700 border border-amber-200'
+                }`}>
+                    <span>{alerta.mensaje}</span>
+                    <button onClick={() => setAlerta(null)} className="ml-4 text-lg leading-none opacity-70 hover:opacity-100">&times;</button>
                 </div>
             )}
 
-            <div className={styles.header}>
-                <div>
-                    <h1 className={styles.title}>Encuestas</h1>
-                    <p className={styles.subtitle}>
-                        Selecciona un evento y una actividad para ver las encuestas disponibles.
-                    </p>
-                </div>
+            <div className="bg-white rounded-xl border border-slate-200 p-6">
+                <h1 className="text-xl font-bold text-slate-800">Encuestas</h1>
+                <p className="text-sm text-slate-500 mt-0.5">Selecciona un evento y una actividad para ver las encuestas disponibles.</p>
             </div>
 
-            <div className={styles.filtrosCascada}>
-                <div className={styles.filtroGrupo}>
-                    <label className={styles.filtroLabel}>Evento</label>
-                    <select
-                        className={styles.filtroSelect}
-                        value={selectedEvento}
-                        onChange={handleEventoChange}
-                    >
+            {/* Cascade filters */}
+            <div className="bg-white rounded-xl border border-slate-200 px-6 py-4 flex flex-wrap gap-4 items-end">
+                <div className="flex flex-col gap-1 min-w-[180px]">
+                    <label className={labelCls}>Evento</label>
+                    <select className={selectCls} value={selectedEvento} onChange={handleEventoChange}>
                         <option value="">Selecciona evento</option>
                         {eventos.map(evento => {
                             const fechaMostrar = evento.fecha_inicio || evento.fecha || evento.fecha_creacion;
-
                             return (
                                 <option key={evento.id} value={evento.id}>
-                                    {evento.titulo} {fechaMostrar ? `- ${new Date(fechaMostrar).toLocaleDateString()}` : ''}
+                                    {evento.titulo}{fechaMostrar ? ` - ${new Date(fechaMostrar).toLocaleDateString()}` : ''}
                                 </option>
                             );
                         })}
                     </select>
                 </div>
 
-                <div className={styles.filtroGrupo}>
-                    <label className={styles.filtroLabel}>Actividad</label>
-                    <select
-                        className={styles.filtroSelect}
-                        value={selectedActividad}
-                        onChange={(e) => {
-                            const value = e.target.value;
-                            setSelectedActividad(value);
-                        }}
-                        disabled={!selectedEvento}
-                    >
+                <div className="flex flex-col gap-1 min-w-[180px]">
+                    <label className={labelCls}>Actividad</label>
+                    <select className={selectCls} value={selectedActividad}
+                        onChange={(e) => setSelectedActividad(e.target.value)}
+                        disabled={!selectedEvento}>
                         <option value="">Selecciona actividad</option>
                         {actividadesFiltradas.map(actividad => (
                             <option key={actividad.id_actividad} value={actividad.id_actividad}>
@@ -343,172 +310,123 @@ const EncuestasSection = ({ eventos = [], ponenteId }) => {
                         ))}
                     </select>
                     {selectedEvento && actividadesFiltradas.length === 0 && (
-                        <p className={styles.sinActividades}>
-                            Este evento no tiene actividades. Puedes crear encuestas para el evento completo.
-                        </p>
+                        <p className="text-xs text-slate-400 mt-0.5">Sin actividades. Puedes crear encuestas para el evento completo.</p>
                     )}
                 </div>
 
-                <div className={styles.filtroGrupo}>
-                    <label className={styles.filtroLabel}>Tipo de encuesta</label>
-                    <select
-                        className={styles.filtroSelect}
-                        value={filtroTipo}
+                <div className="flex flex-col gap-1 min-w-[160px]">
+                    <label className={labelCls}>Tipo de encuesta</label>
+                    <select className={selectCls} value={filtroTipo}
                         onChange={(e) => setFiltroTipo(e.target.value)}
-                        disabled={!selectedEvento && !selectedActividad}
-                    >
-                        {tiposEncuesta.map(tipo => (
-                            <option key={tipo.value} value={tipo.value}>
-                                {tipo.label}
-                            </option>
-                        ))}
+                        disabled={!selectedEvento && !selectedActividad}>
+                        {tiposEncuesta.map(tipo => <option key={tipo.value} value={tipo.value}>{tipo.label}</option>)}
                     </select>
                 </div>
 
-                <div className={styles.filtroGrupo}>
-                    <label className={styles.filtroLabel}>Estado</label>
-                    <select
-                        className={styles.filtroSelect}
-                        value={filtroEstado}
+                <div className="flex flex-col gap-1 min-w-[140px]">
+                    <label className={labelCls}>Estado</label>
+                    <select className={selectCls} value={filtroEstado}
                         onChange={(e) => setFiltroEstado(e.target.value)}
-                        disabled={!selectedEvento && !selectedActividad}
-                    >
-                        {estadosEncuesta.map(estado => (
-                            <option key={estado.value} value={estado.value}>
-                                {estado.label}
-                            </option>
-                        ))}
+                        disabled={!selectedEvento && !selectedActividad}>
+                        {estadosEncuesta.map(estado => <option key={estado.value} value={estado.value}>{estado.label}</option>)}
                     </select>
                 </div>
 
-                <button
-                    className={styles.resetButton}
-                    onClick={handleResetFiltros}
-                >
+                <button onClick={handleResetFiltros}
+                    className="h-9 px-4 rounded-lg text-xs font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors">
                     Limpiar Filtros
                 </button>
             </div>
 
             {selectedEvento && (
-                <div className={styles.actividadSeleccionada}>
-                    <h3>
-                        Encuestas {selectedActividad === 'evento' ? 'del Evento' :
-                            selectedActividad ? `de ${getActividadSeleccionada()?.titulo}` :
-                                'del Evento'}: {getEventoSeleccionado()?.titulo}
+                <div className="bg-slate-50 rounded-xl border border-slate-200 px-5 py-3 flex flex-wrap items-center gap-2">
+                    <h3 className="text-sm font-semibold text-slate-700 mr-2">
+                        Encuestas {selectedActividad ? `de ${getActividadSeleccionada()?.titulo}` : 'del Evento'}:
+                        {' '}{getEventoSeleccionado()?.titulo}
                     </h3>
-                    <div className={styles.badges}>
-                        <span className={styles.eventoBadge}>
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                                <rect x="3" y="4" width="18" height="18" rx="2"
-                                    stroke="currentColor" strokeWidth="2" />
-                                <line x1="3" y1="10" x2="21" y2="10"
-                                    stroke="currentColor" strokeWidth="2" />
-                            </svg>
-                            {getEventoSeleccionado()?.titulo}
+                    <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
+                            <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="2" />
+                            <line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" strokeWidth="2" />
+                        </svg>
+                        {getEventoSeleccionado()?.titulo}
+                    </span>
+                    {selectedActividad && selectedActividad !== 'evento' && getActividadSeleccionada() && (
+                        <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700 border border-purple-200">
+                            {getActividadSeleccionada()?.titulo}
                         </span>
-                        {selectedActividad && selectedActividad !== 'evento' && getActividadSeleccionada() && (
-                            <span className={styles.actividadBadge}>
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                                    <circle cx="12" cy="12" r="9"
-                                        stroke="currentColor" strokeWidth="2" />
-                                    <line x1="12" y1="8" x2="12" y2="16"
-                                        stroke="currentColor" strokeWidth="2" />
-                                    <line x1="8" y1="12" x2="16" y2="12"
-                                        stroke="currentColor" strokeWidth="2" />
-                                </svg>
-                                {getActividadSeleccionada()?.titulo}
-                            </span>
-                        )}
-                    </div>
+                    )}
                 </div>
             )}
 
             {!selectedEvento && !selectedActividad ? (
-                <div className={styles.noSeleccion}>
-                    <h3>Selecciona un evento</h3>
-                    <p>Por favor, selecciona un evento para ver y gestionar las encuestas.</p>
+                <div className="bg-white rounded-xl border border-slate-200 p-10 text-center space-y-1">
+                    <h3 className="text-base font-semibold text-slate-700">Selecciona un evento</h3>
+                    <p className="text-sm text-slate-500">Por favor, selecciona un evento para ver y gestionar las encuestas.</p>
                 </div>
             ) : loading ? (
-                <div className={styles.loadingContainer}>
-                    <div className={styles.spinner}></div>
-                    <p>Cargando encuestas...</p>
+                <div className="flex flex-col items-center justify-center py-16 gap-3">
+                    <div className="w-8 h-8 border-4 border-brand-600 border-t-transparent rounded-full animate-spin" />
+                    <p className="text-sm text-slate-500">Cargando encuestas...</p>
                 </div>
             ) : error ? (
-                <div className={styles.errorContainer}>
-                    <h3>Error al cargar encuestas</h3>
-                    <p>{error}</p>
-                    <button
-                        className={styles.retryButton}
-                        onClick={cargarEncuestas}
-                    >
+                <div className="bg-white rounded-xl border border-slate-200 p-10 text-center space-y-2">
+                    <h3 className="text-base font-semibold text-danger">Error al cargar encuestas</h3>
+                    <p className="text-sm text-slate-500">{error}</p>
+                    <button onClick={cargarEncuestas}
+                        className="h-9 px-5 rounded-lg text-xs font-semibold bg-brand-600 text-white hover:bg-brand-700 transition-colors">
                         Reintentar
                     </button>
                 </div>
             ) : encuestasFiltradas.length === 0 ? (
-                <div className={styles.noEncuestas}>
-                    <h3>No hay encuestas</h3>
-                    <p>No se encontraron encuestas para la selección actual.</p>
-                    <button
-                        className={styles.retryButton}
-                        onClick={handleCrearEncuesta}
-                    >
+                <div className="bg-white rounded-xl border border-slate-200 p-10 text-center space-y-2">
+                    <h3 className="text-base font-semibold text-slate-700">No hay encuestas</h3>
+                    <p className="text-sm text-slate-500">No se encontraron encuestas para la selección actual.</p>
+                    <button onClick={handleCrearEncuesta}
+                        className="h-9 px-5 rounded-lg text-xs font-semibold bg-brand-600 text-white hover:bg-brand-700 transition-colors">
                         Crear primera encuesta
                     </button>
                 </div>
             ) : (
                 <>
-                    <div className={styles.stats}>
-                        <div className={styles.statCard}>
-                            <span className={styles.statNumber}>{estadisticas.total}</span>
-                            <span className={styles.statLabel}>Total</span>
+                    {/* Stats + actions row */}
+                    <div className="flex flex-wrap gap-3 items-center">
+                        <div className="bg-white rounded-xl border border-slate-200 px-4 py-3 text-center min-w-[70px]">
+                            <p className="text-xl font-bold text-slate-800">{estadisticas.total}</p>
+                            <p className="text-xs text-slate-500">Total</p>
                         </div>
-
                         {estadisticas.borrador > 0 && (
-                            <div className={styles.statCard}>
-                                <span className={styles.statNumber} style={{ color: '#6b7280' }}>
-                                    {estadisticas.borrador}
-                                </span>
-                                <span className={styles.statLabel}>Borradores</span>
+                            <div className="bg-white rounded-xl border border-slate-200 px-4 py-3 text-center min-w-[70px]">
+                                <p className="text-xl font-bold text-slate-500">{estadisticas.borrador}</p>
+                                <p className="text-xs text-slate-500">Borradores</p>
                             </div>
                         )}
-
                         {estadisticas.activa > 0 && (
-                            <div className={styles.statCard}>
-                                <span className={styles.statNumber} style={{ color: '#059669' }}>
-                                    {estadisticas.activa}
-                                </span>
-                                <span className={styles.statLabel}>Activas</span>
+                            <div className="bg-white rounded-xl border border-slate-200 px-4 py-3 text-center min-w-[70px]">
+                                <p className="text-xl font-bold text-success">{estadisticas.activa}</p>
+                                <p className="text-xs text-slate-500">Activas</p>
                             </div>
                         )}
-
                         {estadisticas.cerrada > 0 && (
-                            <div className={styles.statCard}>
-                                <span className={styles.statNumber} style={{ color: '#dc2626' }}>
-                                    {estadisticas.cerrada}
-                                </span>
-                                <span className={styles.statLabel}>Cerradas</span>
+                            <div className="bg-white rounded-xl border border-slate-200 px-4 py-3 text-center min-w-[70px]">
+                                <p className="text-xl font-bold text-danger">{estadisticas.cerrada}</p>
+                                <p className="text-xs text-slate-500">Cerradas</p>
                             </div>
                         )}
-
-                        <button
-                            className={`${styles.statCard} ${styles.btnCrear}`}
-                            onClick={handleCrearEncuesta}
-                        >
-                            <span className={styles.statNumber}>+</span>
-                            <span className={styles.statLabel}>Crear Encuesta</span>
+                        <button onClick={handleCrearEncuesta}
+                            className="bg-white rounded-xl border border-slate-200 px-4 py-3 text-center min-w-[90px] hover:border-brand-600 hover:text-brand-600 transition-colors cursor-pointer">
+                            <p className="text-xl font-bold">+</p>
+                            <p className="text-xs text-slate-500">Crear Encuesta</p>
                         </button>
-                        <button
-                            className={`${styles.statCard} ${styles.btnCrear}`}
-                            onClick={handleCrearRapida}
-                            title="Crea y activa una encuesta instantáneamente para tu actividad"
-                            style={{ borderColor: '#059669', color: '#059669' }}
-                        >
-                            <span className={styles.statNumber}>⚡</span>
-                            <span className={styles.statLabel}>Encuesta Rápida</span>
+                        <button onClick={handleCrearRapida}
+                            className="bg-white rounded-xl border border-emerald-300 px-4 py-3 text-center min-w-[90px] hover:border-success hover:text-success transition-colors cursor-pointer"
+                            title="Crea y activa una encuesta instantáneamente">
+                            <p className="text-xl font-bold text-success">⚡</p>
+                            <p className="text-xs text-slate-500">Encuesta Rápida</p>
                         </button>
                     </div>
 
-                    <div className={styles.encuestasGrid}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                         {encuestasFiltradas.map(encuesta => (
                             <EncuestaCard
                                 key={encuesta.id}
@@ -547,6 +465,19 @@ const EncuestasSection = ({ eventos = [], ponenteId }) => {
                     onClose={() => setShowEstadisticasModal(false)}
                 />
             )}
+
+            <Dialog open={!!confirmDeleteId} onOpenChange={(open) => !open && setConfirmDeleteId(null)}>
+                <DialogContent className="max-w-sm">
+                    <DialogHeader>
+                        <DialogTitle>Confirmar eliminación</DialogTitle>
+                    </DialogHeader>
+                    <p className="text-sm text-slate-600">¿Estás seguro de que deseas eliminar esta encuesta? Esta acción no se puede deshacer.</p>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setConfirmDeleteId(null)}>Cancelar</Button>
+                        <Button variant="destructive" onClick={confirmarEliminar}>Eliminar</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             <Dialog open={showRapidaModal} onOpenChange={(o) => !rapidaSaving && setShowRapidaModal(o)}>
                 <DialogContent className="max-w-sm">

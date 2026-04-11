@@ -56,7 +56,6 @@ const apiRequest = async (endpoint, options = {}) => {
     const response = await fetch(url, config);
     return await handleResponse(response);
   } catch (error) {
-    console.error(`Error en ${options.method || 'GET'} ${endpoint}:`, error);
     throw error;
   }
 };
@@ -104,7 +103,6 @@ export const usuariosService = {
 };
 
 export const authService = {
-  // Login
   login: async (credentials) => {
     return await apiRequest('/auth/login', {
       method: 'POST',
@@ -127,7 +125,6 @@ export const authService = {
   },
 
   logout: async () => {
-    // Backend no tiene endpoint de logout, solo limpiar tokens localmente
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');
     sessionStorage.removeItem('access_token');
@@ -153,9 +150,7 @@ export const authService = {
   },
 };
 
-// Servicios de Eventos (ejemplo para futuras implementaciones)
 export const eventosService = {
-  // Obtener todos los eventos
   getAll: async () => {
     return await apiRequest('/eventos', {
       method: 'GET',

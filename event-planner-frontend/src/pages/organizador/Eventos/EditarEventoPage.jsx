@@ -123,7 +123,6 @@ const EditarEventoPage = () => {
             <div className="flex-1 overflow-auto p-6 ml-[280px]">
                 <div className="max-w-2xl mx-auto">
 
-                {/* Header */}
                 <div className="flex items-center gap-3 mb-6">
                     <button
                         onClick={() => navigate(backPath)}
@@ -142,7 +141,6 @@ const EditarEventoPage = () => {
                     </div>
                 </div>
 
-                {/* Alert messages */}
                 {mensaje?.texto && (
                     <Alert variant={mensaje.tipo === 'error' ? 'destructive' : 'default'} className="mb-4">
                         <AlertCircle size={16} />
@@ -161,7 +159,7 @@ const EditarEventoPage = () => {
                     onSubmit={(e) => { e.preventDefault(); guardarEvento(); }}
                     className="space-y-6"
                 >
-                    {/* Card: Información básica */}
+
                     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
                         <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wide border-b border-slate-100 pb-2">Información Básica</h2>
 
@@ -378,7 +376,6 @@ const EditarEventoPage = () => {
                         </div>
                     </div>
 
-                    {/* Actions */}
                     <div className="flex items-center justify-end gap-3 pb-6">
                         <Button type="button" variant="outline" onClick={() => navigate(backPath)} disabled={guardando}>
                             Cancelar
@@ -392,7 +389,6 @@ const EditarEventoPage = () => {
                 </div>
             </div>
 
-            {/* Modal éxito */}
             <Dialog open={mostrarModalExito}>
                 <DialogContent className="max-w-sm text-center">
                     <div className="flex flex-col items-center gap-3 py-4">
@@ -403,7 +399,6 @@ const EditarEventoPage = () => {
                 </DialogContent>
             </Dialog>
 
-            {/* Modal error */}
             <Dialog open={mostrarModalError} onOpenChange={(open) => !open && setMostrarModalError(false)}>
                 <DialogContent className="max-w-sm">
                     <div className="flex flex-col items-center gap-3 py-4 text-center">

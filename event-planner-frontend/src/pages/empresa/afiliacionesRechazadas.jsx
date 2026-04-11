@@ -52,7 +52,6 @@ const AfiliacionesRechazadas = () => {
         setError(errorData.message || 'Error al cargar empresas');
       }
     } catch (error) {
-      console.error('Error al cargar empresas:', error);
       setError('Error de conexión con el servidor');
       setEmpresas([]);
     } finally {

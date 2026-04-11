@@ -45,7 +45,6 @@ export const useEncuestas = () => {
         }
 
         return null;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user]);
 
     const obtenerEncuestas = useCallback(async (opciones = {}) => {
@@ -91,26 +90,20 @@ export const useEncuestas = () => {
                     return true;
                 });
 
-                console.log('📊 Encuestas filtradas:', encuestasFiltradas.length);
-
                 const encuestasConEstadoVerificado = encuestasFiltradas.map(encuesta => {
                     const userId = getUserId();
                     if (!userId) return encuesta;
 
-                    // Verificar localStorage específico del usuario
                     const estadoGuardado = localStorage.getItem(`encuesta_${encuesta.id}_estado_${userId}`);
 
                     if (estadoGuardado === 'completada') {
-                        console.log(`🔄 Encuesta ${encuesta.id} marcada como completada en localStorage para usuario ${userId}`);
 
-                        // Buscar si ya existe una respuesta de este usuario
                         const respuestasExistentes = encuesta.respuestas || [];
                         const respuestaExistenteIndex = respuestasExistentes.findIndex(
                             r => r.id_asistente === userId
                         );
 
                         if (respuestaExistenteIndex >= 0) {
-                            // Actualizar respuesta existente
                             const nuevasRespuestas = [...respuestasExistentes];
                             nuevasRespuestas[respuestaExistenteIndex] = {
                                 ...nuevasRespuestas[respuestaExistenteIndex],
@@ -121,7 +114,6 @@ export const useEncuestas = () => {
                                 respuestas: nuevasRespuestas
                             };
                         } else {
-                            // Agregar nueva respuesta para este usuario
                             return {
                                 ...encuesta,
                                 respuestas: [
@@ -151,7 +143,6 @@ export const useEncuestas = () => {
         } finally {
             setLoading(false);
         }
-                // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [getUserId]);
 
     const obtenerEncuestasPorActividad = useCallback(async (actividadId, tipoEncuesta = null) => {
@@ -168,40 +159,25 @@ export const useEncuestas = () => {
 
             setCompletando(true);
 
-            console.log('🔍 Intentando marcar encuesta como completada:', {
-                idEncuesta,
-                userId
-            });
-
             try {
-                // Intentar marcar como completada
                 const response = await encuestaService.completarEncuesta(idEncuesta, userId);
-
-                console.log('✅ Encuesta marcada como completada:', response);
 
                 if (!response.success) {
                     throw new Error(response.message || 'Error al completar encuesta');
                 }
 
             } catch (error) {
-                console.log('⚠️ Error al marcar como completada:', error.message);
 
-                // Si el error es 409 (ya completada), no lanzar error
-                // sino actualizar el estado localmente
                 if (error.status === 409 || error.message.includes('ya ha sido completada')) {
-                    console.log('🔄 Encuesta ya estaba completada, actualizando estado local...');
                 } else {
                     throw error;
                 }
             }
 
-            // Actualizar estado local para este asistente específico
             setEncuestas(prevEncuestas =>
                 prevEncuestas.map(encuesta => {
                     if (encuesta.id === idEncuesta) {
-                        console.log('🔄 Actualizando estado de encuesta ID:', idEncuesta);
 
-                        // Buscar si ya existe una respuesta de este asistente
                         const respuestasExistentes = encuesta.respuestas || [];
                         const respuestaExistenteIndex = respuestasExistentes.findIndex(
                             r => r.id_asistente === userId
@@ -216,14 +192,12 @@ export const useEncuestas = () => {
 
                         let nuevasRespuestas;
                         if (respuestaExistenteIndex >= 0) {
-                            // Actualizar respuesta existente
                             nuevasRespuestas = [...respuestasExistentes];
                             nuevasRespuestas[respuestaExistenteIndex] = {
                                 ...nuevasRespuestas[respuestaExistenteIndex],
                                 ...nuevaRespuesta
                             };
                         } else {
-                            // Agregar nueva respuesta
                             nuevasRespuestas = [...respuestasExistentes, nuevaRespuesta];
                         }
 
@@ -236,7 +210,6 @@ export const useEncuestas = () => {
                 })
             );
 
-            // Guardar en localStorage específico del usuario
             localStorage.setItem(`encuesta_${idEncuesta}_estado_${userId}`, 'completada');
 
             return {
@@ -245,7 +218,6 @@ export const useEncuestas = () => {
             };
 
         } catch (error) {
-            console.error('❌ Error en marcarComoCompletada:', error);
             throw error;
         } finally {
             setCompletando(false);
@@ -257,66 +229,55 @@ export const useEncuestas = () => {
     }, [encuestas]);
 
     const obtenerEstadoEncuesta = useCallback((encuesta) => {
-        console.log('🔍 Obteniendo estado para encuesta:', {
+        console.log({
             id: encuesta.id,
             tieneRespuestas: !!encuesta.respuestas,
             respuestas: encuesta.respuestas
         });
 
-        // Obtener ID del asistente actual
         const userId = getUserId();
         if (!userId) {
-            console.log('❌ No se pudo obtener ID del asistente');
             return { estado: 'no_enviada', texto: 'No enviada' };
         }
 
-        // Verificar localStorage con clave específica del usuario
         const estadoGuardado = localStorage.getItem(`encuesta_${encuesta.id}_estado_${userId}`);
 
         if (estadoGuardado) {
-            console.log('💾 Estado guardado en localStorage:', estadoGuardado);
             return {
                 estado: estadoGuardado,
                 texto: estadoGuardado === 'completada' ? 'Completada' : 'Pendiente'
             };
         }
 
-        // Si no hay respuestas, devolver "no_enviada"
         if (!encuesta.respuestas || encuesta.respuestas.length === 0) {
-            console.log('📝 Sin respuestas, estado: no_enviada');
             return { estado: 'no_enviada', texto: 'No enviada' };
         }
 
-        // Buscar la respuesta específica de este asistente
         const respuestaAsistente = encuesta.respuestas.find(
             respuesta => respuesta.id_asistente === userId
         );
 
-        console.log('👤 Respuesta encontrada para el asistente:', {
+        console.log({
             userId,
             respuesta: respuestaAsistente
         });
 
         if (!respuestaAsistente) {
-            console.log('📝 No hay respuesta de este asistente, estado: no_enviada');
             return { estado: 'no_enviada', texto: 'No enviada' };
         }
 
         if (respuestaAsistente.estado === 'completada') {
-            // Guardar en localStorage para persistencia
             localStorage.setItem(`encuesta_${encuesta.id}_estado_${userId}`, 'completada');
             return { estado: 'completada', texto: 'Completada' };
         } else if (respuestaAsistente.estado === 'pendiente') {
             return { estado: 'pendiente', texto: 'Pendiente' };
         }
 
-        // Si no tiene estado definido pero tiene fecha_completado, considerarla completada
         if (respuestaAsistente.fecha_completado) {
             localStorage.setItem(`encuesta_${encuesta.id}_estado_${userId}`, 'completada');
             return { estado: 'completada', texto: 'Completada' };
         }
 
-        console.log('❓ Estado indeterminado, usando pendiente');
         return { estado: 'pendiente', texto: 'Pendiente' };
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);

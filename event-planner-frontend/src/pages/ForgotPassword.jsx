@@ -27,7 +27,7 @@ const ForgotPassword = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#142B6F] via-brand-700 to-brand-500 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-modal w-full max-w-md p-8 space-y-6">
-        {/* Header */}
+
         <div className="text-center space-y-2">
           <div className="inline-flex items-center justify-center h-12 w-12 rounded-xl bg-brand-100 text-brand-600 mb-2">
             <CalendarDays size={24} />
@@ -36,7 +36,6 @@ const ForgotPassword = () => {
           <p className="text-sm text-slate-500">Ingresa tu correo y nueva contraseña</p>
         </div>
 
-        {/* Error / success alerts */}
         {error && (
           <div className="flex items-center gap-2 rounded-lg bg-rose-50 border border-rose-200 px-4 py-3 text-sm text-rose-700">
             <AlertCircle size={16} className="shrink-0" />
@@ -51,9 +50,8 @@ const ForgotPassword = () => {
           </div>
         )}
 
-        {/* Form */}
         <form onSubmit={handleResetPassword} className="space-y-4">
-          {/* Email */}
+
           <div className="space-y-1.5">
             <Label htmlFor="email">Correo Electrónico</Label>
             <div className="relative">
@@ -71,7 +69,6 @@ const ForgotPassword = () => {
             </div>
           </div>
 
-          {/* New password */}
           <div className="space-y-1.5">
             <Label htmlFor="newPassword">Nueva Contraseña</Label>
             <div className="relative">
@@ -98,7 +95,6 @@ const ForgotPassword = () => {
             </div>
           </div>
 
-          {/* Confirm password */}
           <div className="space-y-1.5">
             <Label htmlFor="confirmPassword">Confirmar Contraseña</Label>
             <div className="relative">
@@ -139,7 +135,6 @@ const ForgotPassword = () => {
           </Button>
         </form>
 
-        {/* Back to login */}
         <button
           className="flex items-center justify-center gap-2 w-full text-sm text-slate-500 hover:text-slate-700 transition-colors disabled:opacity-50"
           onClick={handleNavigateToLogin}
@@ -154,4 +149,4 @@ const ForgotPassword = () => {
 };
 
 export default ForgotPassword;
-
+

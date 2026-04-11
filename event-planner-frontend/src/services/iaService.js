@@ -19,7 +19,9 @@ export const generarDescripcion = async (id_evento, tono) => {
         headers: authHeaders(),
         body: JSON.stringify({ id_evento, tono })
     });
-    return handleResponse(res);
+    const data = await handleResponse(res);
+    if (data && typeof data === 'object' && data.descripcion_generada) return data.descripcion_generada;
+    return typeof data === 'string' ? data : String(data);
 };
 
 export const generarMensaje = async (id_evento, tipo_mensaje, contexto_adicional) => {
@@ -28,7 +30,9 @@ export const generarMensaje = async (id_evento, tipo_mensaje, contexto_adicional
         headers: authHeaders(),
         body: JSON.stringify({ id_evento, tipo_mensaje, contexto_adicional: contexto_adicional || undefined })
     });
-    return handleResponse(res);
+    const data = await handleResponse(res);
+    if (data && typeof data === 'object' && data.texto_generado) return data.texto_generado;
+    return typeof data === 'string' ? data : String(data);
 };
 
 export const consultarChatbot = async (pregunta, id_evento) => {
@@ -45,4 +49,19 @@ export const consultarChatbot = async (pregunta, id_evento) => {
     if (result && typeof result === 'object' && result.respuesta) return result.respuesta;
     if (typeof result === 'string') return result;
     return String(result);
+};
+
+export const planificarConIA = async (mensaje, historial, contexto) => {
+    const res = await fetch(`${API_URL}/ia/planificar-evento`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({
+            mensaje,
+            historial: historial || [],
+            contexto: contexto || {}
+        })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Error en la solicitud');
+    return data.data || { mensaje: 'Sin respuesta del asistente', estructura: null };
 };

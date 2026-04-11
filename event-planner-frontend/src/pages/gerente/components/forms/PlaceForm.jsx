@@ -53,7 +53,7 @@ const PlaceForm = ({
                 </div>
 
                 <form onSubmit={handleSubmit} className="px-6 py-5 space-y-5">
-                    {/* Empresa info */}
+
                     <div>
                         <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Información de la Empresa</p>
                         <div className="h-9 flex items-center px-3 rounded-lg bg-slate-50 border border-slate-200 text-sm font-medium text-slate-700">
@@ -61,7 +61,6 @@ const PlaceForm = ({
                         </div>
                     </div>
 
-                    {/* Place details */}
                     <div className="space-y-4">
                         <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Información del Lugar</p>
 

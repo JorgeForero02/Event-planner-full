@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Users, Building2, Eye, Pencil } from 'lucide-react';
+import { Calendar, Users, Building2, Eye, Pencil, LayoutList } from 'lucide-react';
 import { cn } from '../../../../lib/utils';
 import StatusBadge from '../../../../components/ui/StatusBadge';
 
@@ -27,7 +27,7 @@ const EventCard = ({
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-card hover:shadow-md transition-shadow overflow-hidden flex flex-col">
-      {/* Card header */}
+
       <div className="px-5 pt-5 pb-3 flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h3 className="text-sm font-semibold text-slate-800 truncate leading-snug">
@@ -40,7 +40,6 @@ const EventCard = ({
         <StatusBadge status={claseKey} label={estado.texto} className="shrink-0" />
       </div>
 
-      {/* Progress bar */}
       {estado.tieneProgreso && (
         <div className="px-5 pb-3">
           <div className="flex items-center justify-between mb-1">
@@ -59,14 +58,12 @@ const EventCard = ({
         </div>
       )}
 
-      {/* Description */}
       {evento.descripcion && evento.descripcion !== 'Sin descripción disponible' && (
         <div className="px-5 pb-3">
           <p className="text-xs text-slate-500 line-clamp-2">{evento.descripcion}</p>
         </div>
       )}
 
-      {/* Meta */}
       <div className="px-5 pb-3 flex flex-wrap gap-x-4 gap-y-1">
         <span className="flex items-center gap-1 text-xs text-slate-500">
           <Calendar size={12} className="shrink-0" />
@@ -86,7 +83,6 @@ const EventCard = ({
         )}
       </div>
 
-      {/* CTA */}
       <div className="mt-auto px-5 pb-5 flex gap-2">
         <button
           onClick={() => onVerDetalles(evento)}
@@ -101,6 +97,13 @@ const EventCard = ({
         >
           <Pencil size={14} />
           Editar
+        </button>
+        <button
+          onClick={() => navigate(`/gerente/eventos/${evento.id}/agenda`)}
+          className="flex-1 flex items-center justify-center gap-2 h-9 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-semibold hover:bg-emerald-100 transition-colors border border-emerald-200"
+        >
+          <LayoutList size={14} />
+          Agenda
         </button>
       </div>
     </div>

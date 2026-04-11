@@ -21,7 +21,6 @@ const NotificacionesDropdown = ({ notificationsIcon }) => {
         limpiarFiltros
     } = useNotificaciones();
 
-    // Cerrar dropdown al hacer clic fuera
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -37,11 +36,9 @@ const NotificacionesDropdown = ({ notificationsIcon }) => {
 
     const toggleDropdown = async () => {
         if (!isOpen) {
-            // Si vamos a abrir, cargamos las notificaciones
             try {
                 await cargarNotificaciones();
             } catch (err) {
-                console.error('Error cargando notificaciones:', err);
             }
         }
         setIsOpen(!isOpen);
@@ -51,10 +48,8 @@ const NotificacionesDropdown = ({ notificationsIcon }) => {
         setFiltroEstado(nuevosFiltros.estado || null);
         setFiltroEntidad(nuevosFiltros.entidad_tipo || null);
         try {
-            // cambiarFiltros ya carga las notificaciones automáticamente
             await cambiarFiltros(nuevosFiltros);
         } catch (err) {
-            console.error('Error aplicando filtros:', err);
         }
     };
 
@@ -62,10 +57,8 @@ const NotificacionesDropdown = ({ notificationsIcon }) => {
         setFiltroEstado(null);
         setFiltroEntidad(null);
         try {
-            // limpiarFiltros ya carga las notificaciones automáticamente
             await limpiarFiltros();
         } catch (err) {
-            console.error('Error limpiando filtros:', err);
         }
     };
 
@@ -74,7 +67,6 @@ const NotificacionesDropdown = ({ notificationsIcon }) => {
         try {
             await marcarComoLeida(notificacionId);
         } catch (err) {
-            console.error('Error:', err);
         }
     };
 
@@ -83,7 +75,6 @@ const NotificacionesDropdown = ({ notificationsIcon }) => {
         try {
             await eliminarNotificacion(notificacionId);
         } catch (err) {
-            console.error('Error:', err);
         }
     };
 
@@ -91,7 +82,6 @@ const NotificacionesDropdown = ({ notificationsIcon }) => {
         try {
             await marcarTodasComoLeidas();
         } catch (err) {
-            console.error('Error:', err);
         }
     };
 
@@ -115,7 +105,7 @@ const NotificacionesDropdown = ({ notificationsIcon }) => {
 
     return (
         <div className={styles.dropdownContainer} ref={dropdownRef}>
-            {/* Botón del ícono de notificaciones */}
+
             <button
                 className={styles.notificationButton}
                 onClick={toggleDropdown}
@@ -133,7 +123,6 @@ const NotificacionesDropdown = ({ notificationsIcon }) => {
                 )}
             </button>
 
-            {/* Dropdown de notificaciones */}
             {isOpen && (
                 <div className={styles.dropdown}>
                     <div className={styles.dropdownHeader}>
@@ -149,7 +138,6 @@ const NotificacionesDropdown = ({ notificationsIcon }) => {
                         )}
                     </div>
 
-                    {/* Filtros */}
                     <div className={styles.filtrosContainer}>
                         <div className={styles.filtroSection}>
                             <label className={styles.filtroLabel}>Estado:</label>

@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import styles from './Agenda.module.css';
+import { Calendar, Clock, MapPin, Building2, ExternalLink, X } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../../../components/ui/dialog';
-import Calendar from '../../../../assets/calendar.png';
-import Clock from '../../../../assets/clock.png';
-import Location from '../../../../assets/lugar.png';
-import EventIcon from '../../../../assets/evento.png';
 import { formatFecha, formatHora } from '../../utils/dateUtils';
 import agendaService from '../../../../services/agendaService';
+
+const MODALIDAD_CLASSES = {
+    virtual: 'bg-sky-50 text-sky-700',
+    presencial: 'bg-violet-50 text-violet-700',
+    híbrida: 'bg-teal-50 text-teal-700',
+};
 
 const Agenda = ({ misInscripciones, onRegisterAttendance }) => {
     const [actividades, setActividades] = useState([]);
@@ -103,7 +105,7 @@ const Agenda = ({ misInscripciones, onRegisterAttendance }) => {
 
         if (eventoFiltro !== 'todos') {
             actividadesFiltradas = actividadesFiltradas.filter(
-                actividad => actividad.evento.id.toString() === eventoFiltro
+                actividad => actividad.evento?.id?.toString() === eventoFiltro
             );
         }
 
@@ -114,7 +116,6 @@ const Agenda = ({ misInscripciones, onRegisterAttendance }) => {
         if (actividades.length > 0) {
             aplicarFiltros(actividades, filtroEvento);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [filtroEvento, actividades]);
 
     useEffect(() => {
@@ -147,7 +148,7 @@ const Agenda = ({ misInscripciones, onRegisterAttendance }) => {
                     headers: { 'Authorization': `Bearer ${token}` }
                 }).then(r => r.json()),
 
-                fetch(`${API_URL}/eventos/${actividad.evento.id}`, {
+                fetch(`${API_URL}/eventos/${actividad.evento?.id}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 }).then(r => r.json())
             ]);
@@ -237,226 +238,194 @@ const Agenda = ({ misInscripciones, onRegisterAttendance }) => {
         return lugares.map(lugar => lugar.nombre).join(', ');
     };
 
-    const getEstadoActividad = (actividad) => {
-        if (agendaService.estaEnCurso(actividad)) {
-            return styles.enCurso;
-        }
-        if (agendaService.esProxima(actividad)) {
-            return styles.proxima;
-        }
-        return styles.pasada;
+    const getEstadoClasses = (actividad) => {
+        if (agendaService.estaEnCurso(actividad)) return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
+        if (agendaService.esProxima(actividad)) return 'bg-amber-50 text-amber-700 border border-amber-200';
+        return 'bg-slate-100 text-slate-600 border border-slate-200';
     };
 
     const getTextoEstado = (actividad) => {
-        if (agendaService.estaEnCurso(actividad)) {
-            return 'En curso';
-        }
-        if (agendaService.esProxima(actividad)) {
-            return 'Próxima';
-        }
+        if (agendaService.estaEnCurso(actividad)) return 'En curso';
+        if (agendaService.esProxima(actividad)) return 'Próxima';
         return 'Finalizada';
     };
 
     if (misInscripciones.length === 0) {
         return (
-            <div className={styles.agendaContainer}>
-                <div className={styles.headerSection}>
-                    <h1 className={styles.mainTitle}>Mi Agenda</h1>
-                    <p className={styles.subtitle}>Consulta las actividades de tus eventos inscritos</p>
+            <div className="space-y-6">
+                <div>
+                    <h1 className="text-2xl font-bold text-slate-800">Mi Agenda</h1>
+                    <p className="text-sm text-slate-500 mt-1">Consulta las actividades de tus eventos inscritos</p>
                 </div>
-                <div className={styles.noEvents}>
-                    <h3>No tienes eventos en tu agenda</h3>
-                    <p>Inscríbete en eventos para ver las actividades programadas</p>
+                <div className="flex flex-col items-center justify-center py-16 gap-3 bg-white rounded-xl border border-slate-200">
+                    <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center">
+                        <Calendar size={24} className="text-slate-400" />
+                    </div>
+                    <div className="text-center">
+                        <h3 className="text-lg font-semibold text-slate-700">No tienes eventos en tu agenda</h3>
+                        <p className="text-sm text-slate-500 mt-1">Inscríbete en eventos para ver las actividades programadas</p>
+                    </div>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className={styles.agendaContainer}>
-            <div className={styles.headerSection}>
-                <h1 className={styles.mainTitle}>Mi Agenda</h1>
-                <p className={styles.subtitle}>Consulta las actividades de tus eventos inscritos</p>
+        <div className="space-y-6">
+            <div>
+                <h1 className="text-2xl font-bold text-slate-800">Mi Agenda</h1>
+                <p className="text-sm text-slate-500 mt-1">Consulta las actividades de tus eventos inscritos</p>
             </div>
 
-            <div className={styles.filtersSection}>
-                <div className={styles.filterGroup}>
-                    <button
-                        className={`${styles.filterButton} ${filtro === 'proximas' ? styles.filterActive : ''}`}
-                        onClick={() => setFiltro('proximas')}
-                    >
-                        Próximas
-                    </button>
-                    <button
-                        className={`${styles.filterButton} ${filtro === 'semana' ? styles.filterActive : ''}`}
-                        onClick={() => setFiltro('semana')}
-                    >
-                        Esta semana
-                    </button>
-                    <button
-                        className={`${styles.filterButton} ${filtro === 'mes' ? styles.filterActive : ''}`}
-                        onClick={() => setFiltro('mes')}
-                    >
-                        Este mes
-                    </button>
-                    <button
-                        className={`${styles.filterButton} ${filtro === 'todas' ? styles.filterActive : ''}`}
-                        onClick={() => setFiltro('todas')}
-                    >
-                        Todas
-                    </button>
+            <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex flex-wrap gap-2">
+                    {[
+                        { key: 'proximas', label: 'Próximas' },
+                        { key: 'semana', label: 'Esta semana' },
+                        { key: 'mes', label: 'Este mes' },
+                        { key: 'todas', label: 'Todas' },
+                    ].map(({ key, label }) => (
+                        <button
+                            key={key}
+                            onClick={() => setFiltro(key)}
+                            className={`h-9 px-4 rounded-lg text-xs font-semibold transition-colors ${
+                                filtro === key
+                                    ? 'bg-brand-600 text-white'
+                                    : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                            }`}
+                        >
+                            {label}
+                        </button>
+                    ))}
                 </div>
 
-                <div className={styles.filtersRight}>
-                    <div className={styles.eventFilterGroup}>
-                        <label htmlFor="filtroEvento" className={styles.filterLabel}>
+                <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
+                        <label htmlFor="filtroEvento" className="text-xs font-medium text-slate-600 whitespace-nowrap">
                             Filtrar por evento:
                         </label>
-                        <select
-                            id="filtroEvento"
-                            value={filtroEvento}
-                            onChange={handleFiltroEventoChange}
-                            className={styles.eventFilterSelect}
-                            disabled={cargandoEventos}
-                        >
-                            <option value="todos">Todos los eventos</option>
-                            {eventosInscritos.map(evento => (
-                                <option key={evento.id} value={evento.id}>
-                                    {evento.titulo}
-                                </option>
-                            ))}
-                        </select>
-                        {filtroEvento !== 'todos' && (
-                            <button
-                                className={styles.clearEventFilter}
-                                onClick={limpiarFiltroEvento}
-                                title="Limpiar filtro de evento"
+                        <div className="relative">
+                            <select
+                                id="filtroEvento"
+                                value={filtroEvento}
+                                onChange={handleFiltroEventoChange}
+                                disabled={cargandoEventos}
+                                className="h-9 pl-3 pr-8 rounded-lg border border-slate-200 text-xs text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-brand-600/20 disabled:opacity-50"
                             >
-                                ×
-                            </button>
-                        )}
+                                <option value="todos">Todos los eventos</option>
+                                {eventosInscritos.map(evento => (
+                                    <option key={evento.id} value={evento.id}>
+                                        {evento.titulo}
+                                    </option>
+                                ))}
+                            </select>
+                            {filtroEvento !== 'todos' && (
+                                <button
+                                    onClick={limpiarFiltroEvento}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                                    title="Limpiar filtro"
+                                >
+                                    <X size={12} />
+                                </button>
+                            )}
+                        </div>
                     </div>
 
-                    <div className={styles.activitiesCount}>
+                    <span className="text-xs text-slate-500 whitespace-nowrap">
                         {actividadesFiltradas.length} actividad(es)
                         {filtroEvento !== 'todos' && actividades.length > 0 && (
-                            <span className={styles.filteredCount}>
-                                de {actividades.length} totales
-                            </span>
+                            <span className="ml-1 text-slate-400">de {actividades.length} totales</span>
                         )}
-                    </div>
+                    </span>
                 </div>
             </div>
 
             {cargando ? (
-                <div className={styles.loadingContainer}>
-                    <div className={styles.spinner}></div>
-                    <p>Cargando actividades...</p>
+                <div className="flex flex-col items-center justify-center py-16 gap-3">
+                    <div className="w-8 h-8 border-4 border-brand-600 border-t-transparent rounded-full animate-spin" />
+                    <p className="text-sm text-slate-500">Cargando actividades...</p>
                 </div>
             ) : actividadesFiltradas.length === 0 ? (
-                <div className={styles.noEvents}>
-                    <h3>No hay actividades {filtro !== 'todas' ? `para ${filtro}` : 'disponibles'}</h3>
-                    <p>
-                        {filtroEvento !== 'todos'
-                            ? `No se encontraron actividades para el evento seleccionado`
-                            : 'No se encontraron actividades con los filtros aplicados'
-                        }
-                    </p>
-                    {filtroEvento !== 'todos' && (
-                        <button
-                            className={styles.btnShowAll}
-                            onClick={limpiarFiltroEvento}
-                        >
-                            Ver todos los eventos
-                        </button>
-                    )}
+                <div className="flex flex-col items-center justify-center py-16 gap-3 bg-white rounded-xl border border-slate-200">
+                    <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center">
+                        <Calendar size={24} className="text-slate-400" />
+                    </div>
+                    <div className="text-center">
+                        <h3 className="text-base font-semibold text-slate-700">
+                            No hay actividades {filtro !== 'todas' ? `para ${filtro}` : 'disponibles'}
+                        </h3>
+                        <p className="text-sm text-slate-500 mt-1">
+                            {filtroEvento !== 'todos'
+                                ? 'No se encontraron actividades para el evento seleccionado'
+                                : 'No se encontraron actividades con los filtros aplicados'}
+                        </p>
+                        {filtroEvento !== 'todos' && (
+                            <button
+                                onClick={limpiarFiltroEvento}
+                                className="mt-3 h-9 px-4 rounded-lg text-xs font-semibold bg-brand-600 text-white hover:bg-brand-700 transition-colors"
+                            >
+                                Ver todos los eventos
+                            </button>
+                        )}
+                    </div>
                 </div>
             ) : (
-                <div className={styles.agendaGrid}>
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                     {actividadesFiltradas.map((actividad, index) => {
-                        const estadoActividad = getEstadoActividad(actividad);
+                        const estadoClases = getEstadoClasses(actividad);
                         const textoEstado = getTextoEstado(actividad);
                         const lugaresTexto = obtenerLugaresTexto(actividad.lugares);
+                        const modalidadKey = actividad.evento?.modalidad?.toLowerCase();
+                        const modalidadCls = MODALIDAD_CLASSES[modalidadKey] || 'bg-slate-100 text-slate-600';
 
                         return (
-                            <div key={`${actividad.id_actividad}-${index}`} className={styles.agendaCard}>
-                                <div className={styles.cardHeader}>
-                                    <div className={styles.eventTitleSection}>
-                                        <h3 className={styles.eventTitle}>
-                                            {actividad.titulo}
-                                        </h3>
-                                    </div>
-                                    <div className={styles.headerRight}>
-                                        <span className={`${styles.eventModality} ${styles[actividad.evento.modalidad?.toLowerCase()]}`}>
-                                            {actividad.evento.modalidad}
-                                        </span>
-                                        <span className={`${styles.estadoActividad} ${estadoActividad}`}>
+                            <div key={`${actividad.id_actividad}-${index}`}
+                                className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden flex flex-col">
+
+                                <div className="px-5 pt-5 pb-3 flex items-start justify-between gap-3">
+                                    <h3 className="text-sm font-semibold text-slate-800 leading-snug line-clamp-2 flex-1">
+                                        {actividad.titulo}
+                                    </h3>
+                                    <div className="flex flex-col items-end gap-1 shrink-0">
+                                        {actividad.evento?.modalidad && (
+                                            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${modalidadCls}`}>
+                                                {actividad.evento.modalidad}
+                                            </span>
+                                        )}
+                                        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold border ${estadoClases}`}>
                                             {textoEstado}
                                         </span>
                                     </div>
                                 </div>
 
-                                <div className={styles.cardContent}>
-                                    <div className={styles.eventDetails}>
-                                        <div className={styles.detailItem}>
-                                            <span className={styles.detailIcon}>
-                                                <img src={Calendar} alt="Fecha" className={styles.iconImage} />
-                                            </span>
-                                            <div className={styles.detailContent}>
-                                                <span className={styles.detailLabel}>Fecha</span>
-                                                <span className={styles.detailValue}>
-                                                    {formatFecha(actividad.fecha_actividad)}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <div className={styles.detailItem}>
-                                            <span className={styles.detailIcon}>
-                                                <img src={Clock} alt="Hora" className={styles.iconImage} />
-                                            </span>
-                                            <div className={styles.detailContent}>
-                                                <span className={styles.detailLabel}>Horario</span>
-                                                <span className={styles.detailValue}>
-                                                    {formatRangoHoras(actividad.hora_inicio, actividad.hora_fin)}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <div className={styles.detailItem}>
-                                            <span className={styles.detailIcon}>
-                                                <img src={Location} alt="Lugar" className={styles.iconImage} />
-                                            </span>
-                                            <div className={styles.detailContent}>
-                                                <span className={styles.detailLabel}>Lugar</span>
-                                                <span className={styles.detailValue}>
-                                                    {lugaresTexto}
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        {actividad.evento.empresa && (
-                                            <div className={styles.detailItem}>
-                                                <span className={styles.detailIcon}>
-                                                    <img src={EventIcon} alt="Empresa" className={styles.iconImage} />
-                                                </span>
-                                                <div className={styles.detailContent}>
-                                                    <span className={styles.detailLabel}>Empresa</span>
-                                                    <span className={styles.detailValue}>
-                                                        {actividad.evento.empresa}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        )}
+                                <div className="px-5 pb-3 space-y-2 flex-1">
+                                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                                        <Calendar size={12} className="text-slate-400 shrink-0" />
+                                        <span>{formatFecha(actividad.fecha_actividad)}</span>
                                     </div>
-
-                                    <div className={styles.detallesActions}>
-                                        <button
-                                            className={styles.btnVerDetalles}
-                                            onClick={() => abrirModalDetalles(actividad)}
-                                        >
-                                            Ver detalles completos
-                                        </button>
+                                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                                        <Clock size={12} className="text-slate-400 shrink-0" />
+                                        <span>{formatRangoHoras(actividad.hora_inicio, actividad.hora_fin)}</span>
                                     </div>
+                                    <div className="flex items-start gap-2 text-xs text-slate-500">
+                                        <MapPin size={12} className="text-slate-400 shrink-0 mt-0.5" />
+                                        <span>{lugaresTexto}</span>
+                                    </div>
+                                    {actividad.evento?.empresa && (
+                                        <div className="flex items-center gap-2 text-xs text-slate-500">
+                                            <Building2 size={12} className="text-slate-400 shrink-0" />
+                                            <span>{actividad.evento.empresa}</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="px-5 pb-4 pt-1">
+                                    <button
+                                        onClick={() => abrirModalDetalles(actividad)}
+                                        className="w-full h-9 rounded-lg text-xs font-semibold bg-brand-600 text-white hover:bg-brand-700 transition-colors"
+                                    >
+                                        Ver detalles completos
+                                    </button>
                                 </div>
                             </div>
                         );
@@ -473,167 +442,126 @@ const Agenda = ({ misInscripciones, onRegisterAttendance }) => {
                         <DialogTitle>Detalles de la Actividad</DialogTitle>
                     </DialogHeader>
 
-                        <div className={styles.modalBody}>
-                            {cargandoDetalles ? (
-                                <div className={styles.cargandoDetalles}>
-                                    <div className={styles.spinner}></div>
-                                    <p>Cargando información detallada...</p>
-                                </div>
-                            ) : (
-                                <div className={styles.detallesCompletos}>
-                                    <div className={styles.infoSection}>
-                                        <h3>Información General</h3>
-                                        <div className={styles.infoGrid}>
-                                            <div className={styles.infoItem}>
-                                                <strong>Empresa:</strong>
-                                                <span>
-                                                    {detallesCompletos?.evento?.empresa?.nombre ||
-                                                        detallesCompletos?.evento?.empresa ||
-                                                        actividadSeleccionada.evento.empresa ||
-                                                        'No especificada'}
-                                                </span>
+                    <div className="space-y-5 max-h-[60vh] overflow-y-auto pr-1">
+                        {!actividadSeleccionada ? null : cargandoDetalles ? (
+                            <div className="flex flex-col items-center justify-center py-12 gap-3">
+                                <div className="w-8 h-8 border-4 border-brand-600 border-t-transparent rounded-full animate-spin" />
+                                <p className="text-sm text-slate-500">Cargando información detallada...</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-5">
+                                <section>
+                                    <h3 className="text-sm font-semibold text-slate-700 mb-3 pb-2 border-b border-slate-100">Información General</h3>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        {[
+                                            { label: 'Empresa', value: detallesCompletos?.evento?.empresa?.nombre || detallesCompletos?.evento?.empresa || actividadSeleccionada.evento?.empresa || 'No especificada' },
+                                            { label: 'Evento', value: actividadSeleccionada.evento?.titulo || 'Sin título' },
+                                            { label: 'Actividad', value: actividadSeleccionada.titulo },
+                                            { label: 'Modalidad', value: detallesCompletos?.actividad?.evento?.modalidad || actividadSeleccionada.evento?.modalidad || 'No especificada' },
+                                        ].map(({ label, value }) => (
+                                            <div key={label} className="bg-slate-50 rounded-lg p-3">
+                                                <p className="text-xs text-slate-500 mb-0.5">{label}</p>
+                                                <p className="text-sm font-medium text-slate-800">{value}</p>
                                             </div>
-
-                                            <div className={styles.infoItem}>
-                                                <strong>Evento:</strong>
-                                                <span>{actividadSeleccionada.evento.titulo}</span>
-                                            </div>
-
-                                            <div className={styles.infoItem}>
-                                                <strong>Actividad:</strong>
-                                                <span>{actividadSeleccionada.titulo}</span>
-                                            </div>
-
-                                            <div className={styles.infoItem}>
-                                                <strong>Modalidad:</strong>
-                                                <span>
-                                                    {detallesCompletos?.actividad?.evento?.modalidad ||
-                                                        actividadSeleccionada.evento.modalidad ||
-                                                        'No especificada'}
-                                                </span>
-                                            </div>
-                                        </div>
+                                        ))}
                                     </div>
+                                </section>
 
-                                    {actividadSeleccionada.descripcion && (
-                                        <div className={styles.infoSection}>
-                                            <h3>Descripción</h3>
-                                            <p className={styles.descripcionTexto}>
-                                                {actividadSeleccionada.descripcion}
-                                            </p>
-                                        </div>
-                                    )}
+                                {actividadSeleccionada.descripcion && (
+                                    <section>
+                                        <h3 className="text-sm font-semibold text-slate-700 mb-2 pb-2 border-b border-slate-100">Descripción</h3>
+                                        <p className="text-sm text-slate-600 leading-relaxed">{actividadSeleccionada.descripcion}</p>
+                                    </section>
+                                )}
 
-                                    <div className={styles.infoSection}>
-                                        <h3>Lugares</h3>
-                                        {actividadSeleccionada.lugares && actividadSeleccionada.lugares.length > 0 ? (
-                                            <div className={styles.lugaresLista}>
-                                                {actividadSeleccionada.lugares.map((lugar, index) => (
-                                                    <div key={lugar.id || index} className={styles.lugarItem}>
-                                                        <h4 className={styles.lugarNombre}>{lugar.nombre}</h4>
-                                                        {lugar.descripcion && (
-                                                            <p className={styles.lugarDescripcion}>{lugar.descripcion}</p>
-                                                        )}
-                                                        <div className={styles.lugarDetalles}>
-                                                            {lugar.capacidad && (
-                                                                <span><strong>Capacidad:</strong> {lugar.capacidad}</span>
-                                                            )}
-                                                            {lugar.equipamiento && (
-                                                                <span><strong>Equipamiento:</strong> {lugar.equipamiento}</span>
-                                                            )}
-                                                        </div>
+                                <section>
+                                    <h3 className="text-sm font-semibold text-slate-700 mb-3 pb-2 border-b border-slate-100">Lugares</h3>
+                                    {actividadSeleccionada.lugares && actividadSeleccionada.lugares.length > 0 ? (
+                                        <div className="space-y-2">
+                                            {actividadSeleccionada.lugares.map((lugar, index) => (
+                                                <div key={lugar.id || index} className="bg-slate-50 rounded-lg p-3">
+                                                    <p className="text-sm font-semibold text-slate-800">{lugar.nombre}</p>
+                                                    {lugar.descripcion && <p className="text-xs text-slate-500 mt-0.5">{lugar.descripcion}</p>}
+                                                    <div className="flex gap-4 mt-1">
+                                                        {lugar.capacidad && <span className="text-xs text-slate-600"><strong>Capacidad:</strong> {lugar.capacidad}</span>}
+                                                        {lugar.equipamiento && <span className="text-xs text-slate-600"><strong>Equipamiento:</strong> {lugar.equipamiento}</span>}
                                                     </div>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <p>Actividad virtual - Sin lugar físico asignado</p>
-                                        )}
-                                    </div>
-
-                                    <div className={styles.infoSection}>
-                                        <h3>Organizador</h3>
-                                        <div className={styles.infoGrid}>
-                                            <div className={styles.infoItem}>
-                                                <strong>Nombre:</strong>
-                                                <span>{detallesCompletos?.evento?.creador?.nombre || 'No especificado'}</span>
-                                            </div>
-                                            <div className={styles.infoItem}>
-                                                <strong>Email:</strong>
-                                                <span>{detallesCompletos?.evento?.creador?.correo || 'No especificado'}</span>
-                                            </div>
+                                                </div>
+                                            ))}
                                         </div>
-                                    </div>
-
-                                    <div className={styles.infoSection}>
-                                        <h3>Ponentes</h3>
-                                        {detallesCompletos?.ponentes && detallesCompletos.ponentes.length > 0 ? (
-                                            <div className={styles.ponentesLista}>
-                                                {detallesCompletos.ponentes.map((ponente, index) => (
-                                                    <div key={index} className={styles.ponenteCard}>
-                                                        <div className={styles.ponenteHeader}>
-                                                            <div className={styles.ponenteInfo}>
-                                                                <h4 className={styles.ponenteNombre}>
-                                                                    {ponente.nombre}
-                                                                </h4>
-                                                                {ponente.especialidad && (
-                                                                    <p className={styles.ponenteEspecialidad}>
-                                                                        {ponente.especialidad}
-                                                                    </p>
-                                                                )}
-                                                                {ponente.correo && (
-                                                                    <p className={styles.ponenteCorreo}>
-                                                                        {ponente.correo}
-                                                                    </p>
-                                                                )}
-                                                            </div>
-                                                        </div>
-
-                                                        {ponente.descripcion && (
-                                                            <p className={styles.ponenteDescripcion}>
-                                                                {ponente.descripcion}
-                                                            </p>
-                                                        )}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <p>No hay ponentes asignados para esta actividad</p>
-                                        )}
-                                    </div>
-
-                                    <div className={styles.infoSection}>
-                                        <h3>Horario</h3>
-                                        <div className={styles.horarioInfo}>
-                                            <div className={styles.horarioItem}>
-                                                <strong>Fecha:</strong> {formatFecha(actividadSeleccionada.fecha_actividad)}
-                                            </div>
-                                            <div className={styles.horarioItem}>
-                                                <strong>Horario:</strong> {formatRangoHoras(actividadSeleccionada.hora_inicio, actividadSeleccionada.hora_fin)}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {actividadSeleccionada.url && (
-                                        <div className={styles.infoSection}>
-                                            <h3>Enlace de la Actividad</h3>
-                                            <a
-                                                href={actividadSeleccionada.url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className={styles.enlaceActividad}
-                                            >
-                                                Acceder a la actividad
-                                            </a>
-                                        </div>
+                                    ) : (
+                                        <p className="text-sm text-slate-500">Actividad virtual - Sin lugar físico asignado</p>
                                     )}
-                                </div>
-                            )}
-                        </div>
+                                </section>
+
+                                <section>
+                                    <h3 className="text-sm font-semibold text-slate-700 mb-3 pb-2 border-b border-slate-100">Organizador</h3>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <div className="bg-slate-50 rounded-lg p-3">
+                                            <p className="text-xs text-slate-500 mb-0.5">Nombre</p>
+                                            <p className="text-sm font-medium text-slate-800">{detallesCompletos?.evento?.creador?.nombre || 'No especificado'}</p>
+                                        </div>
+                                        <div className="bg-slate-50 rounded-lg p-3">
+                                            <p className="text-xs text-slate-500 mb-0.5">Email</p>
+                                            <p className="text-sm font-medium text-slate-800">{detallesCompletos?.evento?.creador?.correo || 'No especificado'}</p>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section>
+                                    <h3 className="text-sm font-semibold text-slate-700 mb-3 pb-2 border-b border-slate-100">Ponentes</h3>
+                                    {detallesCompletos?.ponentes && detallesCompletos.ponentes.length > 0 ? (
+                                        <div className="space-y-2">
+                                            {detallesCompletos.ponentes.map((ponente, index) => (
+                                                <div key={index} className="bg-slate-50 rounded-lg p-3">
+                                                    <p className="text-sm font-semibold text-slate-800">{ponente.nombre}</p>
+                                                    {ponente.especialidad && <p className="text-xs text-slate-500 mt-0.5">{ponente.especialidad}</p>}
+                                                    {ponente.correo && <p className="text-xs text-slate-400 mt-0.5">{ponente.correo}</p>}
+                                                    {ponente.descripcion && <p className="text-xs text-slate-600 mt-1">{ponente.descripcion}</p>}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-sm text-slate-500">No hay ponentes asignados para esta actividad</p>
+                                    )}
+                                </section>
+
+                                <section>
+                                    <h3 className="text-sm font-semibold text-slate-700 mb-3 pb-2 border-b border-slate-100">Horario</h3>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <div className="bg-slate-50 rounded-lg p-3">
+                                            <p className="text-xs text-slate-500 mb-0.5">Fecha</p>
+                                            <p className="text-sm font-medium text-slate-800">{formatFecha(actividadSeleccionada.fecha_actividad)}</p>
+                                        </div>
+                                        <div className="bg-slate-50 rounded-lg p-3">
+                                            <p className="text-xs text-slate-500 mb-0.5">Horario</p>
+                                            <p className="text-sm font-medium text-slate-800">{formatRangoHoras(actividadSeleccionada.hora_inicio, actividadSeleccionada.hora_fin)}</p>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                {actividadSeleccionada.url && (
+                                    <section>
+                                        <h3 className="text-sm font-semibold text-slate-700 mb-2 pb-2 border-b border-slate-100">Enlace de la Actividad</h3>
+                                        <a
+                                            href={actividadSeleccionada.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-1.5 text-sm text-brand-600 hover:text-brand-700 font-medium"
+                                        >
+                                            <ExternalLink size={14} />
+                                            Acceder a la actividad
+                                        </a>
+                                    </section>
+                                )}
+                            </div>
+                        )}
+                    </div>
 
                         <DialogFooter>
                             <button
-                                className={styles.btnCerrar}
                                 onClick={cerrarModalDetalles}
+                                className="h-9 px-5 rounded-lg text-xs font-semibold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-colors"
                             >
                                 Cerrar
                             </button>

@@ -1,4 +1,3 @@
-// File: EnviarEncuestaAsistentes.jsx
 import React, { useState, useEffect } from 'react';
 import asistenciaService from '../../../components/asistenciaService';
 import encuestaService from '../../../components/encuestaService';
@@ -13,7 +12,6 @@ const EnviarEncuestaAsistentes = ({ encuesta, eventoId, onCerrar, onEnvioExitoso
     const [resultado, setResultado] = useState(null);
     const [mostrarConfirmacion, setMostrarConfirmacion] = useState(false);
 
-    // Cargar asistentes al montar el componente
     useEffect(() => {
         cargarAsistentes();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -24,12 +22,9 @@ const EnviarEncuestaAsistentes = ({ encuesta, eventoId, onCerrar, onEnvioExitoso
             setError(null);
 
             const response = await asistenciaService.obtenerAsistenciasEvento(eventoId);
-            console.log(response)
 
-            // Los datos están en response.data.inscripciones
             const inscripciones = response.data?.inscripciones || [];
 
-            // Filtrar solo asistentes confirmados
             const asistentesInscritos = inscripciones.filter(
                 inscripcion => inscripcion.estado?.toLowerCase() === 'confirmada'
             );
@@ -37,7 +32,6 @@ const EnviarEncuestaAsistentes = ({ encuesta, eventoId, onCerrar, onEnvioExitoso
             setAsistentes(asistentesInscritos);
         } catch (err) {
             setError('Error al cargar los asistentes: ' + (err.message || 'Error desconocido'));
-            console.error('Error cargando asistentes:', err);
         } finally {
             setLoadingAsistentes(false);
         }
@@ -65,19 +59,16 @@ const EnviarEncuestaAsistentes = ({ encuesta, eventoId, onCerrar, onEnvioExitoso
                     asistentes: response.data.asistentes
                 });
 
-                // Notificar al componente padre
                 if (onEnvioExitoso) {
                     onEnvioExitoso(response.data);
                 }
 
-                // Cerrar automáticamente después de 3 segundos
                 setTimeout(() => {
                     if (onCerrar) onCerrar();
                 }, 3000);
             }
         } catch (err) {
             setError(err.message || 'Error al enviar las encuestas');
-            console.error('Error enviando encuestas:', err);
         } finally {
             setLoading(false);
         }
@@ -118,7 +109,7 @@ const EnviarEncuestaAsistentes = ({ encuesta, eventoId, onCerrar, onEnvioExitoso
                     </div>
 
                     <div className="card-body">
-                        {/* Información de asistentes */}
+
                         <div className="info-section">
                             <div className="info-item">
                                 <span className="info-label">Total de asistentes inscritos:</span>
@@ -136,7 +127,6 @@ const EnviarEncuestaAsistentes = ({ encuesta, eventoId, onCerrar, onEnvioExitoso
                             </div>
                         </div>
 
-                        {/* Lista de asistentes */}
                         {asistentes.length > 0 && (
                             <div className="asistentes-preview">
                                 <h3>Vista previa de asistentes que recibirán la encuesta</h3>
@@ -160,7 +150,6 @@ const EnviarEncuestaAsistentes = ({ encuesta, eventoId, onCerrar, onEnvioExitoso
                             </div>
                         )}
 
-                        {/* Mensajes de error */}
                         {error && (
                             <div className="alert alert-error">
                                 <svg className="alert-icon" fill="currentColor" viewBox="0 0 20 20">
@@ -170,7 +159,6 @@ const EnviarEncuestaAsistentes = ({ encuesta, eventoId, onCerrar, onEnvioExitoso
                             </div>
                         )}
 
-                        {/* Resultado exitoso */}
                         {resultado && resultado.tipo === 'success' && (
                             <div className="alert alert-success">
                                 <svg className="alert-icon" fill="currentColor" viewBox="0 0 20 20">
@@ -186,7 +174,6 @@ const EnviarEncuestaAsistentes = ({ encuesta, eventoId, onCerrar, onEnvioExitoso
                             </div>
                         )}
 
-                        {/* Modal de confirmación */}
                         {mostrarConfirmacion && (
                             <div className="confirmacion-overlay">
                                 <div className="confirmacion-content">
@@ -218,7 +205,6 @@ const EnviarEncuestaAsistentes = ({ encuesta, eventoId, onCerrar, onEnvioExitoso
                             </div>
                         )}
 
-                        {/* Botón principal */}
                         <div className="actions-section">
                             <button
                                 className="btn btn-enviar"

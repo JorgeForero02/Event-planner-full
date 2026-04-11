@@ -1,4 +1,3 @@
-// src/layouts/Sidebar/sidebarGerente/GerenteSidebar.jsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {

@@ -20,9 +20,7 @@ export const useLogin = () => {
     setLoading(true);
 
     try {
-      // Usar el método de login del AuthContext para actualizar el estado global
       const selectedRole = localStorage.getItem('selected_role');
-      console.log('Rol seleccionado en UI:', selectedRole);
 
       const result = await login(email, password, selectedRole);
 
@@ -30,16 +28,11 @@ export const useLogin = () => {
         throw new Error(result.error || 'Error durante el inicio de sesión');
       }
 
-      // result.redirectPath puede venir del AuthProvider
       const redirectPath = result.redirectPath || getRedirectPath(localStorage.getItem('selected_role'));
-      console.log('Login exitoso!');
-      console.log('Redirigiendo a:', redirectPath);
       navigate(redirectPath);
 
     } catch (err) {
-      console.error('Error durante el inicio de sesión:', err);
 
-      // Manejo de errores de red
       if (err.name === 'TypeError' && err.message.includes('fetch')) {
         setError('No se pudo conectar con el servidor. Verifica tu conexión a internet.');
       } else if (err.message.includes('ETIMEDOUT') || err.message.includes('timeout')) {
@@ -65,18 +58,15 @@ export const useLogin = () => {
   };
 
   return {
-    // Estados
     email,
     password,
     showPassword,
     error,
     loading,
 
-    // Funciones para actualizar estados
     setEmail,
     setPassword,
 
-    // Funciones de acción
     handleLogin,
     togglePasswordVisibility,
     handleNavigateToForgotPassword,

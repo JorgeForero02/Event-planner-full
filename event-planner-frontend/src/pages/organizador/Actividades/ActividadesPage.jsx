@@ -9,7 +9,8 @@ const ActividadesPage = () => {
     const navigate = useNavigate();
     const [eventosInscritos, setEventosInscritos] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [usuario, setUsuario] = useState(null);
+    // eslint-disable-next-line no-unused-vars
+    const [_usuario, setUsuario] = useState(null);
 
     const cargarDatos = useCallback(async () => {
         try {
@@ -67,7 +68,6 @@ const ActividadesPage = () => {
         );
     }
 
-    console.log(usuario)
     return (
         <div className="actividades-page">
             <Sidebar />

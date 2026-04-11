@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import styles from './evento.module.css';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../components/ui/dialog';
+import { useToast } from '../../contexts/ToastContext';
 
 const Evento = () => {
+    const toast = useToast();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [formData, setFormData] = useState({
@@ -106,9 +108,7 @@ const Evento = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log('Inscripción:', { evento: selectedEvent, datos: formData });
-        // Aquí harías la llamada al backend
-        alert('Inscripción enviada correctamente');
+        toast.success('Inscripción enviada correctamente');
         handleCloseModal();
     };
 
@@ -216,7 +216,6 @@ const Evento = () => {
                 </div>
             </div>
 
-            {/* Modal de Inscripción */}
             <Dialog open={isModalOpen && !!selectedEvent} onOpenChange={(open) => !open && handleCloseModal()}>
               <DialogContent className="max-w-2xl">
                 <DialogHeader>

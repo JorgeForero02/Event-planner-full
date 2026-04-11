@@ -15,7 +15,7 @@ const EventFilters = ({
     return (
         <div className="bg-white rounded-xl border border-slate-200 shadow-card p-4 space-y-3">
             <div className="flex flex-col sm:flex-row gap-3">
-                {/* Search */}
+
                 <div className="relative flex-1">
                     <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                     <input
@@ -27,7 +27,6 @@ const EventFilters = ({
                     />
                 </div>
 
-                {/* Organizer filter */}
                 <div className="flex items-center gap-2">
                     <label className="text-xs font-medium text-slate-500 whitespace-nowrap">Organizador:</label>
                     <select

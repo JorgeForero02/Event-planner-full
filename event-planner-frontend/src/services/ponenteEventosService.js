@@ -1,4 +1,3 @@
-// src/pages/ponente/services/ponenteEventosService.js
 import { API_URL } from '../config/apiConfig';
 const API_BASE = API_URL;
 
@@ -8,7 +7,6 @@ export const ponenteEventosService = {
      */
     async obtenerEventosDisponibles(token) {
         try {
-            console.log('🎤 Obteniendo eventos disponibles para ponente...');
 
             const response = await fetch(`${API_BASE}/inscripciones/eventos-disponibles`, {
                 method: 'GET',
@@ -18,16 +16,12 @@ export const ponenteEventosService = {
                 }
             });
 
-            console.log('📡 Response status eventos disponibles:', response.status);
 
             if (!response.ok) {
-                const errorText = await response.text();
-                console.error('❌ Error response eventos disponibles:', errorText);
                 throw new Error(`Error ${response.status}: ${response.statusText}`);
             }
 
             const result = await response.json();
-            console.log('📦 Eventos disponibles:', result);
 
             if (!result.success) {
                 throw new Error(result.message || 'Error al obtener eventos disponibles');
@@ -35,7 +29,6 @@ export const ponenteEventosService = {
 
             return this.formatearEventosLista(result.data || []);
         } catch (error) {
-            console.error('💥 Error en obtenerEventosDisponibles:', error);
             throw error;
         }
     },
@@ -45,7 +38,6 @@ export const ponenteEventosService = {
      */
     async obtenerDetallesEvento(eventoId, token) {
         try {
-            console.log(`🔍 Obteniendo detalles del evento: ${eventoId}`);
 
             const response = await fetch(`${API_BASE}/eventos/${eventoId}`, {
                 method: 'GET',
@@ -55,16 +47,12 @@ export const ponenteEventosService = {
                 }
             });
 
-            console.log('📡 Response status detalles evento:', response.status);
 
             if (!response.ok) {
-                const errorText = await response.text();
-                console.error('❌ Error response detalles evento:', errorText);
                 throw new Error(`Error ${response.status}: ${response.statusText}`);
             }
 
             const result = await response.json();
-            console.log('📦 Detalles COMPLETOS del evento:', result);
 
             if (!result.success || !result.data) {
                 throw new Error(result.message || 'Error al obtener detalles del evento');
@@ -72,7 +60,6 @@ export const ponenteEventosService = {
 
             return this.formatearDetallesEvento(result.data);
         } catch (error) {
-            console.error('💥 Error en obtenerDetallesEvento:', error);
             throw error;
         }
     },
@@ -105,16 +92,12 @@ export const ponenteEventosService = {
      * Formatea los detalles del evento (más robusto para objetos anidados)
      */
     formatearDetallesEvento(evento) {
-        console.log('📋 Formateando detalles completos para ponente:', evento);
 
-        // Función para extraer valores de objetos anidados de forma segura
         const extraerValorSeguro = (obj, posiblesClaves, defaultValue = 'No disponible') => {
             if (!obj) return defaultValue;
 
-            // Si es string, número o booleano, devolverlo directamente
             if (typeof obj !== 'object') return obj;
 
-            // Buscar en las posibles claves
             for (let clave of posiblesClaves) {
                 if (obj[clave] !== undefined && obj[clave] !== null) {
                     return obj[clave];
@@ -124,15 +107,12 @@ export const ponenteEventosService = {
             return defaultValue;
         };
 
-        // Procesar organizador/creador
         const organizadorObj = evento.organizador || evento.creador || {};
         const organizador = extraerValorSeguro(organizadorObj, ['nombre', 'nombre_completo', 'name'], 'No especificado');
         const correoOrganizador = extraerValorSeguro(organizadorObj, ['correo', 'email']);
 
-        // Procesar empresa
         const empresa = extraerValorSeguro(evento.empresa, ['nombre', 'razon_social', 'name'], 'No especificada');
 
-        // Calcular cupos disponibles
         let cuposDisponibles = evento.cupos_disponibles;
         if (cuposDisponibles === undefined || cuposDisponibles === null) {
             const inscritosCount = evento.inscritos_count || 0;
@@ -155,13 +135,11 @@ export const ponenteEventosService = {
             empresa: empresa,
             estado: evento.estado,
             actividades: evento.actividades || [],
-            creador: organizadorObj, // Mantener el objeto completo por si acaso
+            creador: organizadorObj,
             fecha_creacion: evento.fecha_creacion,
             fecha_actualizacion: evento.fecha_actualizacion,
-            // Campos procesados específicamente
             organizador: organizador,
             correo_organizador: correoOrganizador,
-            // Información adicional
             id_empresa: evento.id_empresa,
             id_creador: evento.id_creador,
             inscritos_count: evento.inscritos_count || 0

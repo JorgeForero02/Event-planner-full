@@ -25,27 +25,21 @@ const Admin = () => {
         <Header isSidebarCollapsed={isMenuCollapsed} />
         <div className="flex-1 overflow-auto p-6">
           <Routes>
-            {/* Ruta para /admin */}
+
             <Route index element={<Navigate to="dashboard" replace />} />
             
-            {/* Ruta para /admin/dashboard */}
             <Route path="dashboard" element={<AdminDashboard />} />
             
-            {/* Ruta para /admin/roles */}
             <Route path="roles" element={<Roles />} />
             
-            {/* Ruta para /admin/usuarios */}
             <Route path="usuarios" element={<Usuarios />} />
             
-            {/* Rutas para afiliaciones */}
             <Route path="afiliaciones-pendientes" element={<AfiliacionesPendientes />} />
             <Route path="afiliaciones-aprobadas" element={<AfiliacionesAprobadas />} />
             <Route path="afiliaciones-rechazadas" element={<AfiliacionesRechazadas />} />
             
-            {/* Ruta para /admin/auditoria */}
             <Route path="auditoria" element={<AuditoriaSection />} />
 
-            {/* Ruta de fallback */}
             <Route path="*" element={<Navigate to="dashboard" replace />} />
           </Routes>
         </div>

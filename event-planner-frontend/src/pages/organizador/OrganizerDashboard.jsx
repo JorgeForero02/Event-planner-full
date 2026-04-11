@@ -1,4 +1,3 @@
-// OrganizerDashboard.jsx
 import React from 'react';
 import { useOrganizerDashboard } from '../../components/DashboardOrganizador';
 import { Header, MainContent } from './OrganizerComponents';

@@ -37,8 +37,7 @@ const CrearEvento = () => {
                     nombre: userData.nombre_empresa || 'Mi Empresa'
                 });
             }
-        } catch (error) {
-            console.error('Error:', error);
+        } catch {
             setMensaje({ tipo: 'error', texto: 'No se pudo cargar la información de la empresa' });
         } finally {
             setLoading(false);

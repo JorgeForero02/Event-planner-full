@@ -10,7 +10,6 @@ import { Button } from '../../components/ui/button';
 import { Alert, AlertDescription } from '../../components/ui/alert';
 
 const Empresa = () => {
-  console.log('🔵 Componente Empresa cargado - Versión con cambios');
   const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
   const navigate = useNavigate();
@@ -70,32 +69,25 @@ const Empresa = () => {
 
       if (response.ok) {
         const result = await response.json();
-        console.log('Países recibidos:', result);
         if (result.success && result.data !== undefined) {
-          // Asegurarse de que result.data es un array
           const paisesData = Array.isArray(result.data) ? result.data : [];
           setPaises(paisesData);
 
-          // Mostrar advertencia si no hay países
           if (paisesData.length === 0) {
-            console.warn('⚠️ No hay países disponibles en la base de datos');
             setError('No hay países disponibles. Por favor, contacte al administrador.');
           } else {
-            setError(''); // Limpiar error si hay países
+            setError('');
           }
         } else {
-          console.warn('Respuesta de países sin formato esperado:', result);
           setPaises([]);
           setError('Error en el formato de respuesta de países');
         }
       } else {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('Error al obtener países:', response.status, errorData);
+        await response.json().catch(() => ({}));
         setError('Error al cargar la lista de países');
         setPaises([]);
       }
     } catch (err) {
-      console.error('Error al cargar países:', err);
       setError('Error al cargar países');
       setPaises([]);
     }
@@ -116,7 +108,6 @@ const Empresa = () => {
         return;
       }
 
-      // Intentar múltiples formatos de URL para obtener ciudades por país
       const urlsToTry = [
         `${API_URL}/ciudades?pais=${idPais}`,
         `${API_URL}/paises/${idPais}/ciudades`,
@@ -124,9 +115,7 @@ const Empresa = () => {
       ];
 
       let ciudadesData = [];
-      let lastError = null;
 
-      // Intentar cada URL hasta que una funcione
       for (const url of urlsToTry) {
         try {
           const response = await fetch(url, {
@@ -145,36 +134,27 @@ const Empresa = () => {
 
           if (response.ok) {
             const result = await response.json();
-            console.log(`✅ Ciudades obtenidas desde ${url}:`, result);
 
             if (result.success && result.data) {
-              // Si result.data es un array, usarlo directamente
-              // Si es un objeto con ciudades, extraer el array
               ciudadesData = Array.isArray(result.data)
                 ? result.data
                 : (result.data.ciudades || result.data.data || []);
 
-              // Si las ciudades tienen id_pais, filtrar por país
               if (ciudadesData.length > 0 && ciudadesData[0].id_pais !== undefined) {
-                // eslint-disable-next-line eqeqeq
-                ciudadesData = ciudadesData.filter(ciudad => ciudad.id_pais == idPais);
+                ciudadesData = ciudadesData.filter(ciudad => String(ciudad.id_pais) === String(idPais));
               }
 
               setCiudades(ciudadesData);
-              return; // Éxito, salir de la función
+              return;
             }
           } else {
-            lastError = await response.json().catch(() => ({ status: response.status }));
-            console.log(`⚠️ URL ${url} falló con status ${response.status}`);
+            await response.json().catch(() => ({ status: response.status }));
           }
         } catch (err) {
-          console.log(`⚠️ Error al intentar ${url}:`, err.message);
-          lastError = err;
+          // continue to next URL
         }
       }
 
-      // Si ninguna URL funcionó, intentar obtener todas las ciudades y filtrar en el frontend
-      console.log('⚠️ Intentando obtener todas las ciudades como fallback...');
       try {
         const response = await fetch(`${API_URL}/ciudades`, {
           headers: {
@@ -186,26 +166,21 @@ const Empresa = () => {
           const result = await response.json();
           if (result.success && result.data) {
             const todasLasCiudades = Array.isArray(result.data) ? result.data : [];
-            // Filtrar ciudades por país en el frontend
             ciudadesData = todasLasCiudades.filter(ciudad =>
-              // eslint-disable-next-line eqeqeq
-              ciudad.id_pais == idPais || ciudad.pais_id == idPais || ciudad.idPais == idPais
+              String(ciudad.id_pais) === String(idPais) ||
+              String(ciudad.pais_id) === String(idPais) ||
+              String(ciudad.idPais) === String(idPais)
             );
-            console.log(`✅ ${ciudadesData.length} ciudades filtradas de ${todasLasCiudades.length} totales`);
             setCiudades(ciudadesData);
             return;
           }
         }
       } catch (fallbackErr) {
-        console.error('❌ Error en fallback:', fallbackErr);
       }
 
-      // Si llegamos aquí, no se pudieron obtener ciudades
-      console.error('❌ No se pudieron obtener ciudades para el país:', idPais, lastError);
       setCiudades([]);
 
     } catch (err) {
-      console.error('❌ Error al cargar ciudades:', err);
       setError('Error al cargar ciudades');
       setCiudades([]);
     }
@@ -268,7 +243,6 @@ const Empresa = () => {
       }
     } catch (err) {
       setError('Error de conexión con el servidor');
-      console.error('Error:', err);
     } finally {
       setLoading(false);
     }

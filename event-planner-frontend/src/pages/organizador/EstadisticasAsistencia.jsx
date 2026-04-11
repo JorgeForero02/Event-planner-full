@@ -6,8 +6,10 @@ import html2canvas from 'html2canvas';
 import Sidebar from './Sidebar';
 import asistenciaService from '../../components/asistenciaService';
 import './estadisticas.css';
+import { useToast } from '../../contexts/ToastContext';
 
 export default function EstadisticasAsistencia() {
+    const toast = useToast();
     const [eventos, setEventos] = useState([]);
     const [selectedEventoId, setSelectedEventoId] = useState(null);
     const [estadisticas, setEstadisticas] = useState({
@@ -65,7 +67,7 @@ export default function EstadisticasAsistencia() {
                     const json = await reporteRes.json();
                     reporteData = json.data || json;
                 }
-            } catch { /* fallback to inscripciones */ }
+            } catch {}
 
             const response = await asistenciaService.obtenerAsistenciasEvento(idEvento);
             const info = response.data || {};
@@ -145,7 +147,7 @@ export default function EstadisticasAsistencia() {
 
     const generarPDF = async () => {
         if (!selectedEventoId || !eventoSeleccionado) {
-            alert('Selecciona un evento primero');
+            toast.warning('Selecciona un evento primero');
             return;
         }
 
@@ -229,9 +231,8 @@ export default function EstadisticasAsistencia() {
             const nombreArchivo = `Reporte_${(eventoSeleccionado.titulo || eventoSeleccionado.nombre || 'Evento').replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
             pdf.save(nombreArchivo);
 
-        } catch (error) {
-            console.error('Error al generar PDF:', error);
-            alert('Hubo un error al generar el PDF. Por favor intenta nuevamente.');
+        } catch {
+            toast.error('Hubo un error al generar el PDF. Por favor intenta nuevamente.');
         } finally {
             setGeneratingPDF(false);
         }

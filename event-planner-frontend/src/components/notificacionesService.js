@@ -1,4 +1,3 @@
-// notificacionesService.js
 import axios from 'axios';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
@@ -21,7 +20,6 @@ export async function obtenerMisNotificaciones(estado = 'pendiente') {
 
         return response.data.data;
     } catch (error) {
-        console.error('Error al obtener notificaciones:', error);
         throw error;
     }
 }
@@ -35,7 +33,6 @@ export async function obtenerNotificacionesPorEstadoSolicitud(estadoSolicitud) {
         const token = localStorage.getItem('access_token');
         if (!token) throw new Error('No hay token de autenticación');
 
-        // Obtener todas las notificaciones leídas de tipo 1 (solicitudes)
         const response = await axios.get(
             `${API_URL}/notificaciones/mis-notificaciones?estado=leida`,
             {
@@ -45,14 +42,12 @@ export async function obtenerNotificacionesPorEstadoSolicitud(estadoSolicitud) {
 
         const notificaciones = response.data.data || [];
 
-        // Filtrar solo las notificaciones de tipo 1 que tienen asignación
         const notificacionesTipo1 = notificaciones.filter(n =>
             (n.id_TipoNotificacion === 1 || n.id_TipoNotificacion === '1') &&
             n.datos_adicionales?.id_ponente &&
             n.datos_adicionales?.id_actividad
         );
 
-        // Para cada notificación, consultar el estado de la solicitud
         const notificacionesConEstado = await Promise.all(
             notificacionesTipo1.map(async (notif) => {
                 try {
@@ -67,18 +62,15 @@ export async function obtenerNotificacionesPorEstadoSolicitud(estadoSolicitud) {
                         estado_solicitud: asignacionData.estado_solicitud
                     };
                 } catch (error) {
-                    console.error('Error obteniendo estado de asignación:', error);
                     return null;
                 }
             })
         );
 
-        // Filtrar por el estado solicitado y eliminar nulos
         return notificacionesConEstado.filter(n =>
             n && n.estado_solicitud === estadoSolicitud
         );
     } catch (error) {
-        console.error('Error al obtener notificaciones por estado de solicitud:', error);
         throw error;
     }
 }
@@ -101,7 +93,6 @@ export async function obtenerDetalleNotificacion(notificacionId) {
 
         return response.data.data;
     } catch (error) {
-        console.error('Error al obtener detalle de notificación:', error);
         throw error;
     }
 }
@@ -125,7 +116,6 @@ export async function marcarComoLeida(notificacionId) {
 
         return response.data.data;
     } catch (error) {
-        console.error('Error al marcar notificación como leída:', error);
         throw error;
     }
 }
@@ -148,7 +138,6 @@ export async function eliminarNotificacion(notificacionId) {
 
         return response.data;
     } catch (error) {
-        console.error('Error al eliminar notificación:', error);
         throw error;
     }
 }
@@ -170,7 +159,6 @@ export async function obtenerAsignacion(idPonente, idActividad) {
         );
         return response.data;
     } catch (error) {
-        console.error('Error al obtener asignación:', error);
         throw error;
     }
 }
@@ -195,7 +183,6 @@ export async function procesarSolicitud(idPonente, idActividad, aprobada, coment
         );
         return response.data;
     } catch (error) {
-        console.error('Error al procesar solicitud:', error);
         throw error;
     }
 }
@@ -210,7 +197,6 @@ export async function actualizarActividad(idActividad, cambios) {
         const token = localStorage.getItem('access_token');
         if (!token) throw new Error('No hay token de autenticación');
 
-        // Preparar el objeto de actualización
         const datosActualizacion = {};
 
         if (cambios.titulo) {
@@ -220,13 +206,11 @@ export async function actualizarActividad(idActividad, cambios) {
             datosActualizacion.descripcion = cambios.descripcion;
         }
         if (cambios.hora_inicio) {
-            // Asegurar formato HH:MM:SS
             datosActualizacion.hora_inicio = cambios.hora_inicio.length === 5
                 ? `${cambios.hora_inicio}:00`
                 : cambios.hora_inicio;
         }
         if (cambios.hora_fin) {
-            // Asegurar formato HH:MM:SS
             datosActualizacion.hora_fin = cambios.hora_fin.length === 5
                 ? `${cambios.hora_fin}:00`
                 : cambios.hora_fin;
@@ -247,7 +231,6 @@ export async function actualizarActividad(idActividad, cambios) {
 
         return response.data;
     } catch (error) {
-        console.error('Error al actualizar actividad:', error);
         throw error;
     }
 }

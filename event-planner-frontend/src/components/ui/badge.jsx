@@ -14,7 +14,6 @@ const badgeVariants = cva(
         success:     'border-transparent bg-emerald-100 text-emerald-800 border-emerald-200',
         warning:     'border-transparent bg-amber-100 text-amber-800 border-amber-200',
         info:        'border-transparent bg-sky-100 text-sky-800 border-sky-200',
-        // Event-specific
         draft:     'border-transparent bg-slate-100 text-slate-600',
         published: 'border-transparent bg-brand-100 text-brand-700 border-brand-200',
         cancelled: 'border-transparent bg-rose-100 text-rose-700 border-rose-200',

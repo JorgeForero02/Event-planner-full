@@ -1,5 +1,4 @@
 import React from 'react';
-import styles from './Encuestas.module.css';
 import StatusBadge from '../../../../components/ui/StatusBadge';
 
 const EncuestaCard = ({
@@ -21,7 +20,6 @@ const EncuestaCard = ({
     const esEncuestaActividad = encuesta.id_actividad !== null;
     const esEncuestaSatisfaccion = encuesta.tipo_encuesta === 'satisfaccion_evento';
 
-
     const getRespuestaAsistente = () => {
         if (!idAsistente || !encuesta.respuestas || encuesta.respuestas.length === 0) {
             return null;
@@ -34,89 +32,83 @@ const EncuestaCard = ({
     const respuestaAsistente = getRespuestaAsistente();
 
     return (
-        <div className={styles.encuestaCard}>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+            {/* Colored header strip */}
             <div
-                className={styles.cardHeader}
-                style={{ backgroundColor: color + '20', borderLeftColor: color }}
+                className="px-5 pt-4 pb-3 border-l-4"
+                style={{ backgroundColor: color + '18', borderLeftColor: color }}
             >
-                <div className={styles.cardHeaderContent}>
-                    <div className={styles.cardTitleSection}>
-                        <h3 className={styles.encuestaTitulo}>{encuesta.titulo}</h3>
-                        <div className={styles.badges}>
+                <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                        <h3 className="text-sm font-semibold text-slate-800 leading-snug">{encuesta.titulo}</h3>
+                        <div className="flex flex-wrap gap-1.5 mt-1.5">
                             <span
-                                className={styles.tipoBadge}
+                                className="px-2 py-0.5 rounded-full text-xs font-semibold text-white"
                                 style={{ backgroundColor: color }}
                             >
                                 {tipoTexto}
                             </span>
                             {esObligatoria && (
-                                <span className={styles.obligatoriaBadge}>Obligatoria</span>
+                                <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-danger/10 text-danger border border-danger/20">
+                                    Obligatoria
+                                </span>
                             )}
                         </div>
                     </div>
-                    <StatusBadge status={estado.estado} />
+                    <StatusBadge status={estado.estado} className="shrink-0" />
                 </div>
             </div>
 
-            <div className={styles.cardContent}>
-                <div className={styles.descripcion}>
-                    <p>{encuesta.descripcion || 'Sin descripción'}</p>
-                </div>
+            {/* Body */}
+            <div className="px-5 py-4 flex flex-col gap-3 flex-1">
+                {encuesta.descripcion && (
+                    <p className="text-xs text-slate-500 line-clamp-2">{encuesta.descripcion}</p>
+                )}
 
-                <div className={styles.detalles}>
-                    <div className={styles.detalleItem}>
-                        <span className={styles.detalleLabel}>Asociada a:</span>
-                        <span className={styles.detalleValue}>
-                            {esEncuestaSatisfaccion
-                                ? 'Todo el evento'
-                                : esEncuestaActividad
-                                    ? 'Actividad específica'
-                                    : 'No especificado'
-                            }
+                <div className="space-y-1">
+                    <div className="flex justify-between text-xs">
+                        <span className="text-slate-400">Asociada a:</span>
+                        <span className="text-slate-600 font-medium">
+                            {esEncuestaSatisfaccion ? 'Todo el evento' : esEncuestaActividad ? 'Actividad específica' : 'No especificado'}
                         </span>
                     </div>
-                    <div className={styles.detalleItem}>
-                        <span className={styles.detalleLabel}>Período:</span>
-                        <span className={styles.detalleValue}>
+                    <div className="flex justify-between text-xs">
+                        <span className="text-slate-400">Período:</span>
+                        <span className="text-slate-600 font-medium">
                             {encuesta.fecha_inicio ? new Date(encuesta.fecha_inicio).toLocaleDateString() : 'Sin fecha'}
                             {encuesta.fecha_fin && ` - ${new Date(encuesta.fecha_fin).toLocaleDateString()}`}
                         </span>
                     </div>
-
                     {respuestaAsistente?.fecha_envio && (
-                        <div className={styles.detalleItem}>
-                            <span className={styles.detalleLabel}>Enviada:</span>
-                            <span className={styles.detalleValue}>
-                                {new Date(respuestaAsistente.fecha_envio).toLocaleDateString()}
-                            </span>
+                        <div className="flex justify-between text-xs">
+                            <span className="text-slate-400">Enviada:</span>
+                            <span className="text-slate-600 font-medium">{new Date(respuestaAsistente.fecha_envio).toLocaleDateString()}</span>
                         </div>
                     )}
-
                     {esCompletada && respuestaAsistente?.fecha_completado && (
-                        <div className={styles.detalleItem}>
-                            <span className={styles.detalleLabel}>Completada:</span>
-                            <span className={styles.detalleValue}>
-                                {new Date(respuestaAsistente.fecha_completado).toLocaleDateString()}
-                            </span>
+                        <div className="flex justify-between text-xs">
+                            <span className="text-slate-400">Completada:</span>
+                            <span className="text-slate-600 font-medium">{new Date(respuestaAsistente.fecha_completado).toLocaleDateString()}</span>
                         </div>
                     )}
                 </div>
 
-                <div className={styles.acciones}>
+                <div className="mt-auto pt-2">
                     {!esCompletada ? (
                         <button
-                            className={`${styles.btnAccion} ${styles.btnAcceder}`}
                             onClick={onAcceder}
                             disabled={loading}
+                            className="w-full h-9 rounded-lg text-xs font-semibold text-white transition-colors disabled:opacity-60"
+                            style={{ backgroundColor: color }}
                         >
                             {esPendiente ? 'Continuar Encuesta' : 'Acceder a Encuesta'}
                         </button>
                     ) : (
-                        <div className={styles.completadaInfo}>
-                            <span className={styles.completadaTexto}>Encuesta completada</span>
+                        <div className="flex items-center justify-between gap-2">
+                            <span className="text-xs text-success font-medium">Encuesta completada</span>
                             <button
-                                className={`${styles.btnAccion} ${styles.btnVerRespuesta}`}
                                 onClick={onAcceder}
+                                className="h-8 px-3 rounded-lg text-xs font-semibold bg-slate-50 text-slate-600 border border-slate-200 hover:bg-slate-100 transition-colors"
                             >
                                 Ver Respuesta
                             </button>

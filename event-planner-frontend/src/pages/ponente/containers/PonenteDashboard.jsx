@@ -10,7 +10,6 @@ import EventosSection from '../components/sections/EventosSection';
 import AgendaSection from '../components/sections/AgendaSection';
 import MisActividadesSection from '../components/sections/MisActividadesSection';
 import EncuestasSection from '../components/sections/EncuestasSection';
-import styles from '../components/styles/PonenteDashboard.module.css';
 
 const PATH_TO_VIEW = {
   '/ponente':             'dashboard',
@@ -69,11 +68,11 @@ const PonenteDashboard = () => {
   };
 
   return (
-    <div className={styles.dashboard}>
+    <div className="flex min-h-screen bg-slate-50">
       <Sidebar onToggle={(collapsed) => setIsMenuCollapsed(collapsed)} />
-      <div className={`${styles.mainContent} ${isMenuCollapsed ? styles.menuCollapsed : ''}`}>
+      <div className={`flex-1 flex flex-col transition-[margin-left] duration-300 ${isMenuCollapsed ? 'ml-[80px]' : 'ml-[250px]'}`}>
         <Header isMenuCollapsed={isMenuCollapsed} />
-        <div className={styles.content}>
+        <div className="flex-1 p-5 overflow-y-auto bg-slate-50">
           {renderSection()}
         </div>
       </div>

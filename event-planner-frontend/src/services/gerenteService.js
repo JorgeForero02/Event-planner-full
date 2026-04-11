@@ -32,7 +32,6 @@ class GerenteService extends BaseService {
         totalEventos: events.length
       };
     } catch (error) {
-      console.error('Error calculating stats:', error);
       return {
         totalEmpleados: 0,
         totalEventos: 0

@@ -1,4 +1,3 @@
-// src/pages/ActualizarEmpresa.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Building2, MapPin, Info, RefreshCw, ArrowLeft } from 'lucide-react';
@@ -37,7 +36,6 @@ const ActualizarEmpresa = () => {
         setSidebarCollapsed(isCollapsed);
     };
 
-    // Cargar datos del usuario y de la empresa
     useEffect(() => {
         const userData = localStorage.getItem('user');
         if (!userData) {
@@ -45,7 +43,6 @@ const ActualizarEmpresa = () => {
             return;
         }
 
-        // Cargar datos de la empresa asociada al gerente
         cargarEmpresa();
     }, [navigate]);
 
@@ -55,7 +52,6 @@ const ActualizarEmpresa = () => {
             setLoadError(null);
 
             const respuesta = await empresaService.obtenerEmpresaGerente();
-            console.log('Empresa cargada exitosamente:', respuesta);
 
             const empresaData = respuesta?.data?.[0];
             if (!empresaData) throw new Error('No se encontraron datos de la empresa.');
@@ -90,7 +86,6 @@ const ActualizarEmpresa = () => {
             }
 
         } catch (error) {
-            console.error('Error al cargar empresa:', error);
             setLoadError(error.message || 'No se pudieron cargar los datos de la empresa.');
         } finally {
             setIsLoading(false);
@@ -104,7 +99,6 @@ const ActualizarEmpresa = () => {
             [name]: value
         }));
 
-        // Limpiar error del campo cuando el usuario empieza a escribir
         if (errors[name]) {
             setErrors(prev => ({
                 ...prev,
@@ -150,7 +144,6 @@ const ActualizarEmpresa = () => {
         return Object.keys(newErrors).length === 0;
     };
 
-    // Función para verificar si un campo ha cambiado
     const hasCambiado = (campo) => {
         if (!empresaOriginal) return false;
         return formData[campo] !== empresaOriginal[campo];
@@ -166,9 +159,7 @@ const ActualizarEmpresa = () => {
         setIsSubmitting(true);
 
         try {
-            console.log("Datos originales del formulario:", formData);
 
-            // Buscar el ID de la ciudad según su nombre
             const ciudadResponse = await empresaService.obtenerTodasCiudades();
             const ciudadEncontrada = ciudadResponse.data.find(
                 (c) => c.nombre.toLowerCase() === formData.ciudad.toLowerCase()
@@ -187,18 +178,12 @@ const ActualizarEmpresa = () => {
                 correo: formData.correo
             };
 
-            console.log("Datos a enviar al backend:", datosActualizados);
+            await empresaService.actualizarEmpresa(empresaOriginal.id, datosActualizados);
 
-            const resultado = await empresaService.actualizarEmpresa(empresaOriginal.id, datosActualizados);
-
-            console.log("Empresa actualizada exitosamente:", resultado);
-
-            // Mostrar el modal de éxito
             setModalMessage("Solicitud de actualización fue registrada correctamente. Será revisada por el equipo de administración.");
             setShowModal(true);
 
         } catch (error) {
-            console.error("Error al actualizar empresa:", error);
             setModalMessage("Ocurrió un error al actualizar la empresa");
             setShowModal(true);
         } finally {
@@ -209,20 +194,16 @@ const ActualizarEmpresa = () => {
     const handleCloseModal = () => {
         setShowModal(false);
         setModalMessage('');
-        navigate('/gerente'); // Redirigir al dashboard del gerente
+        navigate('/gerente');
     };
 
-
     const handleCancel = () => {
-        // Verificar si hay cambios
         const hayCambios = Object.keys(formData).some(key => hasCambiado(key));
 
         if (hayCambios) {
-            // Si hay cambios, mostrar modal de confirmación de cancelación
             setCancelModalMessage("¿Está seguro que desea cancelar? Se perderán los cambios no guardados.");
             setShowCancelModal(true);
         } else {
-            // Si no hay cambios, redirigir directamente
             navigate('/gerente');
         }
     };
@@ -230,11 +211,10 @@ const ActualizarEmpresa = () => {
     const handleCloseCancelModal = () => {
         setShowCancelModal(false);
         setCancelModalMessage('');
-        navigate('/gerente'); // Redirigir al dashboard
+        navigate('/gerente');
     };
 
     const handleCancelModalClose = () => {
-        // Solo cerrar el modal sin redirigir (cuando el usuario decide no cancelar)
         setShowCancelModal(false);
         setCancelModalMessage('');
     };
@@ -244,7 +224,6 @@ const ActualizarEmpresa = () => {
         width: sidebarCollapsed ? 'calc(100% - 80px)' : 'calc(100% - 288px)',
     };
 
-    // Mostrar loading mientras se cargan los datos
     if (isLoading) {
         return (
             <div className="min-h-screen bg-slate-50">
@@ -262,7 +241,6 @@ const ActualizarEmpresa = () => {
         );
     }
 
-    // Mostrar error si no se pudieron cargar los datos
     if (loadError) {
         return (
             <div className="min-h-screen bg-slate-50">
@@ -301,7 +279,6 @@ const ActualizarEmpresa = () => {
                 <div className="flex-1 p-6 transition-all duration-300 min-w-0" style={contentStyle}>
                     <div className="max-w-3xl mx-auto space-y-6">
 
-                        {/* Page header */}
                         <div className="flex items-center gap-3">
                             <button
                                 onClick={() => navigate('/gerente')}
@@ -312,7 +289,6 @@ const ActualizarEmpresa = () => {
                             <h1 className="text-2xl font-bold text-slate-800">Actualizar Empresa</h1>
                         </div>
 
-                        {/* Info banner */}
                         <div className="flex items-start gap-3 rounded-xl border border-sky-200 bg-sky-50 p-4 text-sm">
                             <Info size={18} className="shrink-0 text-sky-600 mt-0.5" />
                             <div>
@@ -322,7 +298,7 @@ const ActualizarEmpresa = () => {
                         </div>
 
                         <form onSubmit={handleSubmit} className="space-y-6">
-                            {/* Sección: Información Básica */}
+
                             <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
                                 <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
                                     <Building2 size={18} className="text-slate-500" />
@@ -376,7 +352,6 @@ const ActualizarEmpresa = () => {
                                 </div>
                             </div>
 
-                            {/* Sección: Información de Contacto */}
                             <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
                                 <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
                                     <MapPin size={18} className="text-slate-500" />
@@ -498,7 +473,6 @@ const ActualizarEmpresa = () => {
                                 </div>
                             </div>
 
-                            {/* Form actions */}
                             <div className="flex justify-end gap-3 pt-2">
                                 <Button
                                     type="button"
@@ -520,7 +494,6 @@ const ActualizarEmpresa = () => {
                 </div>
             </div>
 
-            {/* Modal de confirmación */}
             <Dialog open={showModal} onOpenChange={(open) => !open && handleCloseModal()}>
                 <DialogContent>
                     <div className="py-2">
@@ -532,7 +505,6 @@ const ActualizarEmpresa = () => {
                 </DialogContent>
             </Dialog>
 
-            {/* Modal de confirmación de cancelación */}
             <Dialog open={showCancelModal} onOpenChange={(open) => !open && handleCancelModalClose()}>
                 <DialogContent>
                     <DialogHeader>

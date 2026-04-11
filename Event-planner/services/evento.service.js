@@ -278,7 +278,14 @@ class EventoService {
         const actualizaciones = {};
         camposPermitidos.forEach(campo => {
             if (datos[campo] !== undefined) {
-                actualizaciones[campo] = datos[campo];
+                let valor = datos[campo];
+                // Coerce string fields: reject arrays/objects to avoid Sequelize type errors
+                if (['titulo', 'descripcion', 'modalidad', 'hora', 'url_virtual'].includes(campo)) {
+                    if (Array.isArray(valor) || (valor !== null && typeof valor === 'object')) {
+                        valor = JSON.stringify(valor);
+                    }
+                }
+                actualizaciones[campo] = valor;
             }
         });
         actualizaciones.fecha_actualizacion = new Date();

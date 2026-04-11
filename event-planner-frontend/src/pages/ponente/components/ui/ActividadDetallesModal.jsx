@@ -15,14 +15,10 @@ const ActividadDetallesModal = ({ actividadId, eventoId, onClose }) => {
                 setLoading(true);
                 setError(null);
                 const token = localStorage.getItem('access_token');
-                //const API_BASE = (window.__env && window.__env.REACT_APP_API_URL) || 'http://localhost:3000';
-
-                console.log('Buscando detalles para:', { actividadId, eventoId });
 
                 let eventoIdFinal = eventoId;
 
                 if (!eventoIdFinal) {
-                    console.log('No hay eventoId, intentando obtener actividad directamente...');
                     const actividadDirectaRes = await fetch(`${API_URL}/actividades/${actividadId}`, {
                         headers: {
                             'Authorization': `Bearer ${token}`,
@@ -34,7 +30,6 @@ const ActividadDetallesModal = ({ actividadId, eventoId, onClose }) => {
                         const actividadDirectaJson = await actividadDirectaRes.json();
                         if (actividadDirectaJson.success) {
                             eventoIdFinal = actividadDirectaJson.data?.id_evento;
-                            console.log('Evento ID obtenido de actividad directa:', eventoIdFinal);
                         }
                     }
                 }
@@ -43,7 +38,6 @@ const ActividadDetallesModal = ({ actividadId, eventoId, onClose }) => {
                     throw new Error('No se pudo identificar el evento de la actividad');
                 }
 
-                console.log('Obteniendo datos del evento:', eventoIdFinal);
                 const eventoRes = await fetch(`${API_URL}/eventos/${eventoIdFinal}`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -62,9 +56,7 @@ const ActividadDetallesModal = ({ actividadId, eventoId, onClose }) => {
                 }
 
                 setEventoData(eventoJson.data);
-                console.log('Datos del evento obtenidos:', eventoJson.data);
 
-                console.log('Obteniendo actividades del evento...');
                 const actividadesRes = await fetch(`${API_URL}/eventos/${eventoIdFinal}/actividades`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -73,20 +65,15 @@ const ActividadDetallesModal = ({ actividadId, eventoId, onClose }) => {
                 });
 
                 if (!actividadesRes.ok) {
-                    const errorText = await actividadesRes.text();
-                    console.error('Error en respuesta de actividades:', errorText);
                     throw new Error(`Error ${actividadesRes.status} al obtener actividades`);
                 }
 
                 const actividadesJson = await actividadesRes.json();
-                console.log('Respuesta de actividades:', actividadesJson);
 
                 if (actividadesJson.success && actividadesJson.data) {
                     const actividadEncontrada = actividadesJson.data.find(actividad =>
                         actividad.id_actividad === parseInt(actividadId)
                     );
-
-                    console.log('Actividad encontrada:', actividadEncontrada);
 
                     if (actividadEncontrada) {
                         setDetalle(actividadEncontrada);
@@ -97,7 +84,6 @@ const ActividadDetallesModal = ({ actividadId, eventoId, onClose }) => {
                     throw new Error('No se pudo obtener la información de las actividades');
                 }
             } catch (err) {
-                console.error('Error cargando detalle de actividad:', err);
                 setError(err.message || 'Error cargando detalle');
             } finally {
                 setLoading(false);
@@ -189,7 +175,7 @@ const ActividadDetallesModal = ({ actividadId, eventoId, onClose }) => {
 
                     {detalle && eventoData && !loading && !error && (
                         <div className={styles.eventInfoGrid}>
-                            {/* Información del Evento */}
+
                             <div className={styles.infoSection}>
                                 <h4>Información del Evento</h4>
                                 <div className={styles.infoItem}>
@@ -229,7 +215,6 @@ const ActividadDetallesModal = ({ actividadId, eventoId, onClose }) => {
                                 </div>
                             </div>
 
-                            {/* Fechas y Horarios */}
                             <div className={styles.infoSection}>
                                 <h4>Fechas y Horarios</h4>
                                 <div className={styles.infoItem}>
@@ -255,7 +240,6 @@ const ActividadDetallesModal = ({ actividadId, eventoId, onClose }) => {
                                 </div>
                             </div>
 
-                            {/* Información Adicional */}
                             <div className={styles.infoSection}>
                                 <h4>Información Adicional</h4>
                                 <div className={styles.infoItem}>

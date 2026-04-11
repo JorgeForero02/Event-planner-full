@@ -59,7 +59,6 @@ const Menu = ({ onToggle, onSectionChange }) => {
     }
   ];
 
-  // Auto-expandir menú si hay un subitem activo
   useEffect(() => {
     menuItems.forEach((item) => {
       if (item.hasSubmenu && item.submenu) {
@@ -72,7 +71,7 @@ const Menu = ({ onToggle, onSectionChange }) => {
         }
       }
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeSection]);
 
   const toggleMenu = () => {
@@ -134,7 +133,7 @@ const Menu = ({ onToggle, onSectionChange }) => {
         isCollapsed ? 'w-16' : 'w-64'
       }`}
     >
-      {/* Header / Logo section */}
+
       <div className="flex items-center justify-between p-4 h-16 shrink-0 border-b border-white/10">
         {!isCollapsed ? (
           <div className="font-bold text-lg truncate pr-2">Panel Admin</div>
@@ -154,7 +153,6 @@ const Menu = ({ onToggle, onSectionChange }) => {
         </button>
       </div>
 
-      {/* Menu Navigation */}
       <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
         {menuItems.map((item) => {
           const active = isParentMenuActive(item);
@@ -186,7 +184,6 @@ const Menu = ({ onToggle, onSectionChange }) => {
                 )}
               </button>
 
-              {/* Submenu rendering */}
               {item.hasSubmenu && isExpanded && !isCollapsed && (
                 <div className="ml-9 mt-1 space-y-1">
                   {item.submenu.map((subItem) => {
@@ -212,7 +209,6 @@ const Menu = ({ onToggle, onSectionChange }) => {
         })}
       </nav>
 
-      {/* Footer / Logout Button */}
       <div className="p-4 border-t border-white/10 shrink-0">
         <button 
           onClick={handleLogout}

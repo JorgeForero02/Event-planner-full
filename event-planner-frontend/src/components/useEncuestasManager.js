@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { obtenerEventos, obtenerPerfil, obtenerActividadesEvento } from '../../src/components/eventosService';
+import { obtenerEventos, obtenerPerfil, obtenerActividadesEvento } from './eventosService';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
-
 
 export const useEncuestasManager = () => {
     const [encuestas, setEncuestas] = useState([]);
@@ -105,7 +104,6 @@ export const useEncuestasManager = () => {
             listaEncuestas = data.encuestas;
         }
 
-        // Obtener estadísticas para cada encuesta
         const encuestasConEstadisticas = await Promise.all(
             listaEncuestas.map(async (encuesta) => {
                 try {
@@ -120,8 +118,7 @@ export const useEncuestasManager = () => {
                             total_completadas: stats.total_completadas || stats.data?.total_completadas || 0
                         };
                     }
-                } catch (error) {
-                    console.error(`Error obteniendo estadísticas para encuesta ${encuesta.id}:`, error);
+                } catch {
                 }
                 return { ...encuesta, total_completadas: 0 };
             })
@@ -139,7 +136,6 @@ export const useEncuestasManager = () => {
     const cargarActividades = async (eventoId) => {
         try {
             const data = await obtenerActividadesEvento(eventoId);
-            console.log('Datos de actividades recibidos:', data);
 
             const lista = Array.isArray(data)
                 ? data
@@ -154,10 +150,8 @@ export const useEncuestasManager = () => {
                 id: actividad.id || actividad.id_actividad
             }));
 
-            console.log('Actividades mapeadas:', actividadesMapeadas);
             setActividades(actividadesMapeadas);
-        } catch (error) {
-            console.error('Error cargando actividades:', error);
+        } catch {
             setActividades([]);
         }
     };
@@ -343,10 +337,6 @@ export const useEncuestasManager = () => {
     };
 
     const eliminarEncuesta = async (id) => {
-        if (!window.confirm('¿Estás seguro de que deseas eliminar esta encuesta?')) {
-            return;
-        }
-
         try {
             setCargando(true);
             const response = await fetch(`${API_URL}/encuestas/${id}`, {

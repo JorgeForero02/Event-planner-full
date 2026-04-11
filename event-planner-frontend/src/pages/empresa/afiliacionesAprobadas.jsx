@@ -25,7 +25,6 @@ const AfiliacionesAprobadas = () => {
         return;
       }
 
-      // Usar la ruta base con query param para incluir todas las empresas
       const response = await fetch(`${API_URL}/empresas?incluir_pendientes=true`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -54,7 +53,6 @@ const AfiliacionesAprobadas = () => {
         setError(errorData.message || 'Error al cargar empresas');
       }
     } catch (error) {
-      console.error('Error al cargar empresas:', error);
       setError('Error de conexión con el servidor');
       setEmpresas([]);
     } finally {
@@ -77,7 +75,6 @@ const AfiliacionesAprobadas = () => {
         </div>
       </div>
 
-      {/* Search */}
       <div className={styles.controls}>
         <div className={styles.searchContainer}>
           <input

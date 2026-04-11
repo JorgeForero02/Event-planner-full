@@ -4,6 +4,7 @@ import styles from '../gerente/eventosPage.module.css';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../components/ui/dialog';
 import { Input } from '../../components/ui/input';
 import { Select } from '../../components/ui/select';
+import { useToast } from '../../contexts/ToastContext';
 import Header from '../../layouts/Header/header';
 import Calendar from '../../assets/calendar.png';
 import Cupos from '../../assets/cupos.png';
@@ -14,6 +15,7 @@ import { obtenerEventos } from "../../components/eventosService";
 
 const EventosPage = () => {
     const navigate = useNavigate();
+    const toast = useToast();
     const [eventos, setEventos] = useState([]);
     const [eventosFiltrados, setEventosFiltrados] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
@@ -74,9 +76,8 @@ const EventosPage = () => {
             setOrganizadores(organizadoresUnicos);
 
         } catch (error) {
-            console.error("Error al cargar eventos:", error.message);
             if (error.message?.includes("Token inválido")) {
-                alert("Tu sesión ha expirado. Por favor, vuelve a iniciar sesión.");
+                toast.error("Tu sesión ha expirado. Por favor, vuelve a iniciar sesión.");
             }
         } finally {
             setLoading(false);

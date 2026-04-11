@@ -3,6 +3,7 @@ import './EstadisticasEncuesta.css';
 import StatusBadge from '../../../components/ui/StatusBadge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../../components/ui/dialog';
 import DataTable from '../../../components/ui/DataTable';
+import { useToast } from '../../../contexts/ToastContext';
 import * as pdfMake from "pdfmake/build/pdfmake";
 import * as pdfFonts from "pdfmake/build/vfs_fonts";
 pdfMake.vfs = pdfFonts.vfs;
@@ -17,6 +18,7 @@ pdfMake.fonts = {
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
 const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
+    const toast = useToast();
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -70,20 +72,15 @@ const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
     };
 
 
-    // ==================== FUNCIONES DE EXPORTACIÓN ====================
-
     const exportarCSV = () => {
         try {
             setExportando(true);
             const { encuesta, estadisticas, respuestas } = data;
 
-            // Encabezados
             const headers = ['ID', 'Asistente', 'Correo', 'Estado', 'Fecha Envío', 'Fecha Completado'];
 
-            // Construir el CSV
-            let csvContent = '\uFEFF'; // BOM para UTF-8
+            let csvContent = '\uFEFF';
 
-            // Información de la encuesta
             csvContent += `Encuesta: ${encuesta.titulo}\n`;
             csvContent += `Tipo: ${encuesta.tipo_encuesta.replace('_', ' ')}\n`;
             csvContent += `Momento: ${encuesta.momento}\n`;
@@ -94,10 +91,8 @@ const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
             csvContent += `Tasa de Respuesta: ${estadisticas.tasa_respuesta}\n`;
             csvContent += '\n';
 
-            // Encabezados de la tabla
             csvContent += headers.join(',') + '\n';
 
-            // Datos de respuestas
             respuestas.forEach(respuesta => {
                 const row = [
                     respuesta.id,
@@ -110,7 +105,6 @@ const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
                 csvContent += row.join(',') + '\n';
             });
 
-            // Crear y descargar el archivo
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             const url = URL.createObjectURL(blob);
@@ -124,9 +118,9 @@ const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
             URL.revokeObjectURL(url);
 
             setMostrarMenuExportar(false);
-            alert('CSV exportado correctamente');
+            toast.success('CSV exportado correctamente');
         } catch (err) {
-            alert('Error al exportar CSV: ' + err.message);
+            toast.error('Error al exportar CSV: ' + err.message);
         } finally {
             setExportando(false);
         }
@@ -137,13 +131,10 @@ const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
             setExportando(true);
             const { encuesta, estadisticas, respuestas } = data;
 
-            // Importación dinámica de xlsx
             const XLSX = await import('xlsx');
 
-            // Crear libro de trabajo
             const wb = XLSX.utils.book_new();
 
-            // Hoja 1: Información de la encuesta
             const infoData = [
                 ['Información de la Encuesta'],
                 [''],
@@ -170,7 +161,6 @@ const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
             const wsInfo = XLSX.utils.aoa_to_sheet(infoData);
             XLSX.utils.book_append_sheet(wb, wsInfo, 'Información');
 
-            // Hoja 2: Respuestas detalladas
             const respuestasData = [
                 ['ID', 'Asistente', 'Correo', 'Estado', 'Fecha Envío', 'Fecha Completado']
             ];
@@ -189,13 +179,12 @@ const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
             const wsRespuestas = XLSX.utils.aoa_to_sheet(respuestasData);
             XLSX.utils.book_append_sheet(wb, wsRespuestas, 'Respuestas');
 
-            // Descargar el archivo
             XLSX.writeFile(wb, `estadisticas_${encuesta.titulo.replace(/[^a-z0-9]/gi, '_')}_${Date.now()}.xlsx`);
 
             setMostrarMenuExportar(false);
-            alert('Excel exportado correctamente');
+            toast.success('Excel exportado correctamente');
         } catch (err) {
-            alert('Error al exportar Excel: ' + err.message);
+            toast.error('Error al exportar Excel: ' + err.message);
         } finally {
             setExportando(false);
         }
@@ -205,18 +194,15 @@ const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
             setExportando(true);
             const { encuesta, estadisticas, respuestas } = data;
 
-            // Importar jsPDF dinámicamente (sin autotable)
             const { jsPDF } = await import('jspdf');
 
             const doc = new jsPDF();
             let y = 10;
 
-            // Título
             doc.setFontSize(16);
             doc.text(`Estadísticas: ${encuesta.titulo}`, 10, y);
             y += 10;
 
-            // Información básica
             doc.setFontSize(10);
             doc.text(`Tipo: ${encuesta.tipo_encuesta.replace('_', ' ')}`, 10, y);
             y += 7;
@@ -229,12 +215,10 @@ const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
             doc.text(`Pendientes: ${estadisticas.total_pendientes}`, 10, y);
             y += 10;
 
-            // Tabla manual (sin autotable)
             doc.setFontSize(12);
             doc.text('Respuestas:', 10, y);
             y += 10;
 
-            // Encabezados
             doc.setFontSize(10);
             doc.setFont(undefined, 'bold');
             doc.text('Asistente', 10, y);
@@ -243,14 +227,12 @@ const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
             doc.text('Fecha', 150, y);
             y += 7;
 
-            // Línea
             doc.line(10, y, 200, y);
             y += 5;
 
-            // Datos
             doc.setFont(undefined, 'normal');
             respuestas.forEach((r, i) => {
-                if (y > 270) { // Nueva página si se llena
+                if (y > 270) {
                     doc.addPage();
                     y = 20;
                 }
@@ -262,20 +244,17 @@ const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
                 y += 7;
             });
 
-            // Guardar
             doc.save(`estadisticas_${encuesta.titulo.replace(/[^a-z0-9]/gi, '_')}.pdf`);
 
             setMostrarMenuExportar(false);
-            alert('PDF descargado');
+            toast.success('PDF descargado');
 
         } catch (err) {
-            alert('Error: ' + err.message);
+            toast.error('Error: ' + err.message);
         } finally {
             setExportando(false);
         }
     };
-
-    // ==================== FIN FUNCIONES DE EXPORTACIÓN ====================
 
     if (loading) {
         return (
@@ -355,7 +334,6 @@ const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
                         )}
                     </div>
 
-                    {/* Información de la encuesta */}
                     <div className="card-estadisticas info-encuesta">
                         <h3>{encuesta.titulo}</h3>
                         <div className="info-grid">
@@ -397,7 +375,6 @@ const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
                         )}
                     </div>
 
-                    {/* Estadísticas generales */}
                     <div className="estadisticas-grid-modal">
                         <div className="stat-card-modal">
                             <div className="stat-icon-modal stat-enviadas"></div>
@@ -429,7 +406,6 @@ const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
                         </div>
                     </div>
 
-                    {/* Tabla de respuestas */}
                     <div className="card-estadisticas tabla-respuestas">
                         <h3>Detalle de Respuestas ({respuestas.length})</h3>
                         <DataTable
@@ -449,7 +425,6 @@ const EstadisticasEncuesta = ({ encuestaId, onCerrar }) => {
                         />
                     </div>
 
-                    {/* Enlaces a Google Forms */}
                     <div className="card-estadisticas enlaces-forms">
                         <h3>Enlaces</h3>
                         <div className="enlaces-grid-estadisticas">

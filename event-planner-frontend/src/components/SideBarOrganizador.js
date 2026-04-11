@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Calendar, Users, CalendarCheck, Book, FileText } from 'lucide-react';
+import { LayoutDashboard, Calendar, Users, CalendarCheck, Book, FileText } from 'lucide-react';
 
 export const useSidebar = () => {
     const navigate = useNavigate();
@@ -27,6 +27,7 @@ export const useSidebar = () => {
     });
 
     const menuItems = [
+        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/organizador' },
         { id: 'eventos', label: 'Eventos', icon: Calendar, path: '/organizador/eventos' },
         { id: 'asistentes', label: 'Asistentes', icon: Users, path: '/organizador/asistentes' },
         { id: 'actividades', label: 'Agenda', icon: CalendarCheck, path: '/organizador/agenda' },
@@ -41,22 +42,18 @@ export const useSidebar = () => {
             setUser(userData);
             setPasswordData(prev => ({ ...prev, correo: userData.correo || '' }));
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // SOLUCIÓN: Lógica mejorada para detectar rutas anidadas
     useEffect(() => {
         const path = location.pathname;
 
-        // Mapeo especial para rutas anidadas
         if (path.includes('/eventos/') && path.includes('/agenda')) {
-            // Si la ruta es /organizador/eventos/:id/agenda, activar 'actividades'
             setActiveSection('actividades');
         } else if (path.includes('/agenda')) {
-            // Si la ruta es /organizador/agenda, activar 'actividades'
             setActiveSection('actividades');
+        } else if (path === '/organizador') {
+            setActiveSection('dashboard');
         } else {
-            // Para otras rutas, usar la lógica normal
             const section = path.split('/').pop();
             if (section && menuItems.some(item => item.id === section)) {
                 setActiveSection(section);

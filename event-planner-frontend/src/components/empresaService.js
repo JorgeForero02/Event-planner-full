@@ -11,12 +11,10 @@ const getAuthToken = () => {
         const token = accessToken || parsedUser?.token || parsedUser?.access_token;
 
         if (!token) {
-            console.warn('⚠️ No se encontró ningún token en localStorage.');
             return null;
         }
         return token;
     } catch (error) {
-        console.error('❌ Error al obtener token del localStorage:', error);
         return null;
     }
 };
@@ -34,7 +32,6 @@ const getHeaders = () => {
 const handleResponse = async (response) => {
     if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error('Error en la respuesta:', errorData);
         throw new Error(
             errorData.message ||
             errorData.error ||
@@ -53,7 +50,6 @@ const empresaService = {
             });
             return await handleResponse(response);
         } catch (error) {
-            console.error('Error al obtener empresa del gerente:', error);
             throw error;
         }
     },
@@ -66,7 +62,6 @@ const empresaService = {
             });
             return await handleResponse(response);
         } catch (error) {
-            console.error('Error al obtener todas las ciudades:', error);
             throw error;
         }
     },
@@ -79,7 +74,6 @@ const empresaService = {
             });
             return await handleResponse(response);
         } catch (error) {
-            console.error('Error al obtener empresa por ID:', error);
             throw error;
         }
     },
@@ -93,7 +87,6 @@ const empresaService = {
             });
             return await handleResponse(response);
         } catch (error) {
-            console.error('Error al actualizar empresa:', error);
             throw error;
         }
     },
@@ -106,7 +99,6 @@ const empresaService = {
             });
             return await handleResponse(response);
         } catch (error) {
-            console.error('Error al obtener ciudad por ID:', error);
             throw error;
         }
     },
@@ -119,7 +111,6 @@ const empresaService = {
             });
             return await handleResponse(response);
         } catch (error) {
-            console.error('Error al obtener país por ID:', error);
             throw error;
         }
     }
