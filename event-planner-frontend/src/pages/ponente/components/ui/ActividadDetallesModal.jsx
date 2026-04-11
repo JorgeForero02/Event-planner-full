@@ -102,11 +102,13 @@ const ActividadDetallesModal = ({ actividadId, eventoId, onClose }) => {
         if (!fechaString) return 'No definida';
         try {
             const fecha = new Date(fechaString);
-            return fecha.toLocaleDateString('es-ES', {
+            const adjustedDate = new Date(fecha.getTime() + fecha.getTimezoneOffset() * 60000);
+            return adjustedDate.toLocaleDateString('es-ES', {
                 weekday: 'long',
                 year: 'numeric',
                 month: 'long',
-                day: 'numeric'
+                day: 'numeric',
+                timeZone: 'UTC'
             });
         } catch (e) {
             return 'Fecha inválida';

@@ -137,6 +137,7 @@ const ActividadCard = ({ actividad, showActions = true, onSolicitudEnviada, onAc
 
             showNotification('Tu solicitud de cambio ha sido enviada para revisión', 'success');
             setShowModal(false);
+            if (onSolicitudEnviada) onSolicitudEnviada();
 
         } catch (error) {
             setEstadoLocal(actividad.estado);

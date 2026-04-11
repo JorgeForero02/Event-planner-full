@@ -112,18 +112,21 @@ const OrganizadorNotificaciones = () => {
 
         const idActividad = detalle.datos_adicionales.id_actividad;
         const cambios = detalle.datos_adicionales.cambios_solicitados;
+        const idPonente = detalle.datos_adicionales?.id_ponente;
 
         setActualizandoActividad(true);
         try {
             await actualizarActividad(idActividad, cambios);
-            toast.success('Actividad actualizada correctamente');
-            const idPonente = detalle.datos_adicionales?.id_ponente;
-            if (idPonente) {
-                const response = await obtenerAsignacion(idPonente, idActividad);
-                setAsignacion(response.data || response);
+
+            if (idPonente && asignacion) {
+                await procesarSolicitud(idPonente, idActividad, true, comentarios || 'Cambios aplicados por el organizador');
             }
+
+            toast.success('Cambios aplicados y solicitud aprobada correctamente');
+            resetDetalle();
+            cargarNotificaciones();
         } catch (error) {
-            toast.error(error.message || 'Error al actualizar la actividad');
+            toast.error(error.message || 'Error al aplicar los cambios');
         } finally {
             setActualizandoActividad(false);
         }
