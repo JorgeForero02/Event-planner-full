@@ -208,7 +208,7 @@ const OrganizadorNotificaciones = () => {
             <div className="organizador-wrapper">
                 <div className="organizador-header">
                     <div className="header-title">
-                        <Bell className="icon-lg" style={{ color: '#4f46e5' }} />
+                        <Bell className="icon-lg" style={{ color: '#2563eb' }} />
                         <h2>Notificaciones</h2>
                     </div>
                     <p className="header-subtitle">Gestiona las solicitudes y notificaciones de tu evento</p>
@@ -241,7 +241,7 @@ const OrganizadorNotificaciones = () => {
                 {vistaActual === 'enviar' && (
                     <div className="detalle-card" style={{ marginTop: '1rem' }}>
                         <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                            <Send className="icon-md" style={{ color: '#4f46e5' }} />
+                            <Send className="icon-md" style={{ color: '#2563eb' }} />
                             Enviar Notificación a Inscritos
                         </h3>
 
@@ -352,12 +352,12 @@ const OrganizadorNotificaciones = () => {
                             <h3 className="notificaciones-list-header">
                                 {vistaActual === 'pendientes' ? (
                                     <>
-                                        <Bell className="icon-md" style={{ color: '#4f46e5' }} />
+                                        <Bell className="icon-md" style={{ color: '#2563eb' }} />
                                         Bandeja de Entrada
                                     </>
                                 ) : (
                                     <>
-                                        <Archive className="icon-md" style={{ color: '#4f46e5' }} />
+                                        <Archive className="icon-md" style={{ color: '#2563eb' }} />
                                         Notificaciones Leídas
                                     </>
                                 )}
@@ -494,7 +494,7 @@ const OrganizadorNotificaciones = () => {
                             {asignacion && detalle && (detalle.id_TipoNotificacion === 1 || detalle.id_TipoNotificacion === '1') && (
                                 <div className="asignacion-card" style={{ marginTop: '1.5rem' }}>
                                     <h3>
-                                        <User className="icon-md" style={{ color: '#4f46e5' }} />
+                                        <User className="icon-md" style={{ color: '#2563eb' }} />
                                         Solicitud de Ponente
                                     </h3>
 

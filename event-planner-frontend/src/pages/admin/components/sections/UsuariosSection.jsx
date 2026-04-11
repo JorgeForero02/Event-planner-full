@@ -605,7 +605,7 @@ const UsuariosSection = () => {
             ];
 
             return roles
-                .filter(rol => rol.activo && rol.editable && rol.tipo !== 'administrador')
+                .filter(rol => rol.activo !== false && rol.tipo !== 'administrador')
                 .map(rol => ({
                     id: rol.id,
                     nombre: rol.nombre,
