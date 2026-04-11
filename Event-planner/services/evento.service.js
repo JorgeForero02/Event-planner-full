@@ -178,6 +178,10 @@ class EventoService {
             where.id_empresa = empresaUsuario;
         } else if (rol === 'administrador') {
             if (id_empresa) where.id_empresa = id_empresa;
+        } else if (rol === 'ponente') {
+            // Ponentes can view any event they are assigned to, regardless of estado
+            if (!id) where.estado = ESTADOS.PUBLICADO;
+            if (id_empresa) where.id_empresa = id_empresa;
         } else {
             where.estado = ESTADOS.PUBLICADO;
             if (id_empresa) where.id_empresa = id_empresa;

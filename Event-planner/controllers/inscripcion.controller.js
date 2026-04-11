@@ -196,25 +196,24 @@ class InscripcionController {
                 include: [{
                     model: Asistente,
                     as: 'asistente',
-                    include: [{ model: Usuario, as: 'usuario', attributes: ['nombre', 'apellidos', 'correo', 'numeroDocumento'] }]
+                    include: [{ model: Usuario, as: 'usuario', attributes: ['nombre', 'correo', 'cedula'] }]
                 }],
                 order: [['id', 'ASC']]
             });
 
-            const escapar = (v) => `"${String(v ?? '').replace(/"/g, '""')}`;
+            const escapar = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
             const filas = [
-                ['Nombre', 'Apellidos', 'Correo', 'Documento', 'Código Inscripción', 'Estado', 'Fecha Inscripción'].join(',')
+                ['Nombre', 'Correo', 'Cédula', 'Código Inscripción', 'Estado', 'Fecha Inscripción'].join(',')
             ];
             for (const ins of inscripciones) {
                 const u = ins.asistente?.usuario;
                 filas.push([
                     escapar(u?.nombre ?? ''),
-                    escapar(u?.apellidos ?? ''),
                     escapar(u?.correo ?? ''),
-                    escapar(u?.numeroDocumento ?? ''),
+                    escapar(u?.cedula ?? ''),
                     escapar(ins.codigo ?? ''),
                     escapar(ins.estado ?? ''),
-                    escapar(ins.fecha_inscripcion ?? ins.createdAt ?? '')
+                    escapar(ins.fecha ?? ins.createdAt ?? '')
                 ].join(','));
             }
 

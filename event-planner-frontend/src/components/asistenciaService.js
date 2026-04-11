@@ -1,77 +1,50 @@
-import axios from 'axios';
-
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
+
+const getToken = () => localStorage.getItem('access_token') || localStorage.getItem('token');
+
+const authHeaders = () => ({
+    Authorization: `Bearer ${getToken()}`,
+    'Content-Type': 'application/json',
+});
 
 class AsistenciaService {
     async obtenerAsistenciasEvento(idEvento) {
-        try {
-            const token = localStorage.getItem('token') || localStorage.getItem('access_token');
-            const response = await axios.get(`${API_URL}/asistencias/evento/${idEvento}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            return response.data;
-        } catch (error) {
-            throw error;
-        }
+        const response = await fetch(`${API_URL}/asistencias/evento/${idEvento}`, {
+            headers: authHeaders(),
+        });
+        if (!response.ok) throw new Error(`Error ${response.status}`);
+        return response.json();
     }
 
     async obtenerEventos() {
-        try {
-            const token = localStorage.getItem('token') || localStorage.getItem('access_token');
-            const usuario = JSON.parse(localStorage.getItem('user'));
+        const usuario = JSON.parse(localStorage.getItem('user'));
+        const response = await fetch(`${API_URL}/eventos`, {
+            headers: authHeaders(),
+        });
+        if (!response.ok) throw new Error(`Error ${response.status}`);
+        const json = await response.json();
+        const eventos = json.data || json;
 
-            const response = await axios.get(`${API_URL}/eventos`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-
-            const eventos = response.data.data || response.data;
-
-            if (!usuario || !usuario.id) {
-                return eventos;
-            }
-
-            const eventosFiltrados = eventos.filter(
-                (ev) => ev.id_creador === usuario.id
-            );
-
-            return eventosFiltrados;
-        } catch (error) {
-            throw error;
-        }
+        if (!usuario || !usuario.id) return eventos;
+        return eventos.filter((ev) => ev.id_creador === usuario.id);
     }
 
     async actualizarAsistenciaManual(idAsistencia, estado) {
-        try {
-            const token = localStorage.getItem('access_token') || localStorage.getItem('token');
-            const response = await axios.patch(
-                `${API_URL}/asistencias/${idAsistencia}/manual`,
-                { estado },
-                { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } }
-            );
-            return response.data;
-        } catch (error) {
-            throw error;
-        }
+        const response = await fetch(`${API_URL}/asistencias/${idAsistencia}/manual`, {
+            method: 'PATCH',
+            headers: authHeaders(),
+            body: JSON.stringify({ estado }),
+        });
+        if (!response.ok) throw new Error(`Error ${response.status}`);
+        return response.json();
     }
 
     async exportarInscritosCSV(idEvento) {
-        try {
-            const token = localStorage.getItem('access_token') || localStorage.getItem('token');
-            const response = await axios.get(
-                `${API_URL}/eventos/${idEvento}/inscritos/exportar-csv`,
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                    responseType: 'blob'
-                }
-            );
-            return response;
-        } catch (error) {
-            throw error;
-        }
+        const response = await fetch(`${API_URL}/eventos/${idEvento}/inscritos/exportar-csv`, {
+            headers: { Authorization: `Bearer ${getToken()}` },
+        });
+        if (!response.ok) throw new Error(`Error ${response.status}`);
+        return response.blob();
     }
 }
 

@@ -147,8 +147,8 @@ export default function GestionAsistentes() {
         if (!selectedEventoId) return;
         setExportingCSV(true);
         try {
-            const response = await asistenciaService.exportarInscritosCSV(selectedEventoId);
-            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const blob = await asistenciaService.exportarInscritosCSV(selectedEventoId);
+            const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
             const eventoActual = eventos.find(e => String(e.id || e._id) === String(selectedEventoId));

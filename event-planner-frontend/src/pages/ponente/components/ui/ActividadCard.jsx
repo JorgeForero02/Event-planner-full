@@ -247,7 +247,7 @@ const ActividadCard = ({ actividad, showActions = true, onSolicitudEnviada, onAc
     const horaFin = getSafeValue(actividad, ['hora_fin']) || getSafeValue(actividad.actividad, ['hora_fin']);
     const empresa = actividad?.actividad?.evento?.empresa || actividad?.evento?.empresa || actividad?.actividad?.empresa || '';
 
-    const actividadId = actividad.id_ponente || actividad.id_actividad || actividad.actividad?.id_actividad || actividad.actividad?.id;
+    const actividadId = actividad.id_actividad || actividad.actividad?.id_actividad || actividad.actividad?.id;
 
     const primaryBtnClass = cn(
         'flex-1 h-9 rounded-lg text-xs font-semibold transition-colors',
