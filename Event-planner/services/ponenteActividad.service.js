@@ -139,24 +139,22 @@ class PonenteActividadService {
                 {
                     model: Actividad,
                     as: 'actividad',
-                    include: [{
-                        model: Evento,
-                        as: 'evento',
-                        attributes: ['id', 'titulo', 'id_empresa']
-                    }]
-                },
-                {
-                    model: Actividad,
-                    as: 'actividad',
-                    include: [{
-                        model: Lugar,
-                        as: 'lugares',
-                        include: [{
-                            model: Ubicacion,
-                            as: 'ubicacion'
-                        }],
-                        through: { attributes: [] }
-                    }]
+                    include: [
+                        {
+                            model: Evento,
+                            as: 'evento',
+                            attributes: ['id', 'titulo', 'id_empresa']
+                        },
+                        {
+                            model: Lugar,
+                            as: 'lugares',
+                            include: [{
+                                model: Ubicacion,
+                                as: 'ubicacion'
+                            }],
+                            through: { attributes: [] }
+                        }
+                    ]
                 }
             ],
             ...(transaction && { transaction })

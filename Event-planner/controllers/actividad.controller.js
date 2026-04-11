@@ -136,6 +136,20 @@ class ActividadController {
         }
     }
 
+    async obtenerLugaresDeActividad(req, res) {
+        try {
+            const { actividadId } = req.params;
+            const lugares = await ActividadService.obtenerLugaresPorActividad(actividadId);
+            return res.status(CODIGOS_HTTP.OK).json({ success: true, data: lugares });
+        } catch (error) {
+            console.error('Error al obtener lugares de actividad:', error);
+            return res.status(CODIGOS_HTTP.ERROR_INTERNO).json({
+                success: false,
+                message: MENSAJES_RESPUESTA.ERROR_OBTENER
+            });
+        }
+    }
+
     async actualizarActividad(req, res) {
         const transaction = await ActividadService.crearTransaccion();
         try {

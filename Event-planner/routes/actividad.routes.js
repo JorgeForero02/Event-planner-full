@@ -13,6 +13,12 @@ router.get(
     actividadController.obtenerActividadPorId
 );
 
+router.get(
+    '/:actividadId/lugares',
+    auth,
+    actividadController.obtenerLugaresDeActividad
+);
+
 router.put(
     '/:actividadId',
     auth,

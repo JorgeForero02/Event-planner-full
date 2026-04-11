@@ -12,11 +12,29 @@ const SolicitudCambioModal = ({ actividad, onClose, onSubmit }) => {
     const [actividadCompleta, setActividadCompleta] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [lugaresDisponibles, setLugaresDisponibles] = useState([]);
 
     useEffect(() => {
         const cargarActividadCompleta = async () => {
             try {
                 setLoading(true);
+
+                const token = localStorage.getItem('access_token');
+                const actividadId = actividad?.id_actividad || actividad?.id;
+
+                if (actividadId && token) {
+                    try {
+                        const lugaresRes = await fetch(`${API_BASE}/actividades/${actividadId}/lugares`, {
+                            headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (lugaresRes.ok) {
+                            const lugaresData = await lugaresRes.json();
+                            setLugaresDisponibles(lugaresData.data || []);
+                        }
+                    } catch {
+                        // no-op — dropdown stays empty
+                    }
+                }
 
                 if (actividad?.lugares || actividad?.actividad?.lugares) {
                     setActividadCompleta(actividad);
@@ -24,13 +42,11 @@ const SolicitudCambioModal = ({ actividad, onClose, onSubmit }) => {
                     return;
                 }
 
-                const token = localStorage.getItem('access_token');
                 if (!token) {
                     throw new Error('No hay token de autenticación');
                 }
 
                 const ponenteId = actividad?.id_ponente;
-                const actividadId = actividad?.id_actividad || actividad?.id;
 
                 if (!ponenteId || !actividadId) {
                     throw new Error('Faltan IDs para obtener los datos completos');
@@ -483,12 +499,22 @@ const SolicitudCambioModal = ({ actividad, onClose, onSubmit }) => {
                                     </button>
                                 )}
                             </div>
-                            <Input
-                                type="text"
+                            <select
                                 value={formData.cambios_solicitados.ubicacion}
                                 onChange={(e) => handleInputChange('cambios_solicitados.ubicacion', e.target.value)}
-                                placeholder="Nueva ubicación para la actividad"
-                            />
+                                className="w-full h-9 px-3 rounded-md border border-slate-200 bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-brand-600 transition"
+                            >
+                                <option value="">Seleccionar nueva ubicación...</option>
+                                {lugaresDisponibles.map(lugar => {
+                                    const partes = [lugar.nombre];
+                                    if (lugar.ubicacion?.lugar) partes.push(lugar.ubicacion.lugar);
+                                    if (lugar.ubicacion?.direccion) partes.push(lugar.ubicacion.direccion);
+                                    const label = partes.join(' - ');
+                                    return (
+                                        <option key={lugar.id} value={label}>{label}</option>
+                                    );
+                                })}
+                            </select>
                             <p className="text-xs text-slate-500">Actual: {getValorActual('ubicacion')}</p>
                         </div>
                     </div>

@@ -1,4 +1,4 @@
-const { Actividad, Evento, Lugar, LugarActividad, PonenteActividad, Ponente, Usuario } = require('../models');
+const { Actividad, Evento, Lugar, LugarActividad, PonenteActividad, Ponente, Usuario, Ubicacion } = require('../models');
 const notificacionService = require('./notificacion.service');
 const EncuestaService = require('./encuesta.service');
 
@@ -23,12 +23,25 @@ class ActividadService {
                     through: { attributes: [] }
                 }
             ],
-            order: [['fecha_actividad', 'ASC'], ['hora_inicio', 'ASC']]
+            order: [['fecha_actividad', 'ASC'], ['hora_inicio', 'ASC'], ['id_actividad', 'ASC']]
         });
     }
 
     async buscarPorId(actividadId, opcionesInclude = {}) {
         return await Actividad.findByPk(actividadId, opcionesInclude);
+    }
+
+    async obtenerLugaresPorActividad(actividadId) {
+        const actividad = await Actividad.findByPk(actividadId, { attributes: ['id_actividad', 'id_evento'] });
+        if (!actividad) return [];
+        const evento = await Evento.findByPk(actividad.id_evento, { attributes: ['id', 'id_empresa'] });
+        if (!evento) return [];
+        return await Lugar.findAll({
+            where: { id_empresa: evento.id_empresa, activo: 1 },
+            attributes: ['id', 'nombre', 'capacidad', 'descripcion'],
+            include: [{ model: Ubicacion, as: 'ubicacion', attributes: ['lugar', 'direccion'] }],
+            order: [['nombre', 'ASC']]
+        });
     }
 
     async crear(eventoId, datosActividad, evento, transaction) {
