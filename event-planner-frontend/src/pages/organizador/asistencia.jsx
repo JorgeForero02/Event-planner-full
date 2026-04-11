@@ -202,22 +202,22 @@ export default function GestionAsistentes() {
                 return (
                     <div className="flex items-center gap-1.5">
                         <button
-                            onClick={() => actualizarAsistencia(row.id, 'confirmado')}
+                            onClick={() => actualizarAsistencia(row.id, 'Presente')}
                             disabled={!!isLoading}
                             title="Marcar Asistió"
                             className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 disabled:opacity-50 transition-colors"
                         >
                             <UserCheck size={13} />
-                            {isLoading === 'confirmado' ? '...' : 'Asistió'}
+                            {isLoading === 'Presente' ? '...' : 'Asistió'}
                         </button>
                         <button
-                            onClick={() => actualizarAsistencia(row.id, 'ausente')}
+                            onClick={() => actualizarAsistencia(row.id, 'Ausente')}
                             disabled={!!isLoading}
                             title="Marcar No asistió"
                             className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 disabled:opacity-50 transition-colors"
                         >
                             <UserX size={13} />
-                            {isLoading === 'ausente' ? '...' : 'No asistió'}
+                            {isLoading === 'Ausente' ? '...' : 'No asistió'}
                         </button>
                     </div>
                 );
